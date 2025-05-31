@@ -89,11 +89,11 @@
 
       data.forEach(row => {
         const tr = document.createElement('tr');
-        tr.innerHTML = 
+        tr.innerHTML = `
           <td>${row.Bahasa}</td>
           <td>${row.Urutan}</td>
           <td>${row.Judul}</td>
-        ;
+        `;
         tr.onclick = () => {
           window.open(row.Link, '_blank');
         };
