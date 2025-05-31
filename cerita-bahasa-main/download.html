@@ -11,8 +11,11 @@
     select { padding: 0.5rem; font-size: 1rem; }
     table { width: 100%; border-collapse: collapse; background: #fff; }
     th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
-    th { background-color: #eee; }
+    th { background-color: #eee; cursor: pointer; }
     tr:hover { background-color: #def; cursor: pointer; }
+    .sortable::after { content: " ⇅"; font-size: 0.8rem; color: #888; }
+    .asc::after { content: " ↑"; }
+    .desc::after { content: " ↓"; }
     @media (max-width: 600px) {
       .filter-group { flex-direction: column; align-items: stretch; }
     }
@@ -31,9 +34,9 @@
   <table id="downloadTable">
     <thead>
       <tr>
-        <th>bahasa</th>
-        <th>urutan</th>
-        <th>title</th>
+        <th class="sortable" data-key="bahasa">Bahasa</th>
+        <th class="sortable" data-key="urutan">Urutan</th>
+        <th class="sortable" data-key="title">Title</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -42,6 +45,8 @@
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbyVZHGfb2xf-uPtKzqZ0bD4oIDttsBgF-n_aNXB0-h_Xy-oxYChmT-a4SYDV3MwiUpI/exec';
     let fullData = [];
+    let sortKey = '';
+    let sortAsc = true;
 
     async function fetchData() {
       try {
@@ -87,7 +92,27 @@
       const tbody = document.querySelector('#downloadTable tbody');
       tbody.innerHTML = '';
 
-      data.forEach(row => {
+      let sortedData = [...data];
+      if (sortKey) {
+        sortedData.sort((a, b) => {
+          let valA = a[sortKey];
+          let valB = b[sortKey];
+
+          // Ubah ke angka jika bisa
+          const numA = parseFloat(valA);
+          const numB = parseFloat(valB);
+          if (!isNaN(numA) && !isNaN(numB)) {
+            valA = numA;
+            valB = numB;
+          }
+
+          if (valA < valB) return sortAsc ? -1 : 1;
+          if (valA > valB) return sortAsc ? 1 : -1;
+          return 0;
+        });
+      }
+
+      sortedData.forEach(row => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${row.bahasa}</td>
@@ -107,16 +132,40 @@
       const judul = document.getElementById('filterJudul').value;
 
       const filtered = fullData.filter(item => {
-        return (!bahasa || item.Bahasa === bahasa)
-            && (!urutan || item.Urutan.toString() === urutan)
-            && (!judul || item.Judul === judul);
+        return (!bahasa || item.bahasa === bahasa)
+            && (!urutan || item.urutan.toString() === urutan)
+            && (!judul || item.title === judul);
       });
 
       renderTable(filtered);
     }
 
+    function handleSort(event) {
+      const key = event.target.getAttribute('data-key');
+      if (sortKey === key) {
+        sortAsc = !sortAsc;
+      } else {
+        sortKey = key;
+        sortAsc = true;
+      }
+
+      // Atur class tanda panah
+      document.querySelectorAll('th.sortable').forEach(th => {
+        th.classList.remove('asc', 'desc');
+        if (th.getAttribute('data-key') === sortKey) {
+          th.classList.add(sortAsc ? 'asc' : 'desc');
+        }
+      });
+
+      applyFilters();
+    }
+
     document.querySelectorAll('select').forEach(select => {
       select.addEventListener('change', applyFilters);
+    });
+
+    document.querySelectorAll('th.sortable').forEach(th => {
+      th.addEventListener('click', handleSort);
     });
 
     fetchData();
