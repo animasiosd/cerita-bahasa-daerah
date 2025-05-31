@@ -23,12 +23,12 @@
 </head>
 <body>
 
-  <h1>Download Video Cerita</h1>
-
-  <!-- Dropdown navigasi halaman bahasa -->
-  <div class="nav-group">
+  <!-- Navigasi ke Halaman Bahasa (pindah ke paling atas) -->
+  <div class="nav-group" style="margin-bottom: 2rem;">
     <select id="languageNav">
-      <option value="">-- Navigasi ke Halaman Bahasa --</option>
+      <option value="">-- Navigasi Halaman --</option>
+      <option value="index.html">🏠 Beranda</option>
+      <option value="download.html">⬇️ Halaman Download</option>
       <option value="mandar">Bahasa Mandar</option>
       <option value="kaili-unde">Bahasa Kaili Unde</option>
       <option value="suwawa">Bahasa Suwawa</option>
@@ -46,6 +46,8 @@
       <option value="banggai">Bahasa Banggai</option>
     </select>
   </div>
+
+  <h1>Download Video Cerita</h1>
 
   <div class="filter-group">
     <select id="filterBahasa"><option value="">Semua Bahasa</option></select>
@@ -120,7 +122,6 @@
           let valA = a[sortKey];
           let valB = b[sortKey];
 
-          // Ubah ke angka jika bisa
           const numA = parseFloat(valA);
           const numB = parseFloat(valB);
           if (!isNaN(numA) && !isNaN(numB)) {
@@ -192,7 +193,7 @@
     document.getElementById('languageNav').addEventListener('change', function () {
       const selected = this.value;
       if (selected) {
-        window.location.href = selected + '/index.html';
+        window.location.href = selected;
       }
     });
 
