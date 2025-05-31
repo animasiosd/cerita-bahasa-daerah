@@ -1,65 +1,126 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <title>Download Cerita</title>
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Halaman Download Video Cerita</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    table {
-      width: 100%;
-    }
-    .dataTables_filter input {
-      width: 200px;
+    body { font-family: sans-serif; padding: 1rem; background-color: #f9f9f9; }
+    h1 { text-align: center; margin-bottom: 1rem; }
+    .filter-group { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; justify-content: center; }
+    select { padding: 0.5rem; font-size: 1rem; }
+    table { width: 100%; border-collapse: collapse; background: #fff; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+    th { background-color: #eee; }
+    tr:hover { background-color: #def; cursor: pointer; }
+    @media (max-width: 600px) {
+      .filter-group { flex-direction: column; align-items: stretch; }
     }
   </style>
 </head>
 <body>
-  <h1>Halaman Download Cerita</h1>
-  <table id="downloadTable" class="display">
+
+  <h1>Download Video Cerita</h1>
+
+  <div class="filter-group">
+    <select id="filterBahasa"><option value="">Semua Bahasa</option></select>
+    <select id="filterUrutan"><option value="">Semua Urutan</option></select>
+    <select id="filterJudul"><option value="">Semua Judul</option></select>
+  </div>
+
+  <table id="downloadTable">
     <thead>
       <tr>
         <th>Bahasa</th>
-        <th>Urutan Cerita</th>
+        <th>Urutan</th>
         <th>Judul</th>
-        <th>Download</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
 
-  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
   <script>
-    // Ganti ini dengan URL Apps Script JSON Anda
-    const JSON_URL = 'https://script.google.com/macros/s/AKfycbyEXAMPLEURL/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyVZHGfb2xf-uPtKzqZ0bD4oIDttsBgF-n_aNXB0-h_Xy-oxYChmT-a4SYDV3MwiUpI/exec';
+    let fullData = [];
 
-    fetch(JSON_URL)
-      .then(response => response.json())
-      .then(data => {
-        const tbody = document.querySelector("#downloadTable tbody");
-        data.forEach(item => {
-          const row = `
-            <tr>
-              <td>${item.Bahasa}</td>
-              <td>${item["Urutan Cerita"]}</td>
-              <td>${item.Title}</td>
-              <td><a href="${item["Link Download"]}" target="_blank">Download</a></td>
-            </tr>`;
-          tbody.insertAdjacentHTML('beforeend', row);
-        });
-        // Aktifkan DataTable
-        $('#downloadTable').DataTable({
-          pageLength: 10,
-          order: [[0, 'asc']]
-        });
-      })
-      .catch(error => {
-        console.error("Gagal mengambil data:", error);
+    async function fetchData() {
+      try {
+        const res = await fetch(API_URL);
+        const json = await res.json();
+        if (!Array.isArray(json)) throw new Error("Format data tidak sesuai");
+        fullData = json;
+        populateFilters(json);
+        renderTable(json);
+      } catch (err) {
+        alert('Gagal memuat data. Pastikan API Google Apps Script sudah dipublikasikan sebagai "Anyone".');
+        console.error(err);
+      }
+    }
+
+    function populateFilters(data) {
+      const bahasaSet = new Set();
+      const urutanSet = new Set();
+      const judulSet = new Set();
+
+      data.forEach(item => {
+        bahasaSet.add(item.Bahasa);
+        urutanSet.add(item.Urutan);
+        judulSet.add(item.Judul);
       });
+
+      populateSelect('filterBahasa', [...bahasaSet].sort());
+      populateSelect('filterUrutan', [...urutanSet].sort((a, b) => a - b));
+      populateSelect('filterJudul', [...judulSet].sort());
+    }
+
+    function populateSelect(id, items) {
+      const select = document.getElementById(id);
+      items.forEach(val => {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        select.appendChild(opt);
+      });
+    }
+
+    function renderTable(data) {
+      const tbody = document.querySelector('#downloadTable tbody');
+      tbody.innerHTML = '';
+
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = 
+          <td>${row.Bahasa}</td>
+          <td>${row.Urutan}</td>
+          <td>${row.Judul}</td>
+        ;
+        tr.onclick = () => {
+          window.open(row.Link, '_blank');
+        };
+        tbody.appendChild(tr);
+      });
+    }
+
+    function applyFilters() {
+      const bahasa = document.getElementById('filterBahasa').value;
+      const urutan = document.getElementById('filterUrutan').value;
+      const judul = document.getElementById('filterJudul').value;
+
+      const filtered = fullData.filter(item => {
+        return (!bahasa || item.Bahasa === bahasa)
+            && (!urutan || item.Urutan.toString() === urutan)
+            && (!judul || item.Judul === judul);
+      });
+
+      renderTable(filtered);
+    }
+
+    document.querySelectorAll('select').forEach(select => {
+      select.addEventListener('change', applyFilters);
+    });
+
+    fetchData();
   </script>
+
 </body>
 </html>
