@@ -63,9 +63,10 @@
       const judulSet = new Set();
 
       data.forEach(item => {
-        bahasaSet.add(item.Bahasa);
-        urutanSet.add(item.Urutan);
-        judulSet.add(item.Judul);
+        bahasaSet.add(item.bahasa);
+        urutanSet.add(item.urutan);
+        judulSet.add(item.judul);
+
       });
 
       populateSelect('filterBahasa', [...bahasaSet].sort());
@@ -90,12 +91,13 @@
       data.forEach(row => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${row.Bahasa}</td>
-          <td>${row.Urutan}</td>
-          <td>${row.Judul}</td>
+        <td>${row.bahasa}</td>
+        <td>${row.urutan}</td>
+        <td>${row.judul}</td>
+        
         `;
         tr.onclick = () => {
-          window.open(row.Link, '_blank');
+          window.open(row.link, '_blank');
         };
         tbody.appendChild(tr);
       });
