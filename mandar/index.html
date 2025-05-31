@@ -66,31 +66,31 @@
 <body>
 
   <header>
-  <h1>Bahasa Mandar</h1>
-  <div class="dropdown">
-    <select id="languageSelect" onchange="navigateToLanguage()">
-      <option disabled selected>Pilih Bahasa / Halaman</option>
-      <option value="index">🏠 Beranda</option>
-      <option value="download">⬇️ Download</option>
-      <option disabled>─────────────</option>
-      <option value="duano">Bahasa Duano</option>
-      <option value="haloban">Bahasa Haloban</option>
-      <option value="kaimbulawa">Bahasa Kaimbulawa</option>
-      <option value="kaili-unde">Bahasa Kaili Unde</option>
-      <option value="kamaru">Bahasa Kamaru</option>
-      <option value="kioko">Bahasa Kioko</option>
-      <option value="kumbewaha">Bahasa Kumbewaha</option>
-      <option value="lasalimu">Bahasa Lasalimu</option>
-      <option value="malimpung">Bahasa Malimpung</option>
-      <option value="mandar">Bahasa Mandar</option>
-      <option value="pancana">Bahasa Pancana</option>
-      <option value="sarudu">Bahasa Sarudu</option>
-      <option value="sikule">Bahasa Sikule</option>
-      <option value="suwawa">Bahasa Suwawa</option>
-      <option value="toli-toli">Bahasa Toli Toli</option>
-    </select>
-  </div>
-</header>
+    <h1>Bahasa Mandar</h1>
+    <div class="dropdown">
+      <select id="languageSelect" onchange="navigateToLanguage()">
+        <option disabled selected>Pilih Bahasa / Halaman</option>
+        <option value="index">🏠 Beranda</option>
+        <option value="download">⬇️ Download</option>
+        <option disabled>─────────────</option>
+        <option value="duano">Bahasa Duano</option>
+        <option value="haloban">Bahasa Haloban</option>
+        <option value="kaimbulawa">Bahasa Kaimbulawa</option>
+        <option value="kaili-unde">Bahasa Kaili Unde</option>
+        <option value="kamaru">Bahasa Kamaru</option>
+        <option value="kioko">Bahasa Kioko</option>
+        <option value="kumbewaha">Bahasa Kumbewaha</option>
+        <option value="lasalimu">Bahasa Lasalimu</option>
+        <option value="malimpung">Bahasa Malimpung</option>
+        <option value="mandar">Bahasa Mandar</option>
+        <option value="pancana">Bahasa Pancana</option>
+        <option value="sarudu">Bahasa Sarudu</option>
+        <option value="sikule">Bahasa Sikule</option>
+        <option value="suwawa">Bahasa Suwawa</option>
+        <option value="toli-toli">Bahasa Toli Toli</option>
+      </select>
+    </div>
+  </header>
 
   <main>
     <div id="videoTitle">Memuat judul video...</div>
@@ -127,11 +127,13 @@
 
     fetch(`${webAppURL}?bahasa=${currentBahasa}`)
       .then(response => response.json())
-      .then(result => {
-        const PLAYLIST_ID = result.playlistId;
-        if (!PLAYLIST_ID) {
-          throw new Error("Playlist ID tidak ditemukan.");
+      .then(resultArray => {
+        const matched = resultArray.find(item => item.bahasa === currentBahasa);
+        if (!matched || !matched.playlistId) {
+          throw new Error("Playlist ID tidak ditemukan untuk bahasa " + currentBahasa);
         }
+
+        const PLAYLIST_ID = matched.playlistId;
 
         return fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${PLAYLIST_ID}&maxResults=50&key=${API_KEY}`);
       })
