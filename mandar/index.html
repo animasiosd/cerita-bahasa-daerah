@@ -10,7 +10,6 @@
       font-family: Arial, sans-serif;
       background-color: #fff;
     }
-
     header {
       background-color: #6200ea;
       color: white;
@@ -21,15 +20,40 @@
       flex-wrap: wrap;
       position: relative;
     }
-
     header h1 {
       margin: 0;
       font-size: 20px;
     }
-
+    .dropdown {
+      margin: 5px;
+    }
     .dropdown select {
       padding: 6px 10px;
       font-size: 14px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    .hamburger {
+      display: none;
+      font-size: 24px;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    .dropdown-mobile {
+      display: none;
+      width: 100%;
+      padding: 10px;
+      background-color: #3700b3;
+    }
+
+    .dropdown-mobile select {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
       border-radius: 5px;
       border: none;
     }
@@ -40,7 +64,6 @@
       align-items: center;
       padding: 20px;
     }
-
     #videoTitle {
       font-size: 18px;
       font-weight: bold;
@@ -48,7 +71,6 @@
       text-align: center;
       max-width: 800px;
     }
-
     #videoSelect {
       margin-bottom: 15px;
       padding: 10px;
@@ -59,44 +81,11 @@
       width: 250px;
       text-align: center;
     }
-
     iframe {
       width: 100%;
       max-width: 800px;
       height: 450px;
       border: none;
-    }
-
-    /* Hamburger styles */
-    .hamburger {
-      display: none;
-      font-size: 26px;
-      cursor: pointer;
-    }
-
-    .side-menu {
-      display: none;
-      position: fixed;
-      top: 0;
-      right: 0;
-      width: 220px;
-      height: 100%;
-      background-color: #f4f4f4;
-      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
-      padding: 20px;
-      z-index: 999;
-    }
-
-    .side-menu a {
-      display: block;
-      padding: 10px 0;
-      color: #333;
-      text-decoration: none;
-    }
-
-    .side-menu a:hover {
-      color: #6200ea;
-      font-weight: bold;
     }
 
     @media (max-width: 768px) {
@@ -107,6 +96,33 @@
       .hamburger {
         display: block;
       }
+
+      .dropdown-mobile.show {
+        display: block;
+      }
+
+      iframe {
+        height: 250px;
+      }
+
+      #videoSelect {
+        width: 100%;
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 18px;
+      }
+
+      #videoTitle {
+        font-size: 16px;
+      }
+
+      iframe {
+        height: 200px;
+      }
     }
   </style>
 </head>
@@ -114,6 +130,7 @@
 
   <header>
     <h1>Bahasa Mandar</h1>
+    <button class="hamburger" onclick="toggleMenu()">☰</button>
     <div class="dropdown">
       <select id="languageSelect" onchange="navigateToLanguage()">
         <option disabled selected>Pilih Bahasa / Halaman</option>
@@ -137,27 +154,28 @@
         <option value="toli-toli">Bahasa Toli Toli</option>
       </select>
     </div>
-
-    <div class="hamburger" onclick="toggleMenu()">☰</div>
-    <div id="menu" class="side-menu">
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/index">🏠 Beranda</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/download">⬇️ Download</a>
-      <hr>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/duano">Bahasa Duano</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/haloban">Bahasa Haloban</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/kaimbulawa">Bahasa Kaimbulawa</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/kaili-unde">Bahasa Kaili Unde</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/kamaru">Bahasa Kamaru</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/kioko">Bahasa Kioko</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/kumbewaha">Bahasa Kumbewaha</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/lasalimu">Bahasa Lasalimu</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/malimpung">Bahasa Malimpung</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/mandar">Bahasa Mandar</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/pancana">Bahasa Pancana</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/sarudu">Bahasa Sarudu</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/sikule">Bahasa Sikule</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/suwawa">Bahasa Suwawa</a>
-      <a href="https://animasiosd.github.io/cerita-bahasa-daerah/toli-toli">Bahasa Toli Toli</a>
+    <div class="dropdown-mobile" id="mobileMenu">
+      <select onchange="navigateToLanguage()">
+        <option disabled selected>Pilih Bahasa / Halaman</option>
+        <option value="index">🏠 Beranda</option>
+        <option value="download">⬇️ Download</option>
+        <option disabled>─────────────</option>
+        <option value="duano">Bahasa Duano</option>
+        <option value="haloban">Bahasa Haloban</option>
+        <option value="kaimbulawa">Bahasa Kaimbulawa</option>
+        <option value="kaili-unde">Bahasa Kaili Unde</option>
+        <option value="kamaru">Bahasa Kamaru</option>
+        <option value="kioko">Bahasa Kioko</option>
+        <option value="kumbewaha">Bahasa Kumbewaha</option>
+        <option value="lasalimu">Bahasa Lasalimu</option>
+        <option value="malimpung">Bahasa Malimpung</option>
+        <option value="mandar">Bahasa Mandar</option>
+        <option value="pancana">Bahasa Pancana</option>
+        <option value="sarudu">Bahasa Sarudu</option>
+        <option value="sikule">Bahasa Sikule</option>
+        <option value="suwawa">Bahasa Suwawa</option>
+        <option value="toli-toli">Bahasa Toli Toli</option>
+      </select>
     </div>
   </header>
 
@@ -170,14 +188,32 @@
   </main>
 
   <script>
-    function navigateToLanguage() {
-      const selected = document.getElementById("languageSelect").value;
-      window.location.href = "https://animasiosd.github.io/cerita-bahasa-daerah/" + selected;
+    function toggleMenu() {
+      const menu = document.getElementById("mobileMenu");
+      const button = document.querySelector(".hamburger");
+      menu.classList.toggle("show");
+
+      // Toggle icon ☰ ↔ ✕
+      if (menu.classList.contains("show")) {
+        button.textContent = "✕";
+      } else {
+        button.textContent = "☰";
+      }
     }
 
-    function toggleMenu() {
-      const menu = document.getElementById("menu");
-      menu.style.display = menu.style.display === "block" ? "none" : "block";
+    function navigateToLanguage() {
+      const selects = document.querySelectorAll("select");
+      let selectedValue = "";
+
+      selects.forEach(select => {
+        if (select.value && select.selectedIndex > 0) {
+          selectedValue = select.value;
+        }
+      });
+
+      if (selectedValue) {
+        window.location.href = "https://animasiosd.github.io/cerita-bahasa-daerah/" + selectedValue;
+      }
     }
 
     function playVideo(videoId, title) {
@@ -196,7 +232,7 @@
     }
 
     const API_KEY = "AIzaSyDBefJ54bf1RQBrmMye6FjD-gyPLT3bOyU";
-    const currentBahasa = "mandar"; // Ganti ini untuk halaman lain
+    const currentBahasa = "mandar";
     const webAppURL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
 
     fetch(`${webAppURL}?bahasa=${currentBahasa}`)
