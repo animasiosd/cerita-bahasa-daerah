@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="1504.83">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+    p.p3 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Arial; color: #000000; -webkit-text-stroke: #000000}
+    span.s1 {font: 12.0px Helvetica; color: #000000; -webkit-text-stroke: 0px #000000}
+    span.s2 {font-kerning: none}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;input type="text" id="search" placeholder="Cari..."&gt;</p>
+<p class="p1">&lt;table id="download-table"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;th&gt;Bahasa&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;th&gt;Urutan Cerita&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">      </span>&lt;th&gt;Link Download&lt;/th&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/tr&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;/thead&gt;</p>
+<p class="p1"><span class="Apple-converted-space">  </span>&lt;tbody&gt;&lt;/tbody&gt;</p>
+<p class="p1">&lt;/table&gt;</p>
+<p class="p2"><br></p>
+<p class="p1">&lt;script&gt;</p>
+<p class="p3"><span class="s1"><span class="Apple-converted-space">  </span>fetch('</span><span class="s2">https://docs.google.com/spreadsheets/d/e/2PACX-1vRojh_dYICbCfVX1NY77IgLDiL5w8oSHLlvSicNGS36zD_xl1iN-rhAPTj75M08oHUTopdJSxxU-9sP/pubhtml</span><span class="s1">')</span></p>
+<p class="p1"><span class="Apple-converted-space">    </span>.then(response =&gt; response.text())</p>
+<p class="p1"><span class="Apple-converted-space">    </span>.then(data =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const rows = data.split('\n').slice(1);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>const tbody = document.querySelector('#download-table tbody');</p>
+<p class="p1"><span class="Apple-converted-space">      </span>rows.forEach(row =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const cols = row.split(',');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const tr = document.createElement('tr');</p>
+<p class="p1"><span class="Apple-converted-space">        </span>cols.forEach(col =&gt; {</p>
+<p class="p1"><span class="Apple-converted-space">          </span>const td = document.createElement('td');</p>
+<p class="p1"><span class="Apple-converted-space">          </span>td.textContent = col;</p>
+<p class="p1"><span class="Apple-converted-space">          </span>tr.appendChild(td);</p>
+<p class="p1"><span class="Apple-converted-space">        </span>});</p>
+<p class="p1"><span class="Apple-converted-space">        </span>tbody.appendChild(tr);</p>
+<p class="p1"><span class="Apple-converted-space">      </span>});</p>
+<p class="p1"><span class="Apple-converted-space">    </span>});</p>
+<p class="p1">&lt;/script&gt;</p>
+</body>
+</html>

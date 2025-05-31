@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bahasa Kaili Unde - Cerita Bahasa</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #fff;
+    }
+    header {
+      background-color: #6200ea;
+      color: white;
+      padding: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    .dropdown {
+      margin: 5px;
+    }
+    .dropdown select {
+      padding: 6px 10px;
+      font-size: 14px;
+      border-radius: 5px;
+      border: none;
+    }
+    main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    #videoTitle {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+      max-width: 800px;
+    }
+    #videoSelect {
+      margin-bottom: 15px;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      max-width: 90%;
+      width: 250px;
+      text-align: center;
+    }
+    iframe {
+      width: 100%;
+      max-width: 800px;
+      height: 450px;
+      border: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Bahasa Kaili Unde</h1>
+    <div class="dropdown">
+      <select id="languageSelect" onchange="navigateToLanguage()">
+        <option disabled selected>Pilih Bahasa</option>
+        <option value="../duano">Bahasa Duano</option>
+        <option value="../haloban">Bahasa Haloban</option>
+        <option value="../kaimbulawa">Bahasa Kaimbulawa</option>
+        <option value="../kaili-unde">Bahasa Kaili Unde</option>
+        <option value="../kamaru">Bahasa Kamaru</option>
+        <option value="../kioko">Bahasa Kioko</option>
+        <option value="../kumbewaha">Bahasa Kumbewaha</option>
+        <option value="../lasalimu">Bahasa Lasalimu</option>
+        <option value="../malimpung">Bahasa Malimpung</option>
+        <option value="../mandar">Bahasa Mandar</option>
+        <option value="../pancana">Bahasa Pancana</option>
+        <option value="../sarudu">Bahasa Sarudu</option>
+        <option value="../sikule">Bahasa Sikule</option>
+        <option value="../suwawa">Bahasa Suwawa</option>
+        <option value="../toli-toli">Bahasa Toli Toli</option>
+      </select>
+    </div>
+  </header>
+
+  <main>
+    <!-- Judul Video -->
+    <div id="videoTitle">Memuat judul video...</div>
+
+    <!-- Dropdown Daftar Video -->
+    <select id="videoSelect" onchange="playSelectedVideo()">
+      <option disabled selected>Pilih Video</option>
+    </select>
+
+    <!-- Video Player -->
+    <iframe id="videoPlayer" src="" allowfullscreen></iframe>
+  </main>
+
+  <script>
+    function navigateToLanguage() {
+      const selected = document.getElementById("languageSelect").value;
+      window.location.href = selected + "/";
+    }
+
+    function playVideo(videoId, title) {
+      const player = document.getElementById("videoPlayer");
+      const titleDisplay = document.getElementById("videoTitle");
+      player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      titleDisplay.textContent = title;
+    }
+
+    function playSelectedVideo() {
+      const select = document.getElementById("videoSelect");
+      const selectedOption = select.options[select.selectedIndex];
+      const videoId = selectedOption.value;
+      const title = selectedOption.textContent;
+      playVideo(videoId, title);
+    }
+
+    // Konfigurasi YouTube API
+    const API_KEY = "AIzaSyDBefJ54bf1RQBrmMye6FjD-gyPLT3bOyU";
+    const PLAYLIST_ID = "PL_S3R-nuHsqKSX9PpuFyL4zK6fzuIz4te";
+
+    fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${PLAYLIST_ID}&maxResults=50&key=${API_KEY}`)
+      .then(response => response.json())
+      .then(data => {
+        const videoSelect = document.getElementById("videoSelect");
+        const titleDisplay = document.getElementById("videoTitle");
+
+        data.items.forEach((item, index) => {
+          const videoId = item.snippet.resourceId.videoId;
+          const title = item.snippet.title;
+
+          const option = document.createElement("option");
+          option.value = videoId;
+          option.textContent = title;
+          videoSelect.appendChild(option);
+
+          // Putar video pertama otomatis
+          if (index === 0) {
+            playVideo(videoId, title);
+            option.selected = true;
+          }
+        });
+      })
+      .catch(error => {
+        document.getElementById("videoTitle").textContent = "Gagal memuat daftar video.";
+        console.error("Gagal mengambil data video:", error);
+      });
+  </script>
+
+</body>
+</html>
