@@ -70,6 +70,31 @@
       <option disabled selected>Pilih Video</option>
     </select>
     <iframe id="videoPlayer" src="" allowfullscreen></iframe>
+    <!-- Tombol Share -->
+<div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+  <a id="whatsappShare" target="_blank" style="padding: 10px 15px; background-color: #25D366; color: white; border-radius: 5px; text-decoration: none; font-size: 14px;">
+    Bagikan ke WhatsApp
+  </a>
+  <a id="facebookShare" target="_blank" style="padding: 10px 15px; background-color: #3b5998; color: white; border-radius: 5px; text-decoration: none; font-size: 14px;">
+    Bagikan ke Facebook
+  </a>
+</div>
+
+<script>
+  // Dijalankan setelah halaman dimuat
+  window.addEventListener('DOMContentLoaded', () => {
+    const pageUrl = window.location.href;
+
+    // WhatsApp
+    const whatsappLink = `https://wa.me/?text=${encodeURIComponent("Yuk tonton cerita ini! " + pageUrl)}`;
+    document.getElementById("whatsappShare").href = whatsappLink;
+
+    // Facebook
+    const facebookLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
+    document.getElementById("facebookShare").href = facebookLink;
+  });
+</script>
+
     <div id="bookmarks">
       <h3>📌 Video Terakhir yang Dilihat:</h3>
       <ul id="bookmarkList"></ul>
