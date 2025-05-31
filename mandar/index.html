@@ -18,7 +18,6 @@
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
-      position: relative;
     }
     header h1 {
       margin: 0;
@@ -33,31 +32,6 @@
       border-radius: 5px;
       border: none;
     }
-
-    .hamburger {
-      display: none;
-      font-size: 24px;
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-    }
-
-    .dropdown-mobile {
-      display: none;
-      width: 100%;
-      padding: 10px;
-      background-color: #3700b3;
-    }
-
-    .dropdown-mobile select {
-      width: 100%;
-      padding: 10px;
-      font-size: 16px;
-      border-radius: 5px;
-      border: none;
-    }
-
     main {
       display: flex;
       flex-direction: column;
@@ -87,75 +61,14 @@
       height: 450px;
       border: none;
     }
-
-    @media (max-width: 768px) {
-      .dropdown {
-        display: none;
-      }
-
-      .hamburger {
-        display: block;
-      }
-
-      .dropdown-mobile.show {
-        display: block;
-      }
-
-      iframe {
-        height: 250px;
-      }
-
-      #videoSelect {
-        width: 100%;
-        font-size: 16px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      header h1 {
-        font-size: 18px;
-      }
-
-      #videoTitle {
-        font-size: 16px;
-      }
-
-      iframe {
-        height: 200px;
-      }
-    }
   </style>
 </head>
 <body>
 
   <header>
     <h1>Bahasa Mandar</h1>
-    <button class="hamburger" onclick="toggleMenu()">☰</button>
     <div class="dropdown">
       <select id="languageSelect" onchange="navigateToLanguage()">
-        <option disabled selected>Pilih Bahasa / Halaman</option>
-        <option value="index">🏠 Beranda</option>
-        <option value="download">⬇️ Download</option>
-        <option disabled>─────────────</option>
-        <option value="duano">Bahasa Duano</option>
-        <option value="haloban">Bahasa Haloban</option>
-        <option value="kaimbulawa">Bahasa Kaimbulawa</option>
-        <option value="kaili-unde">Bahasa Kaili Unde</option>
-        <option value="kamaru">Bahasa Kamaru</option>
-        <option value="kioko">Bahasa Kioko</option>
-        <option value="kumbewaha">Bahasa Kumbewaha</option>
-        <option value="lasalimu">Bahasa Lasalimu</option>
-        <option value="malimpung">Bahasa Malimpung</option>
-        <option value="mandar">Bahasa Mandar</option>
-        <option value="pancana">Bahasa Pancana</option>
-        <option value="sarudu">Bahasa Sarudu</option>
-        <option value="sikule">Bahasa Sikule</option>
-        <option value="suwawa">Bahasa Suwawa</option>
-        <option value="toli-toli">Bahasa Toli Toli</option>
-      </select>
-    </div>
-    <div class="dropdown-mobile" id="mobileMenu">
-      <select onchange="navigateToLanguage()">
         <option disabled selected>Pilih Bahasa / Halaman</option>
         <option value="index">🏠 Beranda</option>
         <option value="download">⬇️ Download</option>
@@ -188,32 +101,9 @@
   </main>
 
   <script>
-    function toggleMenu() {
-      const menu = document.getElementById("mobileMenu");
-      const button = document.querySelector(".hamburger");
-      menu.classList.toggle("show");
-
-      // Toggle icon ☰ ↔ ✕
-      if (menu.classList.contains("show")) {
-        button.textContent = "✕";
-      } else {
-        button.textContent = "☰";
-      }
-    }
-
     function navigateToLanguage() {
-      const selects = document.querySelectorAll("select");
-      let selectedValue = "";
-
-      selects.forEach(select => {
-        if (select.value && select.selectedIndex > 0) {
-          selectedValue = select.value;
-        }
-      });
-
-      if (selectedValue) {
-        window.location.href = "https://animasiosd.github.io/cerita-bahasa-daerah/" + selectedValue;
-      }
+      const selected = document.getElementById("languageSelect").value;
+      window.location.href = "https://animasiosd.github.io/cerita-bahasa-daerah/" + selected;
     }
 
     function playVideo(videoId, title) {
