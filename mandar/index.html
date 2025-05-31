@@ -106,11 +106,25 @@
       window.location.href = "https://animasiosd.github.io/cerita-bahasa-daerah/" + selected;
     }
 
+    const currentBahasa = "mandar";
+
+    function saveLastWatched(videoId, title) {
+      const key = `lastWatched_${currentBahasa}`;
+      localStorage.setItem(key, JSON.stringify({ videoId, title }));
+    }
+
+    function getLastWatched() {
+      const key = `lastWatched_${currentBahasa}`;
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : null;
+    }
+
     function playVideo(videoId, title) {
       const player = document.getElementById("videoPlayer");
       const titleDisplay = document.getElementById("videoTitle");
       player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
       titleDisplay.textContent = title;
+      saveLastWatched(videoId, title);
     }
 
     function playSelectedVideo() {
@@ -122,7 +136,6 @@
     }
 
     const API_KEY = "AIzaSyDBefJ54bf1RQBrmMye6FjD-gyPLT3bOyU";
-    const currentBahasa = "mandar";
     const webAppURL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
 
     fetch(`${webAppURL}?bahasa=${currentBahasa}`)
@@ -134,12 +147,13 @@
         }
 
         const PLAYLIST_ID = matched.playlistId;
-
         return fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${PLAYLIST_ID}&maxResults=50&key=${API_KEY}`);
       })
       .then(response => response.json())
       .then(data => {
         const videoSelect = document.getElementById("videoSelect");
+        const lastWatched = getLastWatched();
+        let videoPlayed = false;
 
         data.items.forEach((item, index) => {
           const videoId = item.snippet.resourceId.videoId;
@@ -150,11 +164,22 @@
           option.textContent = title;
           videoSelect.appendChild(option);
 
-          if (index === 0) {
-            playVideo(videoId, title);
+          // Putar video terakhir jika ditemukan
+          if (lastWatched && videoId === lastWatched.videoId) {
             option.selected = true;
+            playVideo(videoId, title);
+            videoPlayed = true;
           }
         });
+
+        // Jika belum pernah ditonton, putar video pertama
+        if (!videoPlayed && data.items.length > 0) {
+          const first = data.items[0];
+          const firstVideoId = first.snippet.resourceId.videoId;
+          const firstTitle = first.snippet.title;
+          videoSelect.value = firstVideoId;
+          playVideo(firstVideoId, firstTitle);
+        }
       })
       .catch(error => {
         document.getElementById("videoTitle").textContent = "Gagal memuat daftar video.";
