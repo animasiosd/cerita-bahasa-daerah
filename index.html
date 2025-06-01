@@ -139,18 +139,25 @@
     }
 
 auth.onAuthStateChanged(user => {
-  if (user) {
-    loginContainer.style.display = "none";
-    header.style.display = "flex";
-    main.style.display = "flex";
+    if (user) {
+      loginContainer.style.display = "none";
+      header.style.display = "flex";
+      main.style.display = "flex";
 
-    // Tambahkan nama pengguna
-    const welcomeMessage = document.getElementById("welcomeMessage");
-    if (welcomeMessage && user.displayName) {
-      welcomeMessage.textContent = `Selamat datang ${user.displayName} di Cerita Bahasa Daerah!`;
+      // Tampilkan welcome message
+      const welcomeMessage = document.getElementById("welcomeMessage");
+      if (welcomeMessage && user.displayName) {
+        welcomeMessage.textContent = `Selamat datang ${user.displayName} di Cerita Bahasa Daerah!`;
+      }
+
+      // Kirim data user ke Google Analytics 4
+      gtag('set', {
+        user_id: user.uid,
+        user_name: user.displayName,
+        user_email: user.email
+      });
     }
-  }
-});
+  });
 
 
     function navigateToLanguage() {
