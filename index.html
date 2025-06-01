@@ -89,7 +89,7 @@
   </header>
 
   <main>
-    <h2>Selamat datang di Cerita Bahasa Daerah!</h2>
+    <h2 id="welcomeMessage">Selamat datang di Cerita Bahasa Daerah!</h2>
     <p>Pilih salah satu bahasa di bawah ini untuk mulai menonton cerita animasi dan berdiskusi bersama.</p>
 
     <div style="margin-top: 20px;">
@@ -138,13 +138,20 @@
       auth.signOut().then(() => location.reload());
     }
 
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        loginContainer.style.display = "none";
-        header.style.display = "flex";
-        main.style.display = "flex";
-      }
-    });
+auth.onAuthStateChanged(user => {
+  if (user) {
+    loginContainer.style.display = "none";
+    header.style.display = "flex";
+    main.style.display = "flex";
+
+    // Tambahkan nama pengguna
+    const welcomeMessage = document.getElementById("welcomeMessage");
+    if (welcomeMessage && user.displayName) {
+      welcomeMessage.textContent = `Selamat datang ${user.displayName} di Cerita Bahasa Daerah!`;
+    }
+  }
+});
+
 
     function navigateToLanguage() {
       const selected = document.getElementById("languageSelect").value;
