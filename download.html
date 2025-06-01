@@ -7,6 +7,267 @@
   <style>
     body { font-family: sans-serif; padding: 1rem; background-color: #f9f9f9; }
     h1 { text-align: center; margin-bottom: 1rem; }
+    #welcomeMessage { text-align: center; margin-bottom: 1rem; font-size: 1.1rem; color: #333; }
+    .filter-group, .nav-group { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; justify-content: center; }
+    select { padding: 0.5rem; font-size: 1rem; }
+    table { width: 100%; border-collapse: collapse; background: #fff; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+    th { background-color: #eee; cursor: pointer; }
+    tr:hover { background-color: #def; cursor: pointer; }
+    .sortable::after { content: " ⇅"; font-size: 0.8rem; color: #888; }
+    .asc::after { content: " ↑"; }
+    .desc::after { content: " ↓"; }
+    @media (max-width: 600px) {
+      .filter-group, .nav-group { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+
+  <!-- Ganti dengan kode gtag GA4 Anda -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-XXXXXXX'); // Ganti G-XXXXXXX dengan GA4 ID Anda
+  </script>
+
+  <!-- Firebase App (ganti dengan config Anda) -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script>
+    // Ganti config ini sesuai Firebase project Anda
+    const firebaseConfig = {
+      apiKey: "API_KEY",
+      authDomain: "PROJECT_ID.firebaseapp.com",
+      projectId: "PROJECT_ID",
+      appId: "APP_ID"
+    };
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+  </script>
+</head>
+
+<body>
+  <div class="nav-group" style="margin-bottom: 2rem;">
+    <select id="languageNav">
+      <option value="">-- Menu --</option>
+      <option value="index.html">🏠 Beranda</option>
+      <option value="download.html">⬇️ Halaman Download</option>
+      <option value="duano">Bahasa Duano</option>
+      <option value="haloban">Bahasa Haloban</option>
+      <option value="kaimbulawa">Bahasa Kaimbulawa</option>
+      <option value="kaili-unde">Bahasa Kaili Unde</option>
+      <option value="kamaru">Bahasa Kamaru</option>
+      <option value="kioko">Bahasa Kioko</option>
+      <option value="kumbewaha">Bahasa Kumbewaha</option>
+      <option value="lasalimu">Bahasa Lasalimu</option>
+      <option value="malimpung">Bahasa Malimpung</option>
+      <option value="mandar">Bahasa Mandar</option>
+      <option value="pancana">Bahasa Pancana</option>
+      <option value="sarudu">Bahasa Sarudu</option>
+      <option value="sikule">Bahasa Sikule</option>
+      <option value="suwawa">Bahasa Suwawa</option>
+      <option value="toli-toli">Bahasa Toli-Toli</option>
+    </select>
+  </div>
+
+  <h1>Download Video Cerita</h1>
+  <div id="welcomeMessage"></div>
+
+  <div class="filter-group">
+    <select id="filterBahasa"><option value="">Semua Bahasa</option></select>
+    <select id="filterUrutan"><option value="">Semua Urutan</option></select>
+    <select id="filterJudul"><option value="">Semua Judul</option></select>
+  </div>
+
+  <table id="downloadTable">
+    <thead>
+      <tr>
+        <th class="sortable" data-key="bahasa">Bahasa</th>
+        <th class="sortable" data-key="urutan">Urutan</th>
+        <th class="sortable" data-key="title">Title</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyVZHGfb2xf-uPtKzqZ0bD4oIDttsBgF-n_aNXB0-h_Xy-oxYChmT-a4SYDV3MwiUpI/exec';
+    let fullData = [];
+    let sortKey = '';
+    let sortAsc = true;
+    let currentUser = null;
+
+    async function fetchData() {
+      try {
+        const res = await fetch(API_URL);
+        const json = await res.json();
+        if (!Array.isArray(json)) throw new Error("Format data tidak sesuai");
+        fullData = json;
+        populateFilters(json);
+        renderTable(json);
+      } catch (err) {
+        alert('Gagal memuat data. Pastikan API Google Apps Script sudah dipublikasikan sebagai "Anyone".');
+        console.error(err);
+      }
+    }
+
+    function populateFilters(data) {
+      const bahasaSet = new Set();
+      const urutanSet = new Set();
+      const judulSet = new Set();
+
+      data.forEach(item => {
+        bahasaSet.add(item.bahasa);
+        urutanSet.add(item.urutan);
+        judulSet.add(item.title);
+      });
+
+      populateSelect('filterBahasa', [...bahasaSet].sort());
+      populateSelect('filterUrutan', [...urutanSet].sort((a, b) => a - b));
+      populateSelect('filterJudul', [...judulSet].sort());
+    }
+
+    function populateSelect(id, items) {
+      const select = document.getElementById(id);
+      items.forEach(val => {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        select.appendChild(opt);
+      });
+    }
+
+    function renderTable(data) {
+      const tbody = document.querySelector('#downloadTable tbody');
+      tbody.innerHTML = '';
+
+      let sortedData = [...data];
+      if (sortKey) {
+        sortedData.sort((a, b) => {
+          let valA = a[sortKey];
+          let valB = b[sortKey];
+
+          const numA = parseFloat(valA);
+          const numB = parseFloat(valB);
+          if (!isNaN(numA) && !isNaN(numB)) {
+            valA = numA;
+            valB = numB;
+          }
+
+          if (valA < valB) return sortAsc ? -1 : 1;
+          if (valA > valB) return sortAsc ? 1 : -1;
+          return 0;
+        });
+      }
+
+      sortedData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${row.bahasa}</td>
+          <td>${row.urutan}</td>
+          <td>${row.title}</td>
+        `;
+        tr.onclick = () => {
+          // Kirim event ke GA4 saat download
+          gtag('event', 'download_video', {
+            bahasa: row.bahasa,
+            urutan: row.urutan,
+            title: row.title,
+            user_id: currentUser?.uid || 'anonymous',
+            user_email: currentUser?.email || 'anonymous',
+            user_name: currentUser?.displayName || 'anonymous'
+          });
+          window.open(row.link_download, '_blank');
+        };
+        tbody.appendChild(tr);
+      });
+    }
+
+    function applyFilters() {
+      const bahasa = document.getElementById('filterBahasa').value;
+      const urutan = document.getElementById('filterUrutan').value;
+      const judul = document.getElementById('filterJudul').value;
+
+      const filtered = fullData.filter(item => {
+        return (!bahasa || item.bahasa === bahasa)
+            && (!urutan || item.urutan.toString() === urutan)
+            && (!judul || item.title === judul);
+      });
+
+      renderTable(filtered);
+    }
+
+    function handleSort(event) {
+      const key = event.target.getAttribute('data-key');
+      if (sortKey === key) {
+        sortAsc = !sortAsc;
+      } else {
+        sortKey = key;
+        sortAsc = true;
+      }
+
+      document.querySelectorAll('th.sortable').forEach(th => {
+        th.classList.remove('asc', 'desc');
+        if (th.getAttribute('data-key') === sortKey) {
+          th.classList.add(sortAsc ? 'asc' : 'desc');
+        }
+      });
+
+      applyFilters();
+    }
+
+    document.querySelectorAll('select').forEach(select => {
+      select.addEventListener('change', applyFilters);
+    });
+
+    document.querySelectorAll('th.sortable').forEach(th => {
+      th.addEventListener('click', handleSort);
+    });
+
+    document.getElementById('languageNav').addEventListener('change', function () {
+      const selected = this.value;
+      if (selected) {
+        window.location.href = selected;
+      }
+    });
+
+    // Firebase Login Status & Analytics GA4 Identity
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        currentUser = user;
+
+        const welcomeMessage = document.getElementById("welcomeMessage");
+        if (welcomeMessage && user.displayName) {
+          welcomeMessage.textContent = `Selamat datang ${user.displayName} di Cerita Bahasa Daerah!`;
+        }
+
+        gtag('set', {
+          user_id: user.uid,
+          user_name: user.displayName,
+          user_email: user.email
+        });
+      }
+    });
+
+    fetchData();
+  </script>
+
+</body>
+</html>
+
+
+---------------------------------------------------------------
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Halaman Download Video Cerita</title>
+  <style>
+    body { font-family: sans-serif; padding: 1rem; background-color: #f9f9f9; }
+    h1 { text-align: center; margin-bottom: 1rem; }
     .filter-group, .nav-group { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; justify-content: center; }
     select { padding: 0.5rem; font-size: 1rem; }
     table { width: 100%; border-collapse: collapse; background: #fff; }
