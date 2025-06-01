@@ -7,6 +7,18 @@
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
   <style>
+    .bookmarkBtn {
+  padding: 6px 10px;
+  margin: 3px 3px;
+  font-size: 13px;
+  background-color: #e0e0e0;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.bookmarkBtn:hover {
+  background-color: #d5d5d5;
+}
     body { margin: 0; font-family: Arial, sans-serif; background-color: #fff; }
     header { background-color: #6200ea; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
     header h1 { margin: 0; font-size: 20px; }
@@ -70,6 +82,19 @@
       <option disabled selected>Pilih Video</option>
     </select>
     <iframe id="videoPlayer" src="" allowfullscreen></iframe>
+    <!-- Tambahkan ini setelah <iframe id="videoPlayer" ...> -->
+<div id="discussionQuestions" style="max-width: 800px; margin-top: 20px; text-align: left;">
+  <h3>Pertanyaan Diskusi</h3>
+  <ul style="padding-left: 20px;">
+    <li>Menurut Anda, cerita ini menceritakan tentang apa?</li>
+    <li>Menurut Anda, apa yang paling menarik pada cerita ini?</li>
+    <li>Apa yang Anda pelajari dari cerita ini?</li>
+    <li>Bagaimana Anda akan menerapkan apa yang baru kita pelajari dari cerita ini?</li>
+    <li>Menurut Anda, apakah bahasa yang dipakai dalam cerita mudah dipahami?</li>
+    <li>Apa harapan Anda terkait pelestarian bahasa <strong>Mandar</strong> melalui cerita-cerita?</li>
+  </ul>
+</div>
+
     <!-- Tombol Share -->
 <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
   <a id="whatsappShare" target="_blank" style="padding: 10px 15px; background-color: #25D366; color: white; border-radius: 5px; text-decoration: none; font-size: 14px;">
@@ -174,19 +199,20 @@
     }
 
     function showBookmarks() {
-      const bookmarks = JSON.parse(localStorage.getItem("bookmarks")) || [];
-      const ul = document.getElementById("bookmarkList");
-      ul.innerHTML = "";
-      bookmarks.forEach(item => {
-        const li = document.createElement("li");
-        const a = document.createElement("a");
-        a.href = "#";
-        a.textContent = item.title;
-        a.onclick = () => playVideo(item.videoId, item.title);
-        li.appendChild(a);
-        ul.appendChild(li);
-      });
-    }
+  const bookmarks = JSON.parse(localStorage.getItem("bookmarks")) || [];
+  const ul = document.getElementById("bookmarkList");
+  ul.innerHTML = "";
+  bookmarks.forEach(item => {
+    const li = document.createElement("li");
+    const btn = document.createElement("button");
+    btn.className = "bookmarkBtn";
+    btn.textContent = item.title;
+    btn.onclick = () => playVideo(item.videoId, item.title);
+    li.appendChild(btn);
+    ul.appendChild(li);
+  });
+}
+
 
     function loadVideoData() {
       const API_KEY = "AIzaSyDBefJ54bf1RQBrmMye6FjD-gyPLT3bOyU";
