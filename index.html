@@ -3,204 +3,153 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Beranda - Cerita Bahasa</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #fff;
-    }
-    header {
-      background-color: #6200ea;
-      color: white;
-      padding: 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 20px;
-    }
-    .dropdown select {
-      padding: 6px 10px;
-      font-size: 14px;
-      border-radius: 5px;
-      border: none;
-    }
-    main {
-      padding: 20px;
-      text-align: center;
-    }
-    h2 {
-      font-size: 22px;
-      margin-bottom: 30px;
-    }
-    button {
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 16px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .google {
-      background-color: #db4437;
-      color: white;
-    }
-    .facebook {
-      background-color: #4267B2;
-      color: white;
-    }
+  <title>Beranda - Cerita Bahasa Daerah</title>
 
-    /* Tambahan untuk dropdown profil */
-    .profile-menu {
-      position: relative;
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SFLNYPDQ04"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-SFLNYPDQ04');
+  </script>
+
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; background-color: #fff; }
+    header {
+      background-color: #6200ea; color: white; padding: 15px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;
+    }
+    header h1 { margin: 0; font-size: 20px; }
+    .dropdown, .logoutBtn { margin: 5px; }
+    .dropdown select, .logoutBtn button {
+      padding: 6px 10px; font-size: 14px; border-radius: 5px; border: none;
+    }
+    .logoutBtn button { background-color: #e53935; color: white; cursor: pointer; }
+    main {
+      display: none; flex-direction: column; align-items: center;
+      padding: 30px 20px; text-align: center;
+    }
+    .languageButton {
       display: inline-block;
+      margin: 8px; padding: 10px 15px;
+      background-color: #eee; border: none; border-radius: 5px;
+      font-size: 16px; cursor: pointer;
+      text-decoration: none; color: #333;
     }
-    .profile-button {
-      background-color: #3700b3;
-      color: white;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 5px;
-      cursor: pointer;
+    .languageButton:hover { background-color: #ddd; }
+
+    #loginContainer {
+      display: flex; justify-content: center; align-items: center; height: 100vh;
     }
-    .profile-dropdown {
-      display: none;
-      position: absolute;
-      right: 0;
-      background-color: white;
-      color: black;
-      box-shadow: 0px 4px 6px rgba(0,0,0,0.2);
-      z-index: 1;
-      border-radius: 5px;
-      min-width: 160px;
-    }
-    .profile-dropdown p, .profile-dropdown button {
-      padding: 10px;
-      margin: 0;
-      text-align: left;
-      width: 100%;
-      background: none;
-      border: none;
-      font-size: 14px;
-      cursor: pointer;
-    }
-    .profile-dropdown p {
-      font-weight: bold;
-      cursor: default;
-    }
-    .profile-menu:hover .profile-dropdown {
-      display: block;
+    #loginBtn {
+      padding: 10px 20px; font-size: 16px;
+      background-color: #4285F4; color: white; border: none; border-radius: 5px; cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <div id="authContent" style="display:none;">
-    <header>
-      <h1>Cerita Bahasa Daerah</h1>
-      <div style="display: flex; align-items: center; gap: 15px;">
-        <div class="dropdown">
-          <select id="languageSelect" onchange="navigateToLanguage()">
-            <option disabled selected>-- Pilih Bahasa --</option>
-            <option value="mandar">Bahasa Mandar</option>
-            <option value="kaili-unde">Bahasa Kaili Unde</option>
-            <option value="suwawa">Bahasa Suwawa</option>
-            <option value="toli-toli">Bahasa Toli Toli</option>
-            <option value="kaimbulawa">Bahasa Kaimbulawa</option>
-            <option value="kamaru">Bahasa Kamaru</option>
-            <option value="kioko">Bahasa Kioko</option>
-            <option value="kumbewaha">Bahasa Kumbewaha</option>
-            <option value="lasalimu">Bahasa Lasalimu</option>
-            <option value="pancana">Bahasa Pancana</option>
-            <option value="sarudu">Bahasa Sarudu</option>
-            <option value="malimpung">Bahasa Malimpung</option>
-            <option value="haloban">Bahasa Haloban</option>
-            <option value="duano">Bahasa Duano</option>
-            <option value="sikule">Bahasa Sikule</option>
-          </select>
-        </div>
-        <div class="profile-menu">
-          <button class="profile-button">👤 Profil</button>
-          <div class="profile-dropdown">
-            <p id="userName">Pengguna</p>
-            <button onclick="logout()">Keluar</button>
-          </div>
-        </div>
-      </div>
-    </header>
-
-    <main>
-      <h2 id="greeting">Silakan Pilih Bahasa untuk Mendengarkan Cerita</h2>
-      <p>Gunakan menu dropdown di kanan atas untuk memilih bahasa daerah yang tersedia.</p>
-    </main>
+  <div id="loginContainer">
+    <button id="loginBtn">Login dengan Google</button>
   </div>
 
-  <div id="loginContent" style="text-align:center; padding:50px;">
-    <h2>Silakan Login untuk Mengakses Cerita Bahasa</h2>
-    <button class="google" onclick="loginWithGoogle()">Login dengan Google</button><br>
-    <button class="facebook" onclick="loginWithFacebook()">Login dengan Facebook</button>
-  </div>
+  <header style="display: none;">
+    <h1>Beranda - Cerita Bahasa Daerah</h1>
+    <div class="dropdown">
+      <select id="languageSelect" onchange="navigateToLanguage()">
+        <option disabled selected>Pilih Halaman</option>
+        <option value="index">🏠 Beranda</option>
+        <option value="download">⬇️ Download</option>
+        <option disabled>─────────────</option>
+        <option value="duano">Bahasa Duano</option>
+        <option value="haloban">Bahasa Haloban</option>
+        <option value="kaimbulawa">Bahasa Kaimbulawa</option>
+        <option value="kaili-unde">Bahasa Kaili Unde</option>
+        <option value="kamaru">Bahasa Kamaru</option>
+        <option value="kioko">Bahasa Kioko</option>
+        <option value="kumbewaha">Bahasa Kumbewaha</option>
+        <option value="lasalimu">Bahasa Lasalimu</option>
+        <option value="malimpung">Bahasa Malimpung</option>
+        <option value="mandar">Bahasa Mandar</option>
+        <option value="pancana">Bahasa Pancana</option>
+        <option value="sarudu">Bahasa Sarudu</option>
+        <option value="sikule">Bahasa Sikule</option>
+        <option value="suwawa">Bahasa Suwawa</option>
+        <option value="toli-toli">Bahasa Toli Toli</option>
+      </select>
+    </div>
+    <div class="logoutBtn">
+      <button onclick="logout()">Logout</button>
+    </div>
+  </header>
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <main>
+    <h2>Selamat datang di Cerita Bahasa Daerah!</h2>
+    <p>Pilih salah satu bahasa di bawah ini untuk mulai menonton cerita animasi dan berdiskusi bersama.</p>
+
+    <div style="margin-top: 20px;">
+      <a class="languageButton" href="duano">Bahasa Duano</a>
+      <a class="languageButton" href="haloban">Bahasa Haloban</a>
+      <a class="languageButton" href="kaimbulawa">Bahasa Kaimbulawa</a>
+      <a class="languageButton" href="kaili-unde">Bahasa Kaili Unde</a>
+      <a class="languageButton" href="kamaru">Bahasa Kamaru</a>
+      <a class="languageButton" href="kioko">Bahasa Kioko</a>
+      <a class="languageButton" href="kumbewaha">Bahasa Kumbewaha</a>
+      <a class="languageButton" href="lasalimu">Bahasa Lasalimu</a>
+      <a class="languageButton" href="malimpung">Bahasa Malimpung</a>
+      <a class="languageButton" href="mandar">Bahasa Mandar</a>
+      <a class="languageButton" href="pancana">Bahasa Pancana</a>
+      <a class="languageButton" href="sarudu">Bahasa Sarudu</a>
+      <a class="languageButton" href="sikule">Bahasa Sikule</a>
+      <a class="languageButton" href="suwawa">Bahasa Suwawa</a>
+      <a class="languageButton" href="toli-toli">Bahasa Toli Toli</a>
+    </div>
+  </main>
 
   <script>
-    // GANTI DENGAN KONFIGURASI FIREBASE ANDA
     const firebaseConfig = {
-      apiKey: "AIzaSyDN3_g8cCFD5LvSF1lbFZU5rQ40KD41dwQ",
-      authDomain: "cerita-e3f82.firebaseapp.com",
-      projectId: "cerita-e3f82",
-      appId: "1:367517556840:web:265b9b699c09062c3edbdd"
+      apiKey: "AIzaSyCAOg2aMzFVCQVx07t85lFpTXv3c2ugL1E",
+      authDomain: "animasiosd-github.firebaseapp.com",
+      projectId: "animasiosd-github",
+      storageBucket: "animasiosd-github.firebasestorage.app",
+      messagingSenderId: "424179260770",
+      appId: "1:424179260770:web:2f4a04a8c9643027bca03b",
+      measurementId: "G-SFLNYPDQ04"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    function loginWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).then(result => {
-        location.reload();
-      }).catch(error => {
-        alert("Login gagal: " + error.message);
-      });
-    }
+    const loginContainer = document.getElementById("loginContainer");
+    const loginBtn = document.getElementById("loginBtn");
+    const main = document.querySelector("main");
+    const header = document.querySelector("header");
 
-    function loginWithFacebook() {
-      const provider = new firebase.auth.FacebookAuthProvider();
-      auth.signInWithPopup(provider).then(result => {
-        location.reload();
-      }).catch(error => {
-        alert("Login gagal: " + error.message);
-      });
-    }
+    loginBtn.onclick = () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(error => alert("Login gagal: " + error.message));
+    };
 
     function logout() {
-      auth.signOut().then(() => {
-        location.reload();
-      });
+      auth.signOut().then(() => location.reload());
     }
 
     auth.onAuthStateChanged(user => {
       if (user) {
-        document.getElementById("authContent").style.display = "block";
-        document.getElementById("loginContent").style.display = "none";
-        document.getElementById("userName").textContent = user.displayName;
-        document.getElementById("greeting").innerHTML = `Hai ${user.displayName}.<br>Selamat datang dan selamat belajar!`;
-      } else {
-        document.getElementById("authContent").style.display = "none";
-        document.getElementById("loginContent").style.display = "block";
+        loginContainer.style.display = "none";
+        header.style.display = "flex";
+        main.style.display = "flex";
       }
     });
 
     function navigateToLanguage() {
       const selected = document.getElementById("languageSelect").value;
-      window.location.href = selected + "/";
+      window.location.href = "https://animasiosd.github.io/cerita-bahasa-daerah/" + selected;
     }
   </script>
-
 </body>
 </html>
