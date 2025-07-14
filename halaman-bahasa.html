@@ -10,7 +10,13 @@
 </head>
 <body>
 
-  <div id="loginContainer" class="d-flex justify-content-center align-items-center vh-100">
+  <div id="pageLoader" class="d-flex justify-content-center align-items-center vh-100">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+
+  <div id="loginContainer" class="d-none d-flex justify-content-center align-items-center vh-100">
     <div class="text-center">
       <h1 class="mb-3">Cerita Bahasa Daerah</h1>
       <p class="mb-4">Anda harus login untuk dapat melihat halaman ini.</p>
@@ -19,30 +25,20 @@
   </div>
 
   <div id="mainContent" class="d-none">
-    
     <div id="navbar-placeholder"></div>
-
     <main class="container my-4">
       <div class="row justify-content-center">
         <div class="col-lg-10 col-xl-8">
-
           <h2 id="videoTitle" class="text-center mb-3">Memuat judul video...</h2>
-          
           <div class="input-group mb-3">
             <label class="input-group-text" for="videoSelect">Pilih Video:</label>
-            <select class="form-select" id="videoSelect" onchange="playSelectedVideo()">
-              <option disabled selected>Memuat daftar...</option>
-            </select>
+            <select class="form-select" id="videoSelect" onchange="playSelectedVideo()"></select>
           </div>
-
           <div class="ratio ratio-16x9 shadow-sm rounded overflow-hidden">
             <iframe id="videoPlayer" src="" allowfullscreen title="Pemutar Video YouTube"></iframe>
           </div>
-
           <div class="card mt-4">
-            <div class="card-header h5">
-              Pertanyaan Diskusi
-            </div>
+            <div class="card-header h5">Pertanyaan Diskusi</div>
             <div class="card-body">
               <ul class="list-group list-group-flush">
                 <li class="list-group-item">1. Menurut Anda, cerita ini menceritakan tentang apa?</li>
@@ -54,7 +50,6 @@
               </ul>
             </div>
           </div>
-
         </div>
       </div>
     </main>
@@ -65,8 +60,9 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script src="js/main.js"></script>
-  <script src="js/auth.js"></script> <script>
-    // --- BAGIAN INTI DARI TEMPLATE DINAMIS ---
+  <script src="js/auth.js"></script>
+  
+  <script>
     const urlParams = new URLSearchParams(window.location.search);
     const bahasa = urlParams.get('bahasa');
     
@@ -76,22 +72,20 @@
     }
     const namaBahasaFormatted = formatBahasaName(bahasa);
     
-    // Redirect jika tidak ada parameter bahasa
     if (!bahasa) {
       window.location.href = 'index.html';
     } else {
-      // Atur konten dinamis
       document.title = `${namaBahasaFormatted} - Cerita Bahasa Daerah`;
       document.getElementById('language-name-placeholder').textContent = namaBahasaFormatted;
-      
-      // Panggil fungsi untuk memuat data video.
-      // auth.js akan memastikan ini hanya berjalan setelah user login.
-      loadVideoData(bahasa);
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          loadVideoData(bahasa);
+        }
+      });
     }
-    // --- AKHIR BAGIAN INTI ---
 
     function playVideo(videoId, title) {
-      document.getElementById("videoPlayer").src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      document.getElementById("videoPlayer").src = `https://www.youtube.com/embed/$${videoId}?autoplay=1`;
       document.getElementById("videoTitle").textContent = title;
     }
 
@@ -115,7 +109,7 @@
         .then(response => response.json())
         .then(data => {
           const videoSelect = document.getElementById("videoSelect");
-          videoSelect.innerHTML = ''; // Reset dropdown
+          videoSelect.innerHTML = '<option disabled selected>Pilih Video</option>';
           data.items.forEach((item, index) => {
             const videoId = item.snippet.resourceId.videoId;
             const title = item.snippet.title;
