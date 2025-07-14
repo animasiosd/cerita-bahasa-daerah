@@ -6,9 +6,12 @@
   <title>Beranda - Cerita Bahasa Daerah</title>
   
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css"/> <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+  <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
+  <script>NProgress.start();</script>
 
   <div id="loginContainer" class="d-flex justify-content-center align-items-center vh-100">
     <div class="text-center">
@@ -22,9 +25,7 @@
     <div id="navbar-placeholder"></div>
     <main class="container my-5 text-center">
       <h2 id="welcomeMessage" class="display-5 mb-3">Selamat Datang!</h2>
-      <p class="lead mb-5">Pilih salah satu bahasa di bawah untuk mulai menonton cerita animasi.</p>
-      <div id="languageGrid" class="row g-4 justify-content-center">
-      </div>
+      <p class="lead mb-5">Gunakan menu navigasi di atas untuk memilih cerita bahasa daerah yang ingin Anda tonton.</p>
     </main>
   </div>
 
@@ -33,96 +34,17 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
 
   <script>
-    // Konfigurasi Firebase Anda
-    const firebaseConfig = {
-      apiKey: "AIzaSyCAOg2aMzFVCQVx07t85lFpTXv3c2ugL1E",
-      authDomain: "animasiosd-github.firebaseapp.com",
-      projectId: "animasiosd-github",
-      storageBucket: "animasiosd-github.firebasestorage.app",
-      messagingSenderId: "424179260770",
-      appId: "1:424179260770:web:2f4a04a8c9643027bca03b",
-      measurementId: "G-SFLNYPDQ04"
-    };
-    // Inisialisasi Firebase (sekarang 'firebase' sudah pasti ada)
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-
-    // Sisa kode Anda tidak diubah
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-SFLNYPDQ04');
-
-    const loginContainer = document.getElementById("loginContainer");
-    const mainContent = document.getElementById("mainContent");
-    const loginBtn = document.getElementById("loginBtn");
-    const languageGrid = document.getElementById("languageGrid");
-
-    const languages = [
-      { name: "Duano", value: "duano" }, { name: "Haloban", value: "haloban" },
-      { name: "Kaimbulawa", value: "kaimbulawa" }, { name: "Kaili Unde", value: "kaili-unde" },
-      { name: "Kamaru", value: "kamaru" }, { name: "Kioko", value: "kioko" },
-      { name: "Kumbewaha", value: "kumbewaha" }, { name: "Lasalimu", value: "lasalimu" },
-      { name: "Malimpung", value: "malimpung" }, { name: "Mandar", value: "mandar" },
-      { name: "Pancana", value: "pancana" }, { name: "Sarudu", value: "sarudu" },
-      { name: "Sikule", value: "sikule" }, { name: "Suwawa", value: "suwawa" },
-      { name: "Toli-Toli", value: "toli-toli" }
-    ];
-
-    function createLanguageCards() {
-      languageGrid.innerHTML = '';
-      languages.forEach(lang => {
-        const col = document.createElement("div");
-        col.className = "col-lg-3 col-md-4 col-sm-6";
-        const cardLink = document.createElement("a");
-        cardLink.href = `https://animasiosd.github.io/cerita-bahasa-daerah/${lang.value}.html`;
-        cardLink.className = "card-link";
-        const card = document.createElement("div");
-        card.className = "card h-100 text-center language-card";
-        const cardBody = document.createElement("div");
-        cardBody.className = "card-body d-flex justify-content-center align-items-center";
-        const cardTitle = document.createElement("h5");
-        cardTitle.className = "card-title m-0";
-        cardTitle.textContent = `Bahasa ${lang.name}`;
-        cardBody.appendChild(cardTitle);
-        card.appendChild(cardBody);
-        cardLink.appendChild(card);
-        col.appendChild(cardLink);
-        languageGrid.appendChild(col);
-      });
-    }
-    
-    loginBtn.onclick = () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(error => alert("Login gagal: " + error.message));
-    };
-
-    function logout() {
-      auth.signOut();
-    }
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        if(loginContainer) loginContainer.classList.add('d-none');
-        if(mainContent) mainContent.classList.remove('d-none');
-        const welcomeMessage = document.getElementById("welcomeMessage");
-        if (welcomeMessage && user.displayName) {
-          welcomeMessage.textContent = `Selamat datang, ${user.displayName}!`;
-        }
-        if (languageGrid.children.length === 0) {
-            createLanguageCards();
-        }
-        gtag('set', { user_id: user.uid });
-      } else {
-        if (window.location.pathname.includes('.html')) {
-            window.location.href = '/';
-        }
-        if(loginContainer) loginContainer.classList.remove('d-none');
-        if(mainContent) mainContent.classList.add('d-none');
-      }
-    });
+    // Tidak ada lagi fungsi createLanguageCards di sini.
   </script>
+
+  <script>
+    window.onload = function() {
+      NProgress.done();
+    };
+  </script>
+
 </body>
 </html>
