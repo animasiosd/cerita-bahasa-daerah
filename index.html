@@ -5,78 +5,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Halaman Utama</title>
 
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
   <style>
-    /* Gaya dasar untuk body */
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
       margin: 0;
       background-color: #f4f7f6;
     }
-
-    /* 1. Loader (Tidak berubah) */
     #page-loader {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
       background-color: #ffffff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
+      display: flex; justify-content: center; align-items: center; flex-direction: column;
       z-index: 9999;
       transition: opacity 0.75s ease-out;
     }
     #page-loader.hidden { opacity: 0; }
-    #loader-text {
-        color: #555;
-        margin-top: 20px;
-        font-size: 1.2em;
-    }
-
-    /* 2. Progress Bar (Tidak berubah) */
-    .progress-container {
-      width: 80%;
-      max-width: 400px;
-      background-color: #e0e0e0;
-      border-radius: 25px;
-      overflow: hidden;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    #progress-bar {
-      width: 0%;
-      height: 20px;
-      background-color: #0d6efd;
-      border-radius: 25px;
-      transition: width 0.1s linear;
-    }
-
-    /* 3. Konten Utama dan Kontainer Login */
-    #main-content, #loginContainer {
-      display: none; /* Awalnya disembunyikan */
-      padding: 40px;
-      text-align: center;
-    }
-    #loginContainer {
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-    }
-    #main-content h1, #loginContainer h1 { color: #333; }
-    #main-content p, #loginContainer p {
-        color: #666;
-        font-size: 1.1em;
-    }
-    #loginBtn {
-        padding: 12px 24px;
-        font-size: 1.1em;
-        cursor: pointer;
-        background-color: #4285F4;
-        color: white;
-        border: none;
-        border-radius: 5px;
-    }
+    #loader-text { color: #555; margin-top: 20px; font-size: 1.2em; }
+    .progress-container { width: 80%; max-width: 400px; background-color: #e0e0e0; border-radius: 25px; overflow: hidden; }
+    #progress-bar { width: 0%; height: 20px; background-color: #0d6efd; border-radius: 25px; transition: width 0.1s linear; }
+    #main-content, #loginContainer { display: none; padding: 40px; text-align: center; }
+    #loginContainer { justify-content: center; align-items: center; height: 100vh; }
   </style>
 </head>
 <body>
@@ -90,11 +40,11 @@
     <div id="loader-text">Memuat... 0%</div>
   </div>
 
-  <div id="loginContainer">
-    <div>
+  <div id="loginContainer" class="d-flex">
+    <div class="text-center">
         <h1>Selamat Datang di Website Kami</h1>
         <p class="mb-4">Silakan masuk untuk melanjutkan.</p>
-        <button id="loginBtn">Login dengan Google</button>
+        <button id="loginBtn" class="btn btn-primary btn-lg">Login dengan Google</button>
     </div>
   </div>
 
@@ -103,13 +53,12 @@
       <h1>🎉 Selamat Datang!</h1>
       <p>Halaman telah berhasil dimuat.</p>
     </header>
-    <main>
-      <p>Anda bisa mengganti bagian ini dengan konten halaman web Anda yang sebenarnya, seperti teks, gambar, tombol, atau komponen lainnya.</p>
-    </main>
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script src="js/main.js"></script>
   <script src="js/auth.js"></script>
@@ -119,15 +68,11 @@
       const progressBar = document.getElementById('progress-bar');
       const loaderText = document.getElementById('loader-text');
       const pageLoader = document.getElementById('page-loader');
-
       let progress = 0;
-      const loadingSpeed = 10; 
-
-      const interval = setInterval(function() {
-        progress += 1;
+      const interval = setInterval(() => {
+        progress++;
         progressBar.style.width = progress + '%';
         loaderText.textContent = 'Memuat... ' + progress + '%';
-
         if (progress >= 100) {
           clearInterval(interval);
           setTimeout(() => {
@@ -138,29 +83,16 @@
             }, 750);
           }, 500);
         }
-      }, loadingSpeed);
+      }, 10);
     });
 
-    // Fungsi untuk memuat navbar dari file eksternal
     function loadNavbar() {
         fetch('navbar.html')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Navbar not found');
-                }
-                return response.text();
-            })
-            .then(html => {
-                document.getElementById('navbar-placeholder').innerHTML = html;
-            })
-            .catch(error => {
-                console.error('Gagal memuat navbar:', error);
-                // Tampilkan pesan error jika navbar.html tidak ditemukan
-                document.getElementById('navbar-placeholder').innerHTML = '<p style="color:red; text-align:center;">Gagal memuat navbar.</p>';
-            });
+            .then(response => response.ok ? response.text() : Promise.reject('Navbar not found'))
+            .then(html => { document.getElementById('navbar-placeholder').innerHTML = html; })
+            .catch(error => { console.error('Gagal memuat navbar:', error); });
     }
 
-    // Fungsi untuk memeriksa status login Firebase
     function initializeAuthCheck() {
         const loginContainer = document.getElementById('loginContainer');
         const mainContent = document.getElementById('main-content');
@@ -168,13 +100,11 @@
         
         auth.onAuthStateChanged(user => {
             if (user) {
-                // Jika pengguna sudah login, muat navbar dan tampilkan konten utama
-                loadNavbar(); // Panggil fungsi untuk memuat navbar
+                loadNavbar();
                 mainContent.style.display = 'block';
                 loginContainer.style.display = 'none';
             } else {
-                // Jika belum, kosongkan wadah navbar dan tampilkan tombol login
-                navbarPlaceholder.innerHTML = ''; // Kosongkan navbar saat logout
+                navbarPlaceholder.innerHTML = '';
                 loginContainer.style.display = 'flex';
                 mainContent.style.display = 'none';
             }
