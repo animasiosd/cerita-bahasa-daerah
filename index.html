@@ -52,27 +52,6 @@
       transition: width 0.1s linear;
     }
 
-    /* CSS NAVBAR -- BARU */
-    #navbar {
-        display: none; /* Awalnya disembunyikan */
-        background-color: #ffffff;
-        padding: 10px 40px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        justify-content: space-between;
-        align-items: center;
-    }
-    #navbar .brand {
-        font-weight: bold;
-        font-size: 1.5em;
-    }
-    #navbar a {
-        color: #333;
-        text-decoration: none;
-        padding: 8px 15px;
-    }
-    /* Anda bisa menambahkan tombol logout di sini nanti dan memberinya style */
-
-
     /* 3. Konten Utama dan Kontainer Login */
     #main-content, #loginContainer {
       display: none; /* Awalnya disembunyikan */
@@ -102,12 +81,7 @@
 </head>
 <body>
 
-  <nav id="navbar">
-    <div class="brand">WebsiteKu</div>
-    <div>
-        <a href="#">Home</a>
-        </div>
-  </nav>
+  <div id="navbar-placeholder"></div>
 
   <div id="page-loader">
     <div class="progress-container">
@@ -151,16 +125,13 @@
 
       const interval = setInterval(function() {
         progress += 1;
-        
         progressBar.style.width = progress + '%';
         loaderText.textContent = 'Memuat... ' + progress + '%';
 
         if (progress >= 100) {
           clearInterval(interval);
-
           setTimeout(() => {
             pageLoader.classList.add('hidden');
-            
             setTimeout(() => {
               pageLoader.style.display = 'none';
               initializeAuthCheck();
@@ -170,22 +141,40 @@
       }, loadingSpeed);
     });
 
+    // Fungsi untuk memuat navbar dari file eksternal
+    function loadNavbar() {
+        fetch('navbar.html')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Navbar not found');
+                }
+                return response.text();
+            })
+            .then(html => {
+                document.getElementById('navbar-placeholder').innerHTML = html;
+            })
+            .catch(error => {
+                console.error('Gagal memuat navbar:', error);
+                // Tampilkan pesan error jika navbar.html tidak ditemukan
+                document.getElementById('navbar-placeholder').innerHTML = '<p style="color:red; text-align:center;">Gagal memuat navbar.</p>';
+            });
+    }
+
     // Fungsi untuk memeriksa status login Firebase
     function initializeAuthCheck() {
         const loginContainer = document.getElementById('loginContainer');
         const mainContent = document.getElementById('main-content');
-        const navbar = document.getElementById('navbar'); // BARU
-
-        // 'auth' diasumsikan sudah diinisialisasi di file auth.js Anda
+        const navbarPlaceholder = document.getElementById('navbar-placeholder');
+        
         auth.onAuthStateChanged(user => {
             if (user) {
-                // Jika pengguna sudah login, tampilkan navbar dan konten utama
-                navbar.style.display = 'flex'; // BARU: Tampilkan navbar
+                // Jika pengguna sudah login, muat navbar dan tampilkan konten utama
+                loadNavbar(); // Panggil fungsi untuk memuat navbar
                 mainContent.style.display = 'block';
                 loginContainer.style.display = 'none';
             } else {
-                // Jika belum, sembunyikan navbar dan tampilkan tombol login
-                navbar.style.display = 'none'; // BARU: Sembunyikan navbar
+                // Jika belum, kosongkan wadah navbar dan tampilkan tombol login
+                navbarPlaceholder.innerHTML = ''; // Kosongkan navbar saat logout
                 loginContainer.style.display = 'flex';
                 mainContent.style.display = 'none';
             }
