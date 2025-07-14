@@ -15,21 +15,20 @@
 
     /* 1. Overlay Pemuatan (Loader) */
     #page-loader {
-      position: fixed; /* Tetap di posisi yang sama saat di-scroll */
+      position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: #ffffff; /* Latar belakang putih */
-      display: flex; /* Menggunakan flexbox untuk menengahkan konten */
+      background-color: #ffffff;
+      display: flex;
       justify-content: center;
       align-items: center;
-      flex-direction: column; /* Menata item secara vertikal */
-      z-index: 9999; /* Memastikan loader berada di atas segalanya */
-      transition: opacity 0.75s ease-out; /* Animasi fade-out yang halus */
+      flex-direction: column;
+      z-index: 9999;
+      transition: opacity 0.75s ease-out;
     }
 
-    /* Kelas untuk menyembunyikan loader */
     #page-loader.hidden {
       opacity: 0;
     }
@@ -46,35 +45,55 @@
       max-width: 400px;
       background-color: #e0e0e0;
       border-radius: 25px;
-      overflow: hidden; /* Memastikan bilah progress tetap di dalam container */
+      overflow: hidden;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
     #progress-bar {
-      width: 0%; /* Mulai dari lebar 0% */
+      width: 0%;
       height: 20px;
-      background-color: #0d6efd; /* Warna biru primer (seperti Bootstrap) */
+      background-color: #0d6efd;
       border-radius: 25px;
       text-align: center;
       line-height: 20px;
       color: white;
-      transition: width 0.1s linear; /* Animasi perubahan lebar yang halus */
+      transition: width 0.1s linear;
     }
 
-    /* 3. Konten Utama */
-    #main-content {
+    /* 3. Konten Utama dan Kontainer Login */
+    #main-content, #loginContainer {
       display: none; /* Awalnya disembunyikan */
       padding: 40px;
       text-align: center;
     }
+
+    /* Menambahkan style agar kontainer login bisa di tengah */
+    #loginContainer {
+        display: none;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
     
-    #main-content h1 {
+    #main-content h1, #loginContainer h1 {
         color: #333;
     }
 
-    #main-content p {
+    #main-content p, #loginContainer p {
         color: #666;
         font-size: 1.1em;
+    }
+
+    /* Style untuk tombol login */
+    #loginBtn {
+        padding: 12px 24px;
+        font-size: 1.1em;
+        cursor: pointer;
+        background-color: #4285F4; /* Warna Google */
+        color: white;
+        border: none;
+        border-radius: 5px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
   </style>
 </head>
@@ -87,6 +106,14 @@
     <div id="loader-text">Memuat... 0%</div>
   </div>
 
+  <div id="loginContainer">
+    <div>
+        <h1>Selamat Datang di Website Kami</h1>
+        <p class="mb-4">Silakan masuk untuk melanjutkan.</p>
+        <button id="loginBtn">Login dengan Google</button>
+    </div>
+  </div>
+
   <div id="main-content">
     <header>
       <h1>🎉 Selamat Datang!</h1>
@@ -97,46 +124,63 @@
     </main>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
+
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       const progressBar = document.getElementById('progress-bar');
       const loaderText = document.getElementById('loader-text');
       const pageLoader = document.getElementById('page-loader');
-      const mainContent = document.getElementById('main-content');
 
       let progress = 0;
-      // Atur kecepatan loading di sini (dalam milidetik). Angka lebih kecil = lebih cepat.
       const loadingSpeed = 10; 
 
       const interval = setInterval(function() {
         progress += 1;
         
-        // Update lebar progress bar
         progressBar.style.width = progress + '%';
-        // Update teks persentase
         loaderText.textContent = 'Memuat... ' + progress + '%';
 
-        // Jika loading selesai (mencapai 100%)
         if (progress >= 100) {
-          clearInterval(interval); // Hentikan interval
+          clearInterval(interval);
 
-          // Tunggu sebentar agar pengguna melihat 100%
           setTimeout(() => {
-            // 1. Tambahkan kelas 'hidden' untuk memulai animasi fade-out
             pageLoader.classList.add('hidden');
             
-            // 2. Tunggu animasi fade-out selesai
             setTimeout(() => {
-              // 3. Sembunyikan loader sepenuhnya
               pageLoader.style.display = 'none';
-              // 4. Tampilkan konten utama
-              mainContent.style.display = 'block';
-            }, 750); // Waktu ini harus cocok dengan durasi transisi di CSS (0.75s)
-          }, 500); // Waktu tunda setelah mencapai 100%
+              
+              // **PERUBAHAN UTAMA ADA DI SINI**
+              // Setelah loader hilang, kita cek status login
+              initializeAuthCheck();
+            }, 750);
+          }, 500);
         }
       }, loadingSpeed);
     });
+
+    // Fungsi untuk memeriksa status login Firebase
+    function initializeAuthCheck() {
+        const loginContainer = document.getElementById('loginContainer');
+        const mainContent = document.getElementById('main-content');
+        
+        // 'auth' diasumsikan sudah diinisialisasi di file auth.js Anda
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // Jika pengguna sudah login, tampilkan konten utama
+                mainContent.style.display = 'block';
+                loginContainer.style.display = 'none';
+            } else {
+                // Jika belum, tampilkan tombol login
+                loginContainer.style.display = 'flex';
+                mainContent.style.display = 'none';
+            }
+        });
+    }
   </script>
 
 </body>
