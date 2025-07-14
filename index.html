@@ -4,54 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Beranda - Cerita Bahasa Daerah</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
   <link rel="stylesheet" href="css/style.css">
-
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js" defer></script>
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js" defer></script>
-
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SFLNYPDQ04"></script>
 </head>
 <body>
 
   <div id="loginContainer" class="d-flex justify-content-center align-items-center vh-100">
     <div class="text-center">
       <h1 class="mb-3">Cerita Bahasa Daerah</h1>
-      <p class="mb-4">Masuk untuk menjelajahi cerita dari berbagai daerah di Indonesia.</p>
-      <button id="loginBtn" class="btn btn-primary btn-lg">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" width="24" height="24" class="me-2">
-        Login dengan Google
-      </button>
+      <p class="mb-4">Masuk untuk menjelajahi cerita dari berbagai daerah.</p>
+      <button id="loginBtn" class="btn btn-primary btn-lg">Login dengan Google</button>
     </div>
   </div>
 
   <div id="mainContent" class="d-none">
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-      <div class="container">
-        <a class="navbar-brand" href="#">🏠 Cerita Bahasa Daerah</a>
-        <button onclick="logout()" class="btn btn-danger">Logout</button>
-      </div>
-    </nav>
+    <div id="navbar-placeholder"></div>
 
     <main class="container my-5 text-center">
       <h2 id="welcomeMessage" class="display-5 mb-3">Selamat Datang!</h2>
       <p class="lead mb-5">Pilih salah satu bahasa di bawah untuk mulai menonton cerita animasi.</p>
-
       <div id="languageGrid" class="row g-4 justify-content-center">
         </div>
     </main>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  
+
+  <script src="js/main.js"></script>
+
   <script>
-    // Konfigurasi Firebase Anda (tetap sama)
+    // Seluruh kode JavaScript Anda di sini sudah benar,
+    // tidak perlu diubah.
     const firebaseConfig = {
       apiKey: "AIzaSyCAOg2aMzFVCQVx07t85lFpTXv3c2ugL1E",
       authDomain: "animasiosd-github.firebaseapp.com",
@@ -64,19 +49,16 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
-    // Inisialisasi Google Analytics
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
     gtag('config', 'G-SFLNYPDQ04');
 
-    // Elemen DOM
     const loginContainer = document.getElementById("loginContainer");
     const mainContent = document.getElementById("mainContent");
     const loginBtn = document.getElementById("loginBtn");
     const languageGrid = document.getElementById("languageGrid");
 
-    // Daftar Bahasa
     const languages = [
       { name: "Duano", value: "duano" }, { name: "Haloban", value: "haloban" },
       { name: "Kaimbulawa", value: "kaimbulawa" }, { name: "Kaili Unde", value: "kaili-unde" },
@@ -88,26 +70,21 @@
       { name: "Toli-Toli", value: "toli-toli" }
     ];
 
-    // Fungsi untuk membuat kartu bahasa
     function createLanguageCards() {
+      languageGrid.innerHTML = ''; // Kosongkan dulu untuk mencegah duplikasi
       languages.forEach(lang => {
         const col = document.createElement("div");
         col.className = "col-lg-3 col-md-4 col-sm-6";
-        
         const cardLink = document.createElement("a");
-        cardLink.href = `https://animasiosd.github.io/cerita-bahasa-daerah/${lang.value}`;
+        cardLink.href = `https://animasiosd.github.io/cerita-bahasa-daerah/${lang.value}.html`; // Tambahkan .html jika nama filenya demikian
         cardLink.className = "card-link";
-
         const card = document.createElement("div");
         card.className = "card h-100 text-center language-card";
-        
         const cardBody = document.createElement("div");
         cardBody.className = "card-body d-flex justify-content-center align-items-center";
-        
         const cardTitle = document.createElement("h5");
         cardTitle.className = "card-title m-0";
         cardTitle.textContent = `Bahasa ${lang.name}`;
-
         cardBody.appendChild(cardTitle);
         card.appendChild(cardBody);
         cardLink.appendChild(card);
@@ -116,41 +93,35 @@
       });
     }
     
-    // Logika Otentikasi
     loginBtn.onclick = () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider).catch(error => alert("Login gagal: " + error.message));
     };
 
     function logout() {
-      auth.signOut().then(() => {
-        mainContent.classList.add('d-none');
-        loginContainer.classList.remove('d-none');
-        location.reload(); // Reload untuk membersihkan state
-      });
+      auth.signOut(); // .then() tidak wajib jika hanya reload
     }
 
     auth.onAuthStateChanged(user => {
       if (user) {
-        // Tampilkan konten utama
-        loginContainer.classList.add('d-none'); // Sembunyikan login
-        mainContent.classList.remove('d-none'); // Tampilkan konten
-
-        // Atur pesan selamat datang
+        if(loginContainer) loginContainer.classList.add('d-none');
+        if(mainContent) mainContent.classList.remove('d-none');
         const welcomeMessage = document.getElementById("welcomeMessage");
         if (welcomeMessage && user.displayName) {
           welcomeMessage.textContent = `Selamat datang, ${user.displayName}!`;
         }
-        
-        // Buat kartu bahasa
-        createLanguageCards();
-
-        // Kirim data ke GA4
+        if (languageGrid.children.length === 0) { // Hanya buat kartu jika belum ada
+            createLanguageCards();
+        }
         gtag('set', { user_id: user.uid });
       } else {
-        // Pastikan konten utama tersembunyi jika tidak ada user
-        mainContent.classList.add('d-none');
-        loginContainer.classList.remove('d-none');
+        // Jika logout, reload halaman untuk kembali ke state awal
+        // Ini cara paling sederhana untuk memastikan semuanya bersih
+        if (window.location.pathname.includes('.html')) { // Cek jika kita bukan di halaman login utama lagi
+            window.location.href = '/'; // Atau arahkan ke index.html
+        }
+        if(loginContainer) loginContainer.classList.remove('d-none');
+        if(mainContent) mainContent.classList.add('d-none');
       }
     });
   </script>
