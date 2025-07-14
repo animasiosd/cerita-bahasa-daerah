@@ -13,39 +13,49 @@
   <div id="loginContainer" class="d-flex justify-content-center align-items-center vh-100">
     <div class="text-center">
       <h1 class="mb-3">Cerita Bahasa Daerah</h1>
-      <p class="mb-4">Anda harus login untuk melihat halaman ini.</p>
+      <p class="mb-4">Anda harus login untuk dapat melihat halaman ini.</p>
       <button id="loginBtn" class="btn btn-primary btn-lg">Login dengan Google</button>
     </div>
   </div>
 
   <div id="mainContent" class="d-none">
+    
     <div id="navbar-placeholder"></div>
 
     <main class="container my-4">
-      <div id="videoTitle" class="h3 text-center mb-3">Memuat judul video...</div>
-      
-      <div class="d-flex justify-content-center mb-3">
-        <select id="videoSelect" class="form-select w-auto" onchange="playSelectedVideo()">
-          <option disabled selected>Pilih Video</option>
-        </select>
-      </div>
+      <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
 
-      <div class="d-flex justify-content-center">
-        <div class="w-100" style="max-width: 800px; aspect-ratio: 16/9; background-color: #eee;">
-            <iframe id="videoPlayer" class="w-100 h-100" src="" allowfullscreen border="0"></iframe>
+          <h2 id="videoTitle" class="text-center mb-3">Memuat judul video...</h2>
+          
+          <div class="input-group mb-3">
+            <label class="input-group-text" for="videoSelect">Pilih Video:</label>
+            <select class="form-select" id="videoSelect" onchange="playSelectedVideo()">
+              <option disabled selected>Memuat daftar...</option>
+            </select>
+          </div>
+
+          <div class="ratio ratio-16x9 shadow-sm rounded overflow-hidden">
+            <iframe id="videoPlayer" src="" allowfullscreen title="Pemutar Video YouTube"></iframe>
+          </div>
+
+          <div class="card mt-4">
+            <div class="card-header h5">
+              Pertanyaan Diskusi
+            </div>
+            <div class="card-body">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">1. Menurut Anda, cerita ini menceritakan tentang apa?</li>
+                <li class="list-group-item">2. Menurut Anda, apa yang paling menarik pada cerita ini?</li>
+                <li class="list-group-item">3. Apa yang Anda pelajari dari cerita ini?</li>
+                <li class="list-group-item">4. Bagaimana Anda akan menerapkan apa yang baru kita pelajari dari cerita ini?</li>
+                <li class="list-group-item">5. Menurut Anda, apakah bahasa yang dipakai dalam cerita mudah dipahami?</li>
+                <li class="list-group-item">6. Apa harapan Anda terkait pelestarian bahasa <strong id="language-name-placeholder">ini</strong>?</li>
+              </ul>
+            </div>
+          </div>
+
         </div>
-      </div>
-      
-      <div id="discussionQuestions" class="mx-auto" style="max-width: 800px; margin-top: 20px;">
-        <h3 class="text-center">Pertanyaan Diskusi</h3>
-        <ul class="list-unstyled">
-          <li>1. Menurut Anda, cerita ini menceritakan tentang apa?</li>
-          <li>2. Menurut Anda, apa yang paling menarik pada cerita ini?</li>
-          <li>3. Apa yang Anda pelajari dari cerita ini?</li>
-          <li>4. Bagaimana Anda akan menerapkan apa yang baru kita pelajari dari cerita ini?</li>
-          <li>5. Menurut Anda, apakah bahasa yang dipakai dalam cerita mudah dipahami?</li>
-          <li>6. Apa harapan Anda terkait pelestarian bahasa <strong id="language-name-placeholder">ini</strong> melalui cerita-cerita?</li>
-        </ul>
       </div>
     </main>
   </div>
@@ -55,43 +65,34 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
   <script src="js/main.js"></script>
-  <script src="js/auth.js"></script>
-
-  <script>
+  <script src="js/auth.js"></script> <script>
     // --- BAGIAN INTI DARI TEMPLATE DINAMIS ---
     const urlParams = new URLSearchParams(window.location.search);
     const bahasa = urlParams.get('bahasa');
     
-    // Fungsi untuk mengubah 'toli-toli' menjadi 'Toli-Toli'
     function formatBahasaName(slug) {
-        if (!slug) return "Tidak Dikenal";
-        return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+      if (!slug) return "Tidak Dikenal";
+      return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     }
     const namaBahasaFormatted = formatBahasaName(bahasa);
     
     // Redirect jika tidak ada parameter bahasa
     if (!bahasa) {
-        window.location.href = 'index.html';
+      window.location.href = 'index.html';
     } else {
-        // Atur konten dinamis setelah halaman dimuat
-        document.addEventListener('DOMContentLoaded', () => {
-            document.title = `${namaBahasaFormatted} - Cerita Bahasa Daerah`;
-            const languageNamePlaceholder = document.getElementById('language-name-placeholder');
-            if (languageNamePlaceholder) {
-                languageNamePlaceholder.textContent = namaBahasaFormatted;
-            }
-            // Muat data video setelah memastikan user sudah login (dikelola oleh auth.js)
-            // Kita panggil langsung di sini karena auth.js akan menangani visibilitas
-            loadVideoData(bahasa); 
-        });
+      // Atur konten dinamis
+      document.title = `${namaBahasaFormatted} - Cerita Bahasa Daerah`;
+      document.getElementById('language-name-placeholder').textContent = namaBahasaFormatted;
+      
+      // Panggil fungsi untuk memuat data video.
+      // auth.js akan memastikan ini hanya berjalan setelah user login.
+      loadVideoData(bahasa);
     }
     // --- AKHIR BAGIAN INTI ---
 
     function playVideo(videoId, title) {
-      const player = document.getElementById("videoPlayer");
-      const titleDisplay = document.getElementById("videoTitle");
-      player.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-      titleDisplay.textContent = title;
+      document.getElementById("videoPlayer").src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      document.getElementById("videoTitle").textContent = title;
     }
 
     function playSelectedVideo() {
@@ -101,7 +102,7 @@
     }
 
     function loadVideoData(namaBahasa) {
-      const API_KEY = "AIzaSyDBefJ54bf1RQBrmMye6FjD-gyPLT3bOyU"; // Sebaiknya simpan di tempat yang lebih aman
+      const API_KEY = "AIzaSyDBefJ54bf1RQBrmMye6FjD-gyPLT3bOyU";
       const webAppURL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
 
       fetch(`${webAppURL}?bahasa=${namaBahasa}`)
@@ -114,7 +115,7 @@
         .then(response => response.json())
         .then(data => {
           const videoSelect = document.getElementById("videoSelect");
-          videoSelect.innerHTML = '<option disabled selected>Pilih Video</option>'; // Reset dropdown
+          videoSelect.innerHTML = ''; // Reset dropdown
           data.items.forEach((item, index) => {
             const videoId = item.snippet.resourceId.videoId;
             const title = item.snippet.title;
@@ -134,6 +135,5 @@
         });
     }
   </script>
-
 </body>
 </html>
