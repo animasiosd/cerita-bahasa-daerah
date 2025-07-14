@@ -1,43 +1,143 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Beranda - Cerita Bahasa Daerah</title>
-  
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Halaman Utama</title>
+
+  <style>
+    /* Gaya dasar untuk body */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      margin: 0;
+      background-color: #f4f7f6;
+    }
+
+    /* 1. Overlay Pemuatan (Loader) */
+    #page-loader {
+      position: fixed; /* Tetap di posisi yang sama saat di-scroll */
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #ffffff; /* Latar belakang putih */
+      display: flex; /* Menggunakan flexbox untuk menengahkan konten */
+      justify-content: center;
+      align-items: center;
+      flex-direction: column; /* Menata item secara vertikal */
+      z-index: 9999; /* Memastikan loader berada di atas segalanya */
+      transition: opacity 0.75s ease-out; /* Animasi fade-out yang halus */
+    }
+
+    /* Kelas untuk menyembunyikan loader */
+    #page-loader.hidden {
+      opacity: 0;
+    }
+    
+    #loader-text {
+        color: #555;
+        margin-top: 20px;
+        font-size: 1.2em;
+    }
+
+    /* 2. Bilah Progress (Progress Bar) */
+    .progress-container {
+      width: 80%;
+      max-width: 400px;
+      background-color: #e0e0e0;
+      border-radius: 25px;
+      overflow: hidden; /* Memastikan bilah progress tetap di dalam container */
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    #progress-bar {
+      width: 0%; /* Mulai dari lebar 0% */
+      height: 20px;
+      background-color: #0d6efd; /* Warna biru primer (seperti Bootstrap) */
+      border-radius: 25px;
+      text-align: center;
+      line-height: 20px;
+      color: white;
+      transition: width 0.1s linear; /* Animasi perubahan lebar yang halus */
+    }
+
+    /* 3. Konten Utama */
+    #main-content {
+      display: none; /* Awalnya disembunyikan */
+      padding: 40px;
+      text-align: center;
+    }
+    
+    #main-content h1 {
+        color: #333;
+    }
+
+    #main-content p {
+        color: #666;
+        font-size: 1.1em;
+    }
+  </style>
 </head>
 <body>
 
-  <div id="pageLoader" class="d-flex justify-content-center align-items-center vh-100">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Loading...</span>
+  <div id="page-loader">
+    <div class="progress-container">
+      <div id="progress-bar"></div>
     </div>
+    <div id="loader-text">Memuat... 0%</div>
   </div>
 
-  <div id="loginContainer" class="d-none d-flex justify-content-center align-items-center vh-100">
-    <div class="text-center">
-      <h1 class="mb-3">Cerita Bahasa Daerah</h1>
-      <p class="mb-4">Masuk untuk menjelajahi cerita dari berbagai daerah.</p>
-      <button id="loginBtn" class="btn btn-primary btn-lg">Login dengan Google</button>
-    </div>
-  </div>
-
-  <div id="mainContent" class="d-none">
-    <div id="navbar-placeholder"></div>
-    <main class="container my-5 text-center">
-      <h2 id="welcomeMessage" class="display-5 mb-3">Selamat Datang!</h2>
-      <p class="lead mb-5">Gunakan menu navigasi di atas untuk memilih cerita bahasa daerah.</p>
+  <div id="main-content">
+    <header>
+      <h1>🎉 Selamat Datang!</h1>
+      <p>Halaman telah berhasil dimuat.</p>
+    </header>
+    <main>
+      <p>Anda bisa mengganti bagian ini dengan konten halaman web Anda yang sebenarnya, seperti teks, gambar, tombol, atau komponen lainnya.</p>
     </main>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script src="js/main.js"></script>
-  <script src="js/auth.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const progressBar = document.getElementById('progress-bar');
+      const loaderText = document.getElementById('loader-text');
+      const pageLoader = document.getElementById('page-loader');
+      const mainContent = document.getElementById('main-content');
+
+      let progress = 0;
+      // Atur kecepatan loading di sini (dalam milidetik). Angka lebih kecil = lebih cepat.
+      const loadingSpeed = 25; 
+
+      const interval = setInterval(function() {
+        progress += 1;
+        
+        // Update lebar progress bar
+        progressBar.style.width = progress + '%';
+        // Update teks persentase
+        loaderText.textContent = 'Memuat... ' + progress + '%';
+
+        // Jika loading selesai (mencapai 100%)
+        if (progress >= 100) {
+          clearInterval(interval); // Hentikan interval
+
+          // Tunggu sebentar agar pengguna melihat 100%
+          setTimeout(() => {
+            // 1. Tambahkan kelas 'hidden' untuk memulai animasi fade-out
+            pageLoader.classList.add('hidden');
+            
+            // 2. Tunggu animasi fade-out selesai
+            setTimeout(() => {
+              // 3. Sembunyikan loader sepenuhnya
+              pageLoader.style.display = 'none';
+              // 4. Tampilkan konten utama
+              mainContent.style.display = 'block';
+            }, 750); // Waktu ini harus cocok dengan durasi transisi di CSS (0.75s)
+          }, 500); // Waktu tunda setelah mencapai 100%
+        }
+      }, loadingSpeed);
+    });
+  </script>
 
 </body>
 </html>
