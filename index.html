@@ -13,7 +13,7 @@
       background-color: #f4f7f6;
     }
 
-    /* 1. Overlay Pemuatan (Loader) */
+    /* 1. Loader (Tidak berubah) */
     #page-loader {
       position: fixed;
       top: 0;
@@ -28,18 +28,14 @@
       z-index: 9999;
       transition: opacity 0.75s ease-out;
     }
-
-    #page-loader.hidden {
-      opacity: 0;
-    }
-    
+    #page-loader.hidden { opacity: 0; }
     #loader-text {
         color: #555;
         margin-top: 20px;
         font-size: 1.2em;
     }
 
-    /* 2. Bilah Progress (Progress Bar) */
+    /* 2. Progress Bar (Tidak berubah) */
     .progress-container {
       width: 80%;
       max-width: 400px;
@@ -48,17 +44,34 @@
       overflow: hidden;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-
     #progress-bar {
       width: 0%;
       height: 20px;
       background-color: #0d6efd;
       border-radius: 25px;
-      text-align: center;
-      line-height: 20px;
-      color: white;
       transition: width 0.1s linear;
     }
+
+    /* CSS NAVBAR -- BARU */
+    #navbar {
+        display: none; /* Awalnya disembunyikan */
+        background-color: #ffffff;
+        padding: 10px 40px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        justify-content: space-between;
+        align-items: center;
+    }
+    #navbar .brand {
+        font-weight: bold;
+        font-size: 1.5em;
+    }
+    #navbar a {
+        color: #333;
+        text-decoration: none;
+        padding: 8px 15px;
+    }
+    /* Anda bisa menambahkan tombol logout di sini nanti dan memberinya style */
+
 
     /* 3. Konten Utama dan Kontainer Login */
     #main-content, #loginContainer {
@@ -66,38 +79,35 @@
       padding: 40px;
       text-align: center;
     }
-
-    /* Menambahkan style agar kontainer login bisa di tengah */
     #loginContainer {
-        display: none;
         justify-content: center;
         align-items: center;
         height: 100vh;
     }
-    
-    #main-content h1, #loginContainer h1 {
-        color: #333;
-    }
-
+    #main-content h1, #loginContainer h1 { color: #333; }
     #main-content p, #loginContainer p {
         color: #666;
         font-size: 1.1em;
     }
-
-    /* Style untuk tombol login */
     #loginBtn {
         padding: 12px 24px;
         font-size: 1.1em;
         cursor: pointer;
-        background-color: #4285F4; /* Warna Google */
+        background-color: #4285F4;
         color: white;
         border: none;
         border-radius: 5px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
+
+  <nav id="navbar">
+    <div class="brand">WebsiteKu</div>
+    <div>
+        <a href="#">Home</a>
+        </div>
+  </nav>
 
   <div id="page-loader">
     <div class="progress-container">
@@ -153,9 +163,6 @@
             
             setTimeout(() => {
               pageLoader.style.display = 'none';
-              
-              // **PERUBAHAN UTAMA ADA DI SINI**
-              // Setelah loader hilang, kita cek status login
               initializeAuthCheck();
             }, 750);
           }, 500);
@@ -167,15 +174,18 @@
     function initializeAuthCheck() {
         const loginContainer = document.getElementById('loginContainer');
         const mainContent = document.getElementById('main-content');
-        
+        const navbar = document.getElementById('navbar'); // BARU
+
         // 'auth' diasumsikan sudah diinisialisasi di file auth.js Anda
         auth.onAuthStateChanged(user => {
             if (user) {
-                // Jika pengguna sudah login, tampilkan konten utama
+                // Jika pengguna sudah login, tampilkan navbar dan konten utama
+                navbar.style.display = 'flex'; // BARU: Tampilkan navbar
                 mainContent.style.display = 'block';
                 loginContainer.style.display = 'none';
             } else {
-                // Jika belum, tampilkan tombol login
+                // Jika belum, sembunyikan navbar dan tampilkan tombol login
+                navbar.style.display = 'none'; // BARU: Sembunyikan navbar
                 loginContainer.style.display = 'flex';
                 mainContent.style.display = 'none';
             }
