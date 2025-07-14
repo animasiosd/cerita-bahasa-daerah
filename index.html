@@ -47,6 +47,7 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
 
+    // Google Analytics
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
@@ -55,11 +56,7 @@
     const loginContainer = document.getElementById("loginContainer");
     const mainContent = document.getElementById("mainContent");
     const loginBtn = document.getElementById("loginBtn");
-    // const languageGrid dihapus karena elemennya sudah tidak ada
-
-    // Array 'languages' telah dihapus
-    
-    // Fungsi 'createLanguageCards' telah dihapus
+    // Variabel 'languageGrid' telah dihapus dari sini
     
     loginBtn.onclick = () => {
       const provider = new firebase.auth.GoogleAuthProvider();
@@ -78,7 +75,7 @@
         if (welcomeMessage && user.displayName) {
           welcomeMessage.textContent = `Selamat datang, ${user.displayName}!`;
         }
-        // Pemanggilan fungsi 'createLanguageCards' telah dihapus
+        // Blok 'if' yang memanggil createLanguageCards() telah dihapus dari sini
         gtag('set', { user_id: user.uid });
       } else {
         if (window.location.pathname.includes('.html')) {
