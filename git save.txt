@@ -1,0 +1,8 @@
+# 1. Tandai semua file yang berubah untuk disimpan
+git add .
+
+# 2. Bungkus perubahan dengan pesan yang jelas
+git commit -m "deskripsi perubahan Anda, cth: memperbaiki judul halaman"
+
+# 3. Kirim perubahan ke repositori di GitHub
+git push
