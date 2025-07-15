@@ -80,7 +80,11 @@
     <main class="container my-4">
       <div class="row justify-content-center">
         <div class="col-lg-10 col-xl-8">
-          <h2 id="videoTitle" class="text-center mb-3">Memuat judul video...</h2>
+          <h2 id="videoTitle" class="text-center mb-3">
+            <div class="spinner-border spinner-border-sm" role="status">
+              <span class="visually-hidden">Memuat...</span>
+            </div>
+          </h2>
           <div class="input-group mb-3">
             <label class="input-group-text" for="videoSelect">Pilih Video:</label>
             <select class="form-select" id="videoSelect" onchange="playSelectedVideo()"></select>
