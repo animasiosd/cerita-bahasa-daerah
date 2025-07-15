@@ -1,0 +1,122 @@
+// ID dan Nama Sheet Anda
+const SHEET_ID = "1BgzcET4YA5cradFOKwXDzLNs4LgaqPBx1uihRNbah_c";
+const SHEET_NAME = "comment-database";
+
+const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+
+function doOptions(e) {
+  return ContentService.createTextOutput()
+    .withHeaders({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    });
+}
+
+function doGet(e) {
+  try {
+    const videoId = e.parameter.video_id;
+    if (!videoId) {
+      throw new Error("video_id is required");
+    }
+
+    const data = sheet.getDataRange().getValues();
+    const headers = data.shift();
+    const videoIdColIndex = headers.indexOf('video_id');
+    
+    const comments = data.filter(row => row[videoIdColIndex] === videoId)
+                        .map(row => {
+                          let commentObj = {};
+                          headers.forEach((header, index) => {
+                            commentObj[header] = row[index];
+                          });
+                          return commentObj;
+                        });
+
+    comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    
+    return ContentService.createTextOutput(JSON.stringify(comments))
+                         .setMimeType(ContentService.MimeType.JSON)
+                         .setHeader("Access-Control-Allow-Origin", "*");
+
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ error: error.message }))
+                         .setMimeType(ContentService.MimeType.JSON)
+                         .setHeader("Access-Control-Allow-Origin", "*");
+  }
+}
+
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    let response;
+
+    if (data.action === 'toggle_like') {
+      response = handleToggleLike(data);
+    } else {
+      response = handleAddComment(data);
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify(response))
+                         .setMimeType(ContentService.MimeType.JSON)
+                         .setHeader("Access-Control-Allow-Origin", "*");
+
+  } catch (error) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: error.toString() }))
+                         .setMimeType(ContentService.MimeType.JSON)
+                         .setHeader("Access-Control-Allow-Origin", "*");
+  }
+}
+
+function handleAddComment(data) {
+  const newRow = [
+    "c" + new Date().getTime(),   // comment_id
+    data.commentText,             // comments_description
+    "",                           // parent_id
+    data.videoId,                 // video_id
+    data.videoTitle,              // video_title
+    data.languagePage,            // language_page
+    data.userId,                  // user_id
+    data.userName,                // user_name
+    data.userPhotoUrl,            // user_photo_url
+    new Date().toISOString(),     // timestamp
+    0,                            // likes_count
+    ""                            // likers_user_ids
+  ];
+  sheet.appendRow(newRow);
+  return { status: "success" };
+}
+
+function handleToggleLike(data) {
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const commentIdCol = headers.indexOf('comment_id');
+  const likesCountCol = headers.indexOf('likes_count');
+  const likersCol = headers.indexOf('likers_user_ids');
+  
+  const dataRange = sheet.getDataRange();
+  const values = dataRange.getValues();
+
+  for (let i = 1; i < values.length; i++) {
+    if (values[i][commentIdCol] == data.commentId) {
+      let currentLikes = Number(values[i][likesCountCol]) || 0;
+      let likers = values[i][likersCol] ? values[i][likersCol].toString().split(',') : [];
+      likers = likers.filter(id => id.trim() !== ''); // Membersihkan entri kosong
+      
+      const userIndex = likers.indexOf(data.userId);
+      
+      if (userIndex > -1) {
+        likers.splice(userIndex, 1);
+        currentLikes--;
+      } else {
+        if(data.userId) likers.push(data.userId);
+        currentLikes++;
+      }
+      
+      sheet.getRange(i + 1, likesCountCol + 1).setValue(currentLikes < 0 ? 0 : currentLikes);
+      sheet.getRange(i + 1, likersCol + 1).setValue(likers.join(','));
+      
+      return { status: "success", newLikesCount: currentLikes };
+    }
+  }
+  return { status: "error", message: "Comment not found" };
+}
