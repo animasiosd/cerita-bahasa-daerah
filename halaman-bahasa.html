@@ -153,6 +153,24 @@
                 if (deleteBtn) {
                     handleDeleteComment(deleteBtn.dataset.commentId);
                 }
+                if (event.target.classList.contains('save-edit-btn')) {
+                    const commentId = event.target.dataset.commentId;
+                    const editControls = document.querySelector(`.edit-controls[data-comment-id="${commentId}"]`);
+                    const newText = editControls.querySelector('.edit-textarea').value.trim();
+                    if (newText) {
+                        handleSaveEdit(commentId, newText);
+                    }
+                }
+
+                if (event.target.classList.contains('cancel-edit-btn')) {
+                    const commentId = event.target.dataset.commentId;
+                    const commentTextElement = document.querySelector(`.comment-text[data-comment-id="${commentId}"]`);
+                    const editControlsElement = document.querySelector(`.edit-controls[data-comment-id="${commentId}"]`);
+
+                    commentTextElement.classList.remove('d-none');
+                    editControlsElement.classList.add('d-none');
+                }
+
             });
         });
 
@@ -186,6 +204,28 @@
         }
 
         // --- FUNGSI-FUNGSI FITUR ---
+
+        function handleSaveEdit(commentId, newText) {
+    auth.currentUser.getIdToken(true).then(token => {
+        fetch(WEB_APP_URL_COMMENTS, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'edit_comment',
+                commentId: commentId,
+                userId: auth.currentUser.uid,
+                newCommentText: newText,
+                authToken: token
+            })
+        }).then(res => res.json()).then(result => {
+            if (result.status === "success") {
+                loadComments(currentVideoId);
+            } else {
+                alert("Gagal menyimpan perubahan komentar.");
+            }
+        });
+    });
+}
+
 
         function loadNavbar() {
             fetch('navbar.html')
@@ -268,6 +308,11 @@
                             <strong class="me-2">${comment.user_name}</strong>
                             <small class="text-muted">${new Date(comment.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</small>
                             <p class="mb-1 mt-1 comment-text" style="white-space: pre-wrap;">${comment.comments_description}</p>
+                            <div class="edit-controls mt-2 d-none" data-comment-id="${comment.comment_id}">
+                                <textarea class="form-control mb-2 edit-textarea">${comment.comments_description}</textarea>
+                                <button class="btn btn-sm btn-success me-2 save-edit-btn" data-comment-id="${comment.comment_id}">Simpan</button>
+                                <button class="btn btn-sm btn-secondary cancel-edit-btn" data-comment-id="${comment.comment_id}">Batal</button>
+                                </div>
                             <div class="comment-actions d-flex align-items-center small">
                                 <span class="like-btn ${userHasLiked ? 'liked' : ''}" data-comment-id="${comment.comment_id}">👍</span>
                                 <span class="ms-2 likes-count">${comment.likes_count > 0 ? comment.likes_count : ''}</span>
@@ -288,6 +333,67 @@
             });
         }
         
+        function handleEditComment(commentId, currentText) {
+    const commentTextElement = document.querySelector(`.comment-text[data-comment-id="${commentId}"]`);
+    const editControlsElement = document.querySelector(`.edit-controls[data-comment-id="${commentId}"]`);
+
+    // Buat textarea untuk edit
+    const textarea = document.createElement('textarea');
+    textarea.className = 'form-control mb-2';
+    textarea.rows = 3;
+    textarea.value = currentText;
+
+    // Buat tombol Save
+    const saveButton = document.createElement('button');
+    saveButton.className = 'btn btn-primary btn-sm me-2';
+    saveButton.textContent = 'Simpan';
+
+    // Buat tombol Batal
+    const cancelButton = document.createElement('button');
+    cancelButton.className = 'btn btn-secondary btn-sm';
+    cancelButton.textContent = 'Batal';
+
+    // Event klik Save
+    saveButton.onclick = () => {
+        const newText = textarea.value.trim();
+        if (newText !== '') {
+            auth.currentUser.getIdToken(true).then(token => {
+                fetch(WEB_APP_URL_COMMENTS, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'edit_comment',
+                        commentId: commentId,
+                        userId: auth.currentUser.uid,
+                        newCommentText: newText,
+                        authToken: token
+                    })
+                }).then(res => res.json()).then(result => {
+                    if (result.status === "success") {
+                        loadComments(currentVideoId);
+                    } else {
+                        alert("Gagal menyimpan edit komentar.");
+                    }
+                });
+            });
+        }
+    };
+
+    // Event klik Batal
+    cancelButton.onclick = () => {
+        loadComments(currentVideoId);
+    };
+
+    // Bersihkan dan tampilkan kontrol edit
+    editControlsElement.innerHTML = '';
+    editControlsElement.appendChild(textarea);
+    editControlsElement.appendChild(saveButton);
+    editControlsElement.appendChild(cancelButton);
+
+    // Sembunyikan teks komentar asli
+    commentTextElement.classList.add('d-none');
+    editControlsElement.classList.remove('d-none');
+}
+
 
         // FUNGSI UNTUK INTERAKSI KOMENTAR (LIKE)
         function handleCommentInteraction(event) {
@@ -379,31 +485,6 @@
             if (!slug) return "Tidak Dikenal";
             return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         }
-
-        function handleEditComment(commentId, currentText) {
-    const newText = prompt("Edit komentar Anda:", currentText);
-    if (newText !== null && newText.trim() !== "") {
-        auth.currentUser.getIdToken(true).then(token => {
-            fetch(WEB_APP_URL_COMMENTS, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: 'edit_comment',
-                    commentId: commentId,
-                    userId: auth.currentUser.uid,
-                    newCommentText: newText.trim(),
-                    authToken: token
-                })
-            }).then(res => res.json()).then(result => {
-                if (result.status === "success") {
-                    loadComments(currentVideoId);
-                } else {
-                    alert("Gagal mengedit komentar.");
-                }
-            });
-        });
-    }
-}
-
 
 function handleDeleteComment(commentId) {
     if (!confirm("Yakin ingin menghapus komentar ini?")) return;
