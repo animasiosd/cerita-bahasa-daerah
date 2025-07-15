@@ -25,6 +25,32 @@
       transition: opacity 0.75s ease-out;
     }
 
+    /* BARU: CSS untuk Google Spinner */
+    .google-spinner {
+      /* Ukuran spinner */
+      width: 28px;
+      height: 28px;
+
+      /* Membuat bentuk lingkaran */
+      border-radius: 50%;
+      
+      /* Garis abu-abu (jalur/track) dan garis biru (yang berputar) */
+      border: 4px solid #f3f3f3; /* Warna jalur abu-abu muda */
+      border-top: 4px solid #4285F4; /* Warna biru Google */
+      
+      /* Animasi berputar */
+      animation: spin 1s linear infinite;
+      
+      /* Agar posisinya di tengah h2 */
+      margin: 0 auto;
+    }
+    
+    /* Keyframes untuk animasi berputar 360 derajat */
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     #page-loader.hidden {
       opacity: 0;
     }
@@ -81,9 +107,7 @@
       <div class="row justify-content-center">
         <div class="col-lg-10 col-xl-8">
           <h2 id="videoTitle" class="text-center mb-3">
-            <div class="spinner-border spinner-border-sm text-primary" role="status">
-              <span class="visually-hidden">Memuat...</span>
-            </div>
+            <div class="google-spinner"></div>
           </h2>
           <div class="input-group mb-3">
             <label class="input-group-text" for="videoSelect">Pilih Video:</label>
