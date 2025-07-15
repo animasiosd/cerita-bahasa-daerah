@@ -1,97 +1,130 @@
-// ID dan Nama Sheet Anda
-const SHEET_ID = "1BgzcET4YA5cradFOKwXDzLNs4LgaqPBx1uihRNbah_c";
-const SHEET_NAME = "comment-database";
+// 🔒 Verifikasi Firebase ID Token
+function verifyFirebaseToken(idToken) {
+  if (!idToken) throw new Error("Unauthorized: Missing token");
 
-const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(SHEET_NAME);
+  const firebaseProjectId = "animasiosd-github";  // ⬅️ Ganti dengan Project ID Firebase kamu
+  const apiKey = "AIzaSyCAOg2aMzFVCQVx07t85lFpTXv3c2ugL1E";  // ⬅️ Ganti dengan API Key Firebase kamu
 
-function doOptions(e) {
-  return ContentService.createTextOutput()
-    .withHeaders({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
-    });
+  const url = "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=" + apiKey;
+  const options = {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify({ idToken: idToken }),
+    muteHttpExceptions: true
+  };
+
+  const response = UrlFetchApp.fetch(url, options);
+  const result = JSON.parse(response.getContentText());
+
+  if (result.users && result.users.length > 0) {
+    return result.users[0];
+  } else {
+    throw new Error("Unauthorized: Invalid token");
+  }
 }
 
+
+// ✅ Endpoint GET
 function doGet(e) {
   try {
+    const authToken = e.parameter.authToken;
+    verifyFirebaseToken(authToken);
+
     const videoId = e.parameter.video_id;
-    if (!videoId) {
-      throw new Error("video_id is required");
-    }
+    if (!videoId) return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
 
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("comments-database");
     const data = sheet.getDataRange().getValues();
-    const headers = data.shift();
-    const videoIdColIndex = headers.indexOf('video_id');
-    
-    const comments = data.filter(row => row[videoIdColIndex] === videoId)
-                        .map(row => {
-                          let commentObj = {};
-                          headers.forEach((header, index) => {
-                            commentObj[header] = row[index];
-                          });
-                          return commentObj;
-                        });
 
-    comments.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-    
-    return ContentService.createTextOutput(JSON.stringify(comments))
-                         .setMimeType(ContentService.MimeType.JSON)
-                         .setHeader("Access-Control-Allow-Origin", "*");
+    const comments = data.filter(row => row[0] === videoId).map(row => ({
+      video_id: row[0],
+      comment_id: row[1],
+      comments_description: row[2],
+      user_id: row[3],
+      user_name: row[4],
+      parent_id: row[5],
+      user_photo_url: row[6],
+      timestamp: row[7],
+      likes_count: row[8],
+      likers_user_ids: row[9] ? row[9].split(",") : [],
+      video_title: row[10],
+      language_page: row[11]
+    }));
+
+
+    return ContentService.createTextOutput(JSON.stringify(comments)).setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
     return ContentService.createTextOutput(JSON.stringify({ error: error.message }))
-                         .setMimeType(ContentService.MimeType.JSON)
-                         .setHeader("Access-Control-Allow-Origin", "*");
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
+
+// ✅ Endpoint POST
 function doPost(e) {
   try {
     const data = JSON.parse(e.postData.contents);
-    let response;
 
+    verifyFirebaseToken(data.authToken);
+
+    let response;
     if (data.action === 'toggle_like') {
       response = handleToggleLike(data);
-    } else {
-      response = handleAddComment(data);
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify(response))
-                         .setMimeType(ContentService.MimeType.JSON)
-                         .setHeader("Access-Control-Allow-Origin", "*");
+      } else if (data.action === 'edit_comment') {
+        response = handleEditComment(data);
+        } else if (data.action === 'delete_comment') {
+          response = handleDeleteComment(data);
+          } else {
+            response = handleAddComment(data);
+            }
+
+
+    return ContentService.createTextOutput(JSON.stringify({ status: "success", response: response }))
+      .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: error.toString() }))
-                         .setMimeType(ContentService.MimeType.JSON)
-                         .setHeader("Access-Control-Allow-Origin", "*");
+    return ContentService.createTextOutput(JSON.stringify({ error: error.message }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
+
+// 🎬 Tambahkan fungsi handleAddComment dan handleToggleLike sesuai milikmu sebelumnya
+
 function handleAddComment(data) {
-  const newRow = [
-    "c" + new Date().getTime(),   // comment_id
-    data.commentText,             // comments_description
-    "",                           // parent_id
-    data.videoId,                 // video_id
-    data.videoTitle,              // video_title
-    data.languagePage,            // language_page
-    data.userId,                  // user_id
-    data.userName,                // user_name
-    data.userPhotoUrl,            // user_photo_url
-    new Date().toISOString(),     // timestamp
-    0,                            // likes_count
-    ""                            // likers_user_ids
-  ];
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("comments-database");
+  
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const newRow = [];
+
+  newRow[headers.indexOf('video_id')] = data.videoId;
+  newRow[headers.indexOf('comment_id')] = "c" + new Date().getTime();
+  newRow[headers.indexOf('comments_description')] = data.commentText;
+  newRow[headers.indexOf('user_id')] = data.userId;
+  newRow[headers.indexOf('user_name')] = data.userName;
+  newRow[headers.indexOf('parent_id')] = "";  // kosongkan
+  newRow[headers.indexOf('user_photo_url')] = data.userPhotoUrl;
+  newRow[headers.indexOf('timestamp')] = new Date().toISOString();
+  newRow[headers.indexOf('likes_count')] = 0;
+  newRow[headers.indexOf('likers_user_ids')] = "";
+  newRow[headers.indexOf('video_title')] = data.videoTitle;
+  newRow[headers.indexOf('language_page')] = data.languagePage;
+
   sheet.appendRow(newRow);
+
   return { status: "success" };
 }
+
+
+
 
 function handleToggleLike(data) {
   const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   const commentIdCol = headers.indexOf('comment_id');
   const likesCountCol = headers.indexOf('likes_count');
   const likersCol = headers.indexOf('likers_user_ids');
+
   
   const dataRange = sheet.getDataRange();
   const values = dataRange.getValues();
@@ -120,3 +153,44 @@ function handleToggleLike(data) {
   }
   return { status: "error", message: "Comment not found" };
 }
+
+
+// FUNGSI EDIT COMMENTS
+function handleEditComment(data) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("comments-database");
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const commentIdCol = headers.indexOf('comment_id');
+  const userIdCol = headers.indexOf('user_id');
+  const commentDescCol = headers.indexOf('comments_description');
+
+  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
+
+  for (let i = 0; i < values.length; i++) {
+    if (values[i][commentIdCol] == data.commentId && values[i][userIdCol] == data.userId) {
+      sheet.getRange(i + 2, commentDescCol + 1).setValue(data.newCommentText);
+      return { status: "success", message: "Komentar berhasil diedit" };
+    }
+  }
+
+  return { status: "error", message: "Komentar tidak ditemukan atau bukan milik Anda" };
+}
+
+// FUNGSI DELETE COMMENTS
+function handleDeleteComment(data) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("comments-database");
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const commentIdCol = headers.indexOf('comment_id');
+  const userIdCol = headers.indexOf('user_id');
+
+  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
+
+  for (let i = 0; i < values.length; i++) {
+    if (values[i][commentIdCol] == data.commentId && values[i][userIdCol] == data.userId) {
+      sheet.deleteRow(i + 2);
+      return { status: "success", message: "Komentar berhasil dihapus" };
+    }
+  }
+
+  return { status: "error", message: "Komentar tidak ditemukan atau bukan milik Anda" };
+}
+
