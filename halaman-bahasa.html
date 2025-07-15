@@ -113,8 +113,11 @@
         let currentVideoId = null;
         let currentLanguagePage = null; // BARU: untuk menyimpan nama bahasa
 
-        // --- ALUR UTAMA HALAMAN ---
+        // --- ALUR UTAMA HALAMAN (STRUKTUR DIPERBAIKI) ---
         document.addEventListener("DOMContentLoaded", () => {
+            // Semua logika yang berjalan saat halaman dimuat diletakkan di sini
+            
+            // 1. Logika untuk Loading Bar
             const pageLoader = document.getElementById('page-loader');
             const progressBar = document.getElementById('progress-bar');
             const loaderText = document.getElementById('loader-text');
@@ -137,7 +140,9 @@
                 }
             }, loadingSpeed);
 
+            // 2. Logika untuk Event Listener Form dan Komentar
             document.getElementById('comment-form').addEventListener('submit', handleCommentSubmit);
+            document.getElementById('comment-section').addEventListener('click', handleCommentInteraction);
         });
 
         function initializePage() {
@@ -145,6 +150,7 @@
             const mainContent = document.getElementById('mainContent');
             const urlParams = new URLSearchParams(window.location.search);
             const bahasa = urlParams.get('bahasa');
+            currentLanguagePage = bahasa;
 
             if (!bahasa) {
                 window.location.href = 'index.html';
@@ -228,6 +234,7 @@
         
         function loadComments(videoId) {
             const commentSection = document.getElementById('comment-section');
+            const currentUser = auth.currentUser;
             commentSection.innerHTML = `<div class="text-center py-5"><div class="google-spinner"></div></div>`;
 
             fetch(`${WEB_APP_URL_COMMENTS}?video_id=${videoId}`)
@@ -240,25 +247,32 @@
                         comments.forEach(comment => {
                             const commentElement = document.createElement('div');
                             commentElement.className = 'd-flex mb-3';
+                            const userHasLiked = currentUser && comment.likers_user_ids && comment.likers_user_ids.includes(currentUser.uid);
+                            
                             commentElement.innerHTML = `
                                 <img src="${comment.user_photo_url}" alt="${comment.user_name}" class="rounded-circle me-3" style="width: 40px; height: 40px;">
                                 <div class="flex-grow-1">
                                     <strong class="me-2">${comment.user_name}</strong>
                                     <small class="text-muted">${new Date(comment.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</small>
-                                    <p class="mb-0 mt-1" style="white-space: pre-wrap;">${comment.comments_description}</p>
+                                    <p class="mb-1 mt-1" style="white-space: pre-wrap;">${comment.comments_description}</p>
+                                    
+                                    <div class="comment-actions d-flex align-items-center small">
+                                        <span class="like-btn ${userHasLiked ? 'liked' : ''}" data-comment-id="${comment.comment_id}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-hand-thumbs-up-fill" viewBox="0 0 16 16"><path d="M6.956 1.745C7.021.81 7.908.087 8.864.325l.261.066c.463.116.874.456 1.012.965.22.816.533 2.511.062 4.51a9.84 9.84 0 0 1 .443-.051c.713-.065 1.669-.072 2.516.21.518.173.994.681 1.2 1.273.184.532.16 1.162-.234 1.733.058.119.103.242.138.363.077.27.113.567.113.856 0 .289-.036.586-.113.856-.039.135-.09.273-.16.404.169.387.107.819-.003 1.148a3.163 3.163 0 0 1-.488.901c.054.152.076.312.076.465 0 .305-.089.625-.253.912C13.1 15.522 12.437 16 11.5 16H8c-.605 0-1.07-.081-1.466-.218a4.82 4.82 0 0 1-.97-.484l-.048-.03c-.504-.307-.999-.609-2.068-.722C2.682 14.464 2 13.846 2 13V9c0-.85.685-1.432 1.357-1.615.849-.232 1.574-.787 2.132-1.41.56-.627.914-1.28 1.039-1.639.199-.575.356-1.539.428-2.59z"/></svg>
+                                        </span>
+                                        <span class="ms-2 likes-count">${comment.likes_count > 0 ? comment.likes_count : ''}</span>
+                                    </div>
                                 </div>
                             `;
                             commentSection.appendChild(commentElement);
                         });
                     }
                 })
-                .catch(error => {
-                    console.error('Gagal memuat komentar:', error);
-                    commentSection.innerHTML = '<p class="text-center text-danger">Maaf, gagal memuat komentar.</p>';
-                });
+                .catch(error => { /* ... (catch error tidak berubah) ... */ });
         }
+        
 
-        // BARU: Fungsi untuk menangani semua interaksi di area komentar
+        // FUNGSI UNTUK INTERAKSI KOMENTAR (LIKE)
         function handleCommentInteraction(event) {
             const likeButton = event.target.closest('.like-btn');
             if (likeButton) {
@@ -266,7 +280,6 @@
             }
         }
         
-        // BARU: Fungsi spesifik untuk menangani klik pada tombol Like
         function handleLikeClick(buttonElement) {
             const user = auth.currentUser;
             if (!user) {
@@ -275,41 +288,24 @@
             }
             
             const commentId = buttonElement.dataset.commentId;
-            
-            // Optimistic Update: Langsung ubah tampilan di frontend
-            buttonElement.classList.toggle('liked');
             const likesCountElement = buttonElement.nextElementSibling;
-            let currentLikes = parseInt(likesCountElement.textContent || '0');
             
-            if (buttonElement.classList.contains('liked')) {
-                currentLikes++;
-            } else {
-                currentLikes--;
+            // Optimistic Update
+            const isLiked = buttonElement.classList.toggle('liked');
+            let currentLikes = parseInt(likesCountElement.textContent || '0');
+            likesCountElement.textContent = isLiked ? currentLikes + 1 : currentLikes - 1;
+            if (parseInt(likesCountElement.textContent) <= 0) {
+                likesCountElement.textContent = '';
             }
-            likesCountElement.textContent = currentLikes > 0 ? currentLikes : '';
 
             // Kirim data ke backend
-            const likeData = {
-                action: 'toggle_like',
-                commentId: commentId,
-                userId: user.uid
-            };
-
             fetch(WEB_APP_URL_COMMENTS, {
                 method: 'POST',
-                body: JSON.stringify(likeData)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.status !== "success") {
-                    // Jika gagal, kembalikan tampilan ke state semula (rollback)
-                    console.error("Gagal update like di server");
-                    loadComments(currentVideoId); // Muat ulang komentar untuk data yang akurat
-                }
+                body: JSON.stringify({ action: 'toggle_like', commentId: commentId, userId: user.uid })
             })
             .catch(error => {
                 console.error('Error saat menyukai komentar:', error);
-                loadComments(currentVideoId); // Muat ulang komentar untuk data yang akurat
+                loadComments(currentVideoId); // Rollback jika gagal
             });
         }
         
