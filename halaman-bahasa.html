@@ -142,7 +142,18 @@
 
             // 2. Logika untuk Event Listener Form dan Komentar
             document.getElementById('comment-form').addEventListener('submit', handleCommentSubmit);
-            document.getElementById('comment-section').addEventListener('click', handleCommentInteraction);
+            document.getElementById('comment-section').addEventListener('click', function(event) {
+                
+                const editBtn = event.target.closest('.edit-btn');
+                const deleteBtn = event.target.closest('.delete-btn');
+                
+                if (editBtn) {
+                    handleEditComment(editBtn.dataset.commentId, editBtn.dataset.commentText);
+                }
+                if (deleteBtn) {
+                    handleDeleteComment(deleteBtn.dataset.commentId);
+                }
+            });
         });
 
         function initializePage() {
@@ -246,26 +257,31 @@
                             commentSection.innerHTML = '<p class="text-center text-muted">Belum ada komentar. Jadilah yang pertama!</p>';
                         } else {
                             comments.forEach(comment => {
-                                const commentElement = document.createElement('div');
-                                commentElement.className = 'd-flex mb-3';
-                                const userHasLiked = currentUser && comment.likers_user_ids && comment.likers_user_ids.includes(currentUser.uid);
+                            const commentElement = document.createElement('div');
+                            commentElement.className = 'd-flex mb-3';
+                            const userHasLiked = currentUser && comment.likers_user_ids && comment.likers_user_ids.includes(currentUser.uid);
+                            const isOwner = currentUser && comment.user_id === currentUser.uid;
+                            
+                            commentElement.innerHTML = `
+                            <img src="${comment.user_photo_url}" alt="${comment.user_name}" class="rounded-circle me-3" style="width: 40px; height: 40px;">
+                            <div class="flex-grow-1">
+                            <strong class="me-2">${comment.user_name}</strong>
+                            <small class="text-muted">${new Date(comment.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</small>
+                            <p class="mb-1 mt-1 comment-text" style="white-space: pre-wrap;">${comment.comments_description}</p>
+                            <div class="comment-actions d-flex align-items-center small">
+                                <span class="like-btn ${userHasLiked ? 'liked' : ''}" data-comment-id="${comment.comment_id}">👍</span>
+                                <span class="ms-2 likes-count">${comment.likes_count > 0 ? comment.likes_count : ''}</span>
+                                ${isOwner ? `
+                                    <button class="btn btn-sm btn-outline-primary ms-3 edit-btn" data-comment-id="${comment.comment_id}" data-comment-text="${comment.comments_description}">Edit</button>
+                                    <button class="btn btn-sm btn-outline-danger ms-2 delete-btn" data-comment-id="${comment.comment_id}">Hapus</button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
 
-                                commentElement.innerHTML = `
-                                   <img src="${comment.user_photo_url}" alt="${comment.user_name}" class="rounded-circle me-3" style="width: 40px; height: 40px;">
-                                    <div class="flex-grow-1">
-                                        <strong class="me-2">${comment.user_name}</strong>
-                                        <small class="text-muted">${new Date(comment.timestamp).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}</small>
-                                        <p class="mb-1 mt-1" style="white-space: pre-wrap;">${comment.comments_description}</p>
-                                        <div class="comment-actions d-flex align-items-center small">
-                                            <span class="like-btn ${userHasLiked ? 'liked' : ''}" data-comment-id="${comment.comment_id}">
-                                                👍
-                                            </span>
-                                            <span class="ms-2 likes-count">${comment.likes_count > 0 ? comment.likes_count : ''}</span>
-                                        </div>
-                                    </div>
-                                `;
-                                commentSection.appendChild(commentElement);
-                            });
+                    commentSection.appendChild(commentElement);
+                });
+
                         }
                     })
                     .catch(error => { commentSection.innerHTML = '<p class="text-danger">Gagal memuat komentar.</p>'; });
@@ -363,6 +379,54 @@
             if (!slug) return "Tidak Dikenal";
             return slug.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
         }
+
+        function handleEditComment(commentId, currentText) {
+    const newText = prompt("Edit komentar Anda:", currentText);
+    if (newText !== null && newText.trim() !== "") {
+        auth.currentUser.getIdToken(true).then(token => {
+            fetch(WEB_APP_URL_COMMENTS, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'edit_comment',
+                    commentId: commentId,
+                    userId: auth.currentUser.uid,
+                    newCommentText: newText.trim(),
+                    authToken: token
+                })
+            }).then(res => res.json()).then(result => {
+                if (result.status === "success") {
+                    loadComments(currentVideoId);
+                } else {
+                    alert("Gagal mengedit komentar.");
+                }
+            });
+        });
+    }
+}
+
+
+function handleDeleteComment(commentId) {
+    if (!confirm("Yakin ingin menghapus komentar ini?")) return;
+
+    auth.currentUser.getIdToken(true).then(token => {
+        fetch(WEB_APP_URL_COMMENTS, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'delete_comment',
+                commentId: commentId,
+                userId: auth.currentUser.uid,
+                authToken: token
+            })
+        }).then(res => res.json()).then(result => {
+            if (result.status === "success") {
+                loadComments(currentVideoId);
+            } else {
+                alert("Gagal menghapus komentar.");
+            }
+        });
+    });
+}
+
     </script>
 </body>
 </html>
