@@ -57,7 +57,13 @@
                         <div class="card-header h5">Pertanyaan Diskusi</div>
                         <div class="card-body">
                             <ul class="list-group list-group-flush">
-                                </ul>
+                                <li class="list-group-item">1. Menurut Anda, cerita ini menceritakan tentang apa?</li>
+                                <li class="list-group-item">2. Menurut Anda, apa yang paling menarik pada cerita ini?</li>
+                                <li class="list-group-item">3. Apa yang Anda pelajari dari cerita ini?</li>
+                                <li class="list-group-item">4. Bagaimana Anda akan menerapkan apa yang baru kita pelajari dari cerita ini?</li>
+                                <li class="list-group-item">5. Menurut Anda, apakah bahasa yang dipakai dalam cerita mudah dipahami?</li>
+                                <li class="list-group-item">6. Apa harapan Anda terkait pelestarian bahasa <strong id="language-name-placeholder">ini</strong>?</li>
+                            </ul>
                         </div>
                     </div>
 
@@ -76,7 +82,6 @@
                         </form>
                         <div id="comment-section"></div>
                     </div>
-
                 </div>
             </div>
         </main>
@@ -89,18 +94,36 @@
     <script src="js/auth.js"></script>
   
     <script>
-        // --- VARIABEL GLOBAL ---
-        const WEB_APP_URL_COMMENTS = "https://script.google.com/macros/s/AKfycbwlCVUzCu9GEdi2aCZnzj-HYFXJlNX25sBEBDvivqGg2kyJrpfQZ6Jr31cknT_fcGu5_g/exec";
+        // --- VARIABEL GLOBAL & KONSTANTA ---
         const WEB_APP_URL_VIDEOS = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
-        const API_KEY_YOUTUBE = "AIzaSyDBefJ54bf1RQBrmMye6FjD-gyPLT3bOyU"; // INGAT: Pindahkan ini ke backend untuk keamanan
+        const WEB_APP_URL_COMMENTS = "https://script.google.com/macros/s/AKfycbwlCVUzCu9GEdi2aCZnzj-HYFXJlNX25sBEBDvivqGg2kyJrpfQZ6Jr31cknT_fcGu5_g/exec";
+        const API_KEY_YOUTUBE = "AIzaSyDBefJ54bf1RQBrmMye6FjD-gyPLT3bOyU"; // INGAT: Ini tidak aman, pindahkan ke backend
         let currentVideoId = null;
 
-        // --- LOGIKA UTAMA & INISIALISASI ---
-        document.addEventListener("DOMContentLoaded", function() {
-            // ... (Kode loading bar tidak berubah dan sudah benar) ...
-            let progress = 0; const loadingSpeed = 5; const progressBar = document.getElementById('progress-bar'); const loaderText = document.getElementById('loader-text'); const pageLoader = document.getElementById('page-loader');
-            const interval = setInterval(() => { progress += 1; progressBar.style.width = progress + '%'; loaderText.textContent = 'Memuat... ' + progress + '%'; if (progress >= 100) { clearInterval(interval); setTimeout(() => { pageLoader.classList.add('hidden'); setTimeout(() => { pageLoader.style.display = 'none'; initializePage(); }, 750); }, 500); } }, loadingSpeed);
-            
+        // --- ALUR UTAMA HALAMAN ---
+        document.addEventListener("DOMContentLoaded", () => {
+            const pageLoader = document.getElementById('page-loader');
+            const progressBar = document.getElementById('progress-bar');
+            const loaderText = document.getElementById('loader-text');
+            let progress = 0;
+            const loadingSpeed = 5;
+
+            const interval = setInterval(() => {
+                progress += 1;
+                progressBar.style.width = progress + '%';
+                loaderText.textContent = 'Memuat... ' + progress + '%';
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        pageLoader.classList.add('hidden');
+                        setTimeout(() => {
+                            pageLoader.style.display = 'none';
+                            initializePage();
+                        }, 750);
+                    }, 500);
+                }
+            }, loadingSpeed);
+
             document.getElementById('comment-form').addEventListener('submit', handleCommentSubmit);
         });
 
@@ -109,21 +132,20 @@
             const mainContent = document.getElementById('mainContent');
             const urlParams = new URLSearchParams(window.location.search);
             const bahasa = urlParams.get('bahasa');
-            
+
             if (!bahasa) {
                 window.location.href = 'index.html';
                 return;
             }
-            
-            const namaBahasaFormatted = formatBahasaName(bahasa);
-            document.title = `${namaBahasaFormatted} - Cerita Bahasa Daerah`;
-            
+
+            document.title = `${formatBahasaName(bahasa)} - Cerita Bahasa Daerah`;
+
             auth.onAuthStateChanged(user => {
                 if (user) {
                     mainContent.style.display = 'block';
                     loginContainer.style.display = 'none';
                     document.getElementById('user-photo-container').innerHTML = `<img src="${user.photoURL}" alt="${user.displayName}" class="rounded-circle" style="width: 40px; height: 40px;">`;
-                    loadNavbar(); // FUNGSI NAVBAR DIKEMBALIKAN
+                    loadNavbar();
                     loadVideoData(bahasa);
                 } else {
                     mainContent.style.display = 'none';
@@ -135,16 +157,17 @@
 
         // --- FUNGSI-FUNGSI FITUR ---
 
-        // FUNGSI NAVBAR DIKEMBALIKAN
         function loadNavbar() {
             fetch('navbar.html')
                 .then(response => response.ok ? response.text() : Promise.reject('Navbar not found'))
                 .then(html => { document.getElementById('navbar-placeholder').innerHTML = html; })
-                .catch(error => { console.error('Gagal memuat navbar:', error); });
+                .catch(error => console.error('Gagal memuat navbar:', error));
         }
-        
+
         function loadVideoData(namaBahasa) {
             document.getElementById('language-name-placeholder').textContent = formatBahasaName(namaBahasa);
+            const videoSelect = document.getElementById("videoSelect");
+            
             fetch(`${WEB_APP_URL_VIDEOS}?bahasa=${namaBahasa}`)
                 .then(response => response.json())
                 .then(resultArray => {
@@ -154,21 +177,18 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    const videoSelect = document.getElementById("videoSelect");
-                    videoSelect.innerHTML = '<option disabled selected>Pilih Video</option>';
+                    videoSelect.innerHTML = ''; // Kosongkan dulu
                     if (data.items && data.items.length > 0) {
                         data.items.forEach((item, index) => {
                             const videoId = item.snippet.resourceId.videoId;
                             const title = item.snippet.title;
                             const option = new Option(title, videoId);
                             videoSelect.add(option);
-                            if (index === 0) {
-                                option.selected = true;
-                                playVideo(videoId, title);
-                            }
                         });
+                        // Setelah semua opsi ditambahkan, putar video pertama
+                        playVideo(videoSelect.value, videoSelect.options[0].text);
                     } else {
-                         document.getElementById("videoTitle").textContent = "Tidak ada video di playlist ini.";
+                        document.getElementById("videoTitle").textContent = "Tidak ada video di playlist ini.";
                     }
                 })
                 .catch(error => {
@@ -180,13 +200,17 @@
         function playVideo(videoId, title) {
             currentVideoId = videoId;
             document.getElementById("videoPlayer").src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-            document.getElementById("videoTitle").textContent = title;
+            const videoTitleElement = document.getElementById("videoTitle");
+            videoTitleElement.innerHTML = ''; // Hapus spinner
+            videoTitleElement.textContent = title;
             loadComments(currentVideoId);
         }
 
         function playSelectedVideo() {
             const select = document.getElementById("videoSelect");
-            playVideo(select.value, select.options[select.selectedIndex].text);
+            if (select.options.length > 0) {
+                 playVideo(select.value, select.options[select.selectedIndex].text);
+            }
         }
         
         function loadComments(videoId) {
@@ -197,7 +221,7 @@
                 .then(response => response.json())
                 .then(comments => {
                     commentSection.innerHTML = '';
-                    if (comments.length === 0) {
+                    if (!comments || comments.length === 0) {
                         commentSection.innerHTML = '<p class="text-center text-muted">Belum ada komentar. Jadilah yang pertama!</p>';
                     } else {
                         comments.forEach(comment => {
@@ -227,9 +251,8 @@
             const commentText = commentInput.value.trim();
             const user = auth.currentUser;
 
-            if (!commentText) return;
-            if (!user) {
-                alert("Anda harus login untuk berkomentar!");
+            if (!commentText || !user) {
+                if (!user) alert("Anda harus login untuk berkomentar!");
                 return;
             }
 
@@ -243,17 +266,13 @@
                     if (result.status === "success") {
                         commentInput.value = '';
                         loadComments(currentVideoId);
-                    } else {
-                        alert('Gagal mengirim komentar.');
-                    }
+                    } else { throw new Error(result.message || 'Gagal mengirim komentar.'); }
                 })
                 .catch(error => {
                     console.error('Error saat mengirim komentar:', error);
                     alert('Terjadi kesalahan saat mengirim komentar.');
                 })
-                .finally(() => {
-                    submitButton.disabled = false;
-                });
+                .finally(() => { submitButton.disabled = false; });
         }
 
         function formatBahasaName(slug) {
