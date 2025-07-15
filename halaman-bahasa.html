@@ -97,8 +97,9 @@
         // --- VARIABEL GLOBAL & KONSTANTA ---
         const WEB_APP_URL_VIDEOS = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
         const WEB_APP_URL_COMMENTS = "https://script.google.com/macros/s/AKfycbwlCVUzCu9GEdi2aCZnzj-HYFXJlNX25sBEBDvivqGg2kyJrpfQZ6Jr31cknT_fcGu5_g/exec";
-        const API_KEY_YOUTUBE = "AIzaSyDBefJ54bf1RQBrmMye6FjD-gyPLT3bOyU"; // INGAT: Ini tidak aman, pindahkan ke backend
+        const API_KEY_YOUTUBE = "AIzaSyDBefJ54bf1RQBrmMye6FjD-gyPLT3bOyU";
         let currentVideoId = null;
+        let currentLanguagePage = null; // BARU: untuk menyimpan nama bahasa
 
         // --- ALUR UTAMA HALAMAN ---
         document.addEventListener("DOMContentLoaded", () => {
@@ -251,12 +252,25 @@
             const commentText = commentInput.value.trim();
             const user = auth.currentUser;
 
+            // BARU: Ambil judul video dari elemen H2
+            const videoTitle = document.getElementById('videoTitle').textContent;
+
             if (!commentText || !user) {
                 if (!user) alert("Anda harus login untuk berkomentar!");
                 return;
             }
-
-            const commentData = { videoId: currentVideoId, userId: user.uid, userName: user.displayName, userPhotoUrl: user.photoURL, commentText: commentText };
+            
+            // DIUBAH: Tambahkan data baru ke objek yang akan dikirim
+            const commentData = {
+              videoId: currentVideoId,
+              videoTitle: videoTitle,         // data baru
+              languagePage: currentLanguagePage, // data baru
+              userId: user.uid,
+              userName: user.displayName,
+              userPhotoUrl: user.photoURL,
+              commentText: commentText
+            };
+            
             const submitButton = event.target.querySelector('button');
             submitButton.disabled = true;
 
