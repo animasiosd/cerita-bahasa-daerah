@@ -18,6 +18,18 @@
         .progress-container { width: 80%; max-width: 400px; background-color: #e0e0e0; border-radius: 25px; overflow: hidden; }
         #progress-bar { width: 0%; height: 20px; background-color: #0d6efd; border-radius: 25px; transition: width 0.1s linear; }
         #loginContainer, #mainContent { display: none; }
+        /* BARU: CSS untuk tombol like */
+        .like-btn {
+            cursor: pointer;
+            color: #6c757d; /* Warna abu-abu */
+            transition: transform 0.2s;
+        }
+        .like-btn:hover {
+            transform: scale(1.2);
+        }
+        .like-btn.liked {
+            color: #0d6efd; /* Warna biru saat di-like */
+        }
     </style>
 </head>
 
@@ -246,6 +258,62 @@
                 });
         }
 
+        // BARU: Fungsi untuk menangani semua interaksi di area komentar
+        function handleCommentInteraction(event) {
+            const likeButton = event.target.closest('.like-btn');
+            if (likeButton) {
+                handleLikeClick(likeButton);
+            }
+        }
+        
+        // BARU: Fungsi spesifik untuk menangani klik pada tombol Like
+        function handleLikeClick(buttonElement) {
+            const user = auth.currentUser;
+            if (!user) {
+                alert("Anda harus login untuk menyukai komentar!");
+                return;
+            }
+            
+            const commentId = buttonElement.dataset.commentId;
+            
+            // Optimistic Update: Langsung ubah tampilan di frontend
+            buttonElement.classList.toggle('liked');
+            const likesCountElement = buttonElement.nextElementSibling;
+            let currentLikes = parseInt(likesCountElement.textContent || '0');
+            
+            if (buttonElement.classList.contains('liked')) {
+                currentLikes++;
+            } else {
+                currentLikes--;
+            }
+            likesCountElement.textContent = currentLikes > 0 ? currentLikes : '';
+
+            // Kirim data ke backend
+            const likeData = {
+                action: 'toggle_like',
+                commentId: commentId,
+                userId: user.uid
+            };
+
+            fetch(WEB_APP_URL_COMMENTS, {
+                method: 'POST',
+                body: JSON.stringify(likeData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status !== "success") {
+                    // Jika gagal, kembalikan tampilan ke state semula (rollback)
+                    console.error("Gagal update like di server");
+                    loadComments(currentVideoId); // Muat ulang komentar untuk data yang akurat
+                }
+            })
+            .catch(error => {
+                console.error('Error saat menyukai komentar:', error);
+                loadComments(currentVideoId); // Muat ulang komentar untuk data yang akurat
+            });
+        }
+        
+        // ... (handleCommentSubmit, formatBahasaName, dll tidak berubah) ...
         function handleCommentSubmit(event) {
             event.preventDefault();
             const commentInput = document.getElementById('comment-input');
