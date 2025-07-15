@@ -20,7 +20,7 @@ function logout() {
 // 3. LOGIKA UTAMA (diperbarui)
 document.addEventListener('DOMContentLoaded', () => {
   // Ambil semua elemen yang relevan
-  const pageLoader = document.getElementById("pageLoader");
+  const pageLoader = document.getElementById("page-loader");
   const loginContainer = document.getElementById("loginContainer");
   const mainContent = document.getElementById("mainContent");
   const loginBtn = document.getElementById("loginBtn");
