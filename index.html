@@ -88,7 +88,7 @@
     });
 
     function loadNavbar() {
-        fetch('navbar.html')
+        fetch('/components/navbar.html')
             .then(response => response.ok ? response.text() : Promise.reject('Navbar not found'))
             .then(html => { document.getElementById('navbar-placeholder').innerHTML = html; })
             .catch(error => { console.error('Gagal memuat navbar:', error); });
