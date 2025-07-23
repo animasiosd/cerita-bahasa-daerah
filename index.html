@@ -51,10 +51,11 @@
 
   <div id="main-content">
     <header>
-      <h1>🎉 Selamat Datang!</h1>
+      <h1 id="welcome-text">🎉 Selamat Datang!</h1>
       <p>Mau dengar cerita dari mana? Pilih bahasanya di tombol <strong>Pilih Bahasa</strong> ↗️</p>
     </header>
   </div>
+
 
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
@@ -65,13 +66,16 @@
   firebase.auth().onAuthStateChanged(function(user) {
     const mainContent = document.getElementById("main-content");
     const loginContainer = document.getElementById("loginContainer");
+    const welcomeText = document.getElementById("welcome-text");
 
     if (user) {
-      // Sudah login
+      const name = user.displayName || "Pengguna";
+      if (welcomeText) {
+        welcomeText.textContent = `🎉 Selamat Datang, ${name}!`;
+      }
       mainContent.style.display = "block";
       loginContainer.style.display = "none";
     } else {
-      // Belum login
       loginContainer.style.display = "flex";
       mainContent.style.display = "none";
     }
