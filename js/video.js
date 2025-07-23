@@ -15,6 +15,9 @@ function initPage() {
         return;
     }
 
+    // --- JUDUL HALAMAN BAHASA ---
+    document.title = `Cerita Bahasa ${language}`;
+
     fetch(`${VIDEO_API_URL}?lang=${encodeURIComponent(language)}`)
         .then(res => res.json())
         .then(data => {

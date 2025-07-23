@@ -130,5 +130,21 @@
         });
     </script>
 
+    <script>
+  firebase.auth().onAuthStateChanged(function(user) {
+    const mainContent = document.getElementById("mainContent");
+    const loginContainer = document.getElementById("loginContainer");
+
+    if (user) {
+      // Mengubah style display secara langsung, bukan via class
+      if (mainContent) mainContent.style.display = "block";
+      if (loginContainer) loginContainer.style.display = "none";
+    } else {
+      if (loginContainer) loginContainer.style.display = "flex";
+      if (mainContent) mainContent.style.display = "none";
+    }
+  });
+</script>
+
 </body>
 </html>
