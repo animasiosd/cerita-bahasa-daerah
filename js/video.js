@@ -1,6 +1,6 @@
 // File: js/video.js
 
-const API_URL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
+const VIDEO_API_URL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
 
 document.addEventListener("DOMContentLoaded", function () {
     const videoSelect = document.getElementById('videoSelect');
@@ -8,14 +8,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const videoTitle = document.getElementById('videoTitle');
     const urlParams = new URLSearchParams(window.location.search);
 
-    const language = urlParams.get('bahasa');  // ✅ Sesuai parameter URL Anda
-
+    const language = urlParams.get('bahasa'); // ✅ Sesuai parameter URL
     if (!language) {
         videoTitle.textContent = "Parameter ?bahasa= tidak ditemukan.";
         return;
     }
 
-    fetch(`${API_URL}?lang=${encodeURIComponent(language)}`)  // ✅ Ambil berdasarkan nama bahasa
+    fetch(`${VIDEO_API_URL}?lang=${encodeURIComponent(language)}`)
         .then(res => res.json())
         .then(data => {
             if (!Array.isArray(data) || data.length === 0) {
@@ -23,9 +22,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            videoTitle.textContent = "Silakan pilih video.";
+            // Simpan info global untuk komentar.js
+            window.currentLanguagePage = language;
+            window.currentVideoId = null;
 
-            videoSelect.innerHTML = '';  // Bersihkan dropdown
+            videoTitle.textContent = "Silakan pilih video.";
+            videoSelect.innerHTML = '';
 
             const defaultOption = document.createElement('option');
             defaultOption.value = "";
@@ -44,31 +46,24 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (!videoId) {
                     videoPlayer.src = '';
                     videoTitle.textContent = "Silakan pilih video.";
+                    window.currentVideoId = null;
                     return;
                 }
 
                 const selected = data.find(v => v.videoId === videoId);
-
                 videoPlayer.src = `https://www.youtube.com/embed/${videoId}`;
                 videoTitle.textContent = selected ? selected.title : "Video";
 
-                // Tambahan untuk sistem komentar
-                if (typeof currentVideoId !== 'undefined') {
-                    currentVideoId = videoId;    // ✅ Kirim video ID ke sistem komentar
-                }
-                if (typeof currentLanguagePage !== 'undefined') {
-                    currentLanguagePage = language;   // ✅ Kirim bahasa ke sistem komentar
-                }
+                // Simpan untuk komentar
+                window.currentVideoId = videoId;
 
-                // Jika ada fungsi loadComments, otomatis jalankan
                 if (typeof loadComments === 'function') {
-                    loadComments(videoId);   // ✅ Muat komentar untuk video ini
+                    loadComments(videoId);
                 }
             });
-
         })
         .catch(err => {
-            console.error(err);
+            console.error("❌ Gagal memuat video:", err);
             videoTitle.textContent = "Gagal memuat video.";
         });
 });
