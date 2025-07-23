@@ -59,7 +59,8 @@ function loadDynamicLanguages() {
     .then(data => {
       console.log("🧩 Data Bahasa dari API:", data);
 
-      const bahasaList = data.headers;
+       // ✅ SEKARANG 'data' adalah array of objects, bukan data.headers
+      const bahasaList = data; 
       if (!Array.isArray(bahasaList) || bahasaList.length === 0) {
         dropdown.innerHTML = '<li><span class="dropdown-item text-muted">Daftar bahasa kosong.</span></li>';
         return;
@@ -67,12 +68,15 @@ function loadDynamicLanguages() {
 
       dropdown.innerHTML = '';
 
+       // ✅ Sesuaikan perulangan untuk menggunakan properti .value dan .display
       bahasaList.forEach(bahasa => {
         const listItem = document.createElement('li');
         const link = document.createElement('a');
         link.className = 'dropdown-item';
-        link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa)}`;
-        link.textContent = `Bahasa ${bahasa}`;
+        // Gunakan 'bahasa.value' untuk URL
+        link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}`;
+        // Gunakan 'bahasa.display' untuk teks yang tampil
+        link.textContent = `Bahasa ${bahasa.display}`; 
         listItem.appendChild(link);
         dropdown.appendChild(listItem);
       });

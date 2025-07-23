@@ -15,8 +15,9 @@ function initPage() {
         return;
     }
 
-    // --- JUDUL HALAMAN BAHASA ---
-    document.title = `Cerita Bahasa ${language}`;
+    // Perintah ini akan mengganti judul di tab browser.
+    document.title = `Cerita Bahasa ${language.charAt(0).toUpperCase() + language.slice(1)}`;
+    // ----------------------------------------------------
 
     fetch(`${VIDEO_API_URL}?lang=${encodeURIComponent(language)}`)
         .then(res => res.json())
