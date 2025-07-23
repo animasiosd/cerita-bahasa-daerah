@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
       .then(html => {
         navbarPlaceholder.innerHTML = html;
         highlightActiveMenu();
-        loadDynamicLanguages();
+        loadDynamicLanguages(); // Panggil setelah navbar dimuat
       })
       .catch(err => {
         console.error("Error memuat navbar:", err);
@@ -43,15 +43,17 @@ function loadDynamicLanguages() {
         return;
       }
 
-      dropdown.innerHTML = ''; // Bersihkan isi awal
+      dropdown.innerHTML = ''; // Kosongkan isi awal
 
-      data.forEach(item => {
-        const namaBahasa = item.bahasa;
+      // Ambil nama header kolom dari baris pertama
+      const bahasaKeys = Object.keys(data[0]).filter(k => k.toLowerCase() !== 'timestamp');
+
+      bahasaKeys.forEach(bahasa => {
         const listItem = document.createElement('li');
         const link = document.createElement('a');
         link.className = 'dropdown-item';
-        link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(namaBahasa)}`;
-        link.textContent = `Bahasa ${namaBahasa}`;
+        link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa)}`;
+        link.textContent = `Bahasa ${bahasa}`;
         listItem.appendChild(link);
         dropdown.appendChild(listItem);
       });
