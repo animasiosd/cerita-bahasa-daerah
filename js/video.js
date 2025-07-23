@@ -1,6 +1,6 @@
 // File: js/video.js
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwCT57fhlebRz7nKvvtmPxjKrR54-mQU3syiuRqspHX9nRubS-gg7RYkHybOlIwxdhyTg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
 
 document.addEventListener("DOMContentLoaded", function () {
     const videoSelect = document.getElementById('videoSelect');
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    fetch(`${API_URL}?bahasa=${encodeURIComponent(language)}`)  // ✅ Ambil berdasarkan nama bahasa
+    fetch(`${API_URL}?lang=${encodeURIComponent(language)}`)  // ✅ Ambil berdasarkan nama bahasa
         .then(res => res.json())
         .then(data => {
             if (!Array.isArray(data) || data.length === 0) {
