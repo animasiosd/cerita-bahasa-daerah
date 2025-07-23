@@ -13,10 +13,13 @@ document.addEventListener("DOMContentLoaded", function() {
       })
       .then(html => {
         navbarPlaceholder.innerHTML = html;
-
+        
+        // Tunggu satu frame render agar DOM siap, lalu jalankan
+        requestAnimationFrame(() => {
         // 🧠 Ini sangat penting: pastikan loadDynamicLanguages() dipanggil setelah navbar dimasukkan ke DOM
-        highlightActiveMenu();
-        loadDynamicLanguages();
+          highlightActiveMenu();
+          loadDynamicLanguages();
+        });
       })
       .catch(err => {
         console.error("Error memuat navbar:", err);
@@ -68,3 +71,5 @@ function loadDynamicLanguages() {
       dropdown.innerHTML = '<li><span class="dropdown-item text-danger">Gagal memuat bahasa.</span></li>';
     });
 }
+
+console.log("Cek elemen #languagesDropdown:", document.getElementById("languagesDropdown"));
