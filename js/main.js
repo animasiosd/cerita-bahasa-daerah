@@ -13,8 +13,10 @@ document.addEventListener("DOMContentLoaded", function() {
       })
       .then(html => {
         navbarPlaceholder.innerHTML = html;
+
+        // 🧠 Ini sangat penting: pastikan loadDynamicLanguages() dipanggil setelah navbar dimasukkan ke DOM
         highlightActiveMenu();
-        loadDynamicLanguages(); // Panggil setelah navbar dimuat
+        loadDynamicLanguages();
       })
       .catch(err => {
         console.error("Error memuat navbar:", err);
@@ -33,19 +35,23 @@ function highlightActiveMenu() {
 
 function loadDynamicLanguages() {
   const dropdown = document.getElementById('languagesDropdown');
-  if (!dropdown) return;
+  if (!dropdown) {
+    console.warn("Element #languagesDropdown tidak ditemukan");
+    return;
+  }
 
   fetch(BAHASA_API_URL)
     .then(response => response.json())
     .then(data => {
-          console.log("Data Bahasa:", data); // ⬅ Tambahkan baris ini
+      console.log("🧩 Data Bahasa dari API:", data); // <=== Tambahkan ini
+
       const bahasaList = data.headers;
       if (!Array.isArray(bahasaList) || bahasaList.length === 0) {
         dropdown.innerHTML = '<li><span class="dropdown-item text-muted">Daftar bahasa kosong.</span></li>';
         return;
       }
 
-      dropdown.innerHTML = ''; // Kosongkan isi awal
+      dropdown.innerHTML = '';
 
       bahasaList.forEach(bahasa => {
         const listItem = document.createElement('li');
@@ -57,7 +63,8 @@ function loadDynamicLanguages() {
         dropdown.appendChild(listItem);
       });
     })
-    .catch(() => {
+    .catch((err) => {
+      console.error("❌ Gagal memuat bahasa:", err);
       dropdown.innerHTML = '<li><span class="dropdown-item text-danger">Gagal memuat bahasa.</span></li>';
     });
 }
