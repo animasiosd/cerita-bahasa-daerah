@@ -65,6 +65,18 @@
                 <iframe id="videoPlayer" src="" allowfullscreen title="Pemutar Video YouTube"></iframe>
             </div>
 
+            <div class="text-center my-4">
+                <strong>Bagikan cerita ini:</strong>
+                <div class="mt-2">
+                    <a id="share-wa" class="btn btn-success me-2" href="#" target="_blank" rel="noopener noreferrer">
+                        Bagikan ke WhatsApp
+                    </a>
+                    <a id="share-fb" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer">
+                        Bagikan ke Facebook
+                    </a>
+                </div>
+            </div>
+
             <div class="card mt-4">
                 <div class="card-header h5">Pertanyaan Diskusi</div>
                 <div class="card-body">
@@ -144,6 +156,35 @@
       if (mainContent) mainContent.style.display = "none";
     }
   });
+</script>
+
+<script>
+    // Fungsi untuk mengatur tombol bagikan
+    function setupShareButtons() {
+        const pageUrl = window.location.href;
+        const shareText = "Ayo lihat cerita menarik dalam bahasa daerah ini: " + document.title;
+
+        // Link untuk WhatsApp
+        const whatsappLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + pageUrl)}`;
+        
+        // Link untuk Facebook
+        const facebookLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
+
+        // Ambil elemen tombol
+        const shareWaBtn = document.getElementById('share-wa');
+        const shareFbBtn = document.getElementById('share-fb');
+
+        // Atur link pada tombol
+        if (shareWaBtn) {
+            shareWaBtn.href = whatsappLink;
+        }
+        if (shareFbBtn) {
+            shareFbBtn.href = facebookLink;
+        }
+    }
+
+    // Panggil fungsi setelah halaman dimuat
+    document.addEventListener('DOMContentLoaded', setupShareButtons);
 </script>
 
 </body>
