@@ -2,7 +2,8 @@
 
 const VIDEO_API_URL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
 
-document.addEventListener("DOMContentLoaded", function () {
+// Fungsi ini akan dipanggil dari main.js setelah navbar & komentar siap
+function initPage() {
     const videoSelect = document.getElementById('videoSelect');
     const videoPlayer = document.getElementById('videoPlayer');
     const videoTitle = document.getElementById('videoTitle');
@@ -66,4 +67,4 @@ document.addEventListener("DOMContentLoaded", function () {
             console.error("❌ Gagal memuat video:", err);
             videoTitle.textContent = "Gagal memuat video.";
         });
-});
+}

@@ -1,8 +1,6 @@
-// File: js/main.js
-
 const BAHASA_API_URL = "https://script.google.com/macros/s/AKfycbwCT57fhlebRz7nKvvtmPxjKrR54-mQU3syiuRqspHX9nRubS-gg7RYkHybOlIwxdhyTg/exec";
 
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener("DOMContentLoaded", function () {
   const navbarPlaceholder = document.getElementById("navbar-placeholder");
 
   if (navbarPlaceholder) {
@@ -13,17 +11,29 @@ document.addEventListener("DOMContentLoaded", function() {
       })
       .then(html => {
         navbarPlaceholder.innerHTML = html;
-        
-        // Tunggu satu frame render agar DOM siap, lalu jalankan
+
         requestAnimationFrame(() => {
           console.log("Cek elemen #languagesDropdown:", document.getElementById("languagesDropdown"));
-        // 🧠 Ini sangat penting: pastikan loadDynamicLanguages() dipanggil setelah navbar dimasukkan ke DOM
           highlightActiveMenu();
           loadDynamicLanguages();
+
+          // Tunggu sampai fungsi dari video.js & comments.js tersedia
+          const waitUntilReady = () => {
+            if (
+              typeof firebase !== 'undefined' &&
+              typeof initPage === 'function' &&
+              typeof loadComments === 'function'
+            ) {
+              initPage(); // dari video.js
+            } else {
+              requestAnimationFrame(waitUntilReady);
+            }
+          };
+          waitUntilReady();
         });
       })
       .catch(err => {
-        console.error("Error memuat navbar:", err);
+        console.error("❌ Error memuat navbar:", err);
       });
   }
 });
@@ -40,14 +50,14 @@ function highlightActiveMenu() {
 function loadDynamicLanguages() {
   const dropdown = document.getElementById('languagesDropdown');
   if (!dropdown) {
-    console.warn("Element #languagesDropdown tidak ditemukan");
+    console.warn("⚠️ Element #languagesDropdown tidak ditemukan");
     return;
   }
 
   fetch(BAHASA_API_URL)
     .then(response => response.json())
     .then(data => {
-      console.log("🧩 Data Bahasa dari API:", data); // <=== Tambahkan ini
+      console.log("🧩 Data Bahasa dari API:", data);
 
       const bahasaList = data.headers;
       if (!Array.isArray(bahasaList) || bahasaList.length === 0) {
