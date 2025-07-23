@@ -16,13 +16,29 @@ function initPage() {
 
     // ✅ Gunakan 'languageDisplay' jika ada, jika tidak gunakan 'language' sebagai cadangan
     const pageTitle = languageDisplay ? languageDisplay : language.charAt(0).toUpperCase() + language.slice(1);
+    
+    // Perbarui judul tab
     document.title = `Cerita Bahasa ${pageTitle}`;
 
-    // --- TAMBAHKAN 3 BARIS DI BAWAH INI ---
-    const langPlaceholder = document.getElementById('language-name-placeholder');
-    if (langPlaceholder) {
-        langPlaceholder.textContent = pageTitle;
+    // ▼▼▼ TAMBAHKAN BLOK KODE INI ▼▼▼
+    // Perbarui Meta Tag Open Graph (OG) untuk media sosial
+    const ogTitle = document.getElementById('og-title');
+    const ogDesc = document.getElementById('og-description');
+    const ogUrl = document.getElementById('og-url');
+
+    if (ogTitle) {
+        ogTitle.setAttribute('content', `Cerita Bahasa ${pageTitle}`);
     }
+    if (ogDesc) {
+        ogDesc.setAttribute('content', `Dengarkan dan tonton cerita menarik dalam Bahasa ${pageTitle}.`);
+    }
+    if (ogUrl) {
+        ogUrl.setAttribute('content', window.location.href);
+    }
+    // ▲▲▲ BLOK KODE DI ATAS ▲▲▲
+
+    const langPlaceholder = document.getElementById('language-name-placeholder');
+    // ... (sisa kode tidak perlu diubah)
     // ------------------------------------
 
     fetch(`${VIDEO_API_URL}?lang=${encodeURIComponent(language)}`)
