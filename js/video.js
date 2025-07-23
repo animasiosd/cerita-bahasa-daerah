@@ -17,7 +17,13 @@ function initPage() {
     // ✅ Gunakan 'languageDisplay' jika ada, jika tidak gunakan 'language' sebagai cadangan
     const pageTitle = languageDisplay ? languageDisplay : language.charAt(0).toUpperCase() + language.slice(1);
     document.title = `Cerita Bahasa ${pageTitle}`;
-    // Baris duplikat yang salah sudah dihapus
+
+    // --- TAMBAHKAN 3 BARIS DI BAWAH INI ---
+    const langPlaceholder = document.getElementById('language-name-placeholder');
+    if (langPlaceholder) {
+        langPlaceholder.textContent = pageTitle;
+    }
+    // ------------------------------------
 
     fetch(`${VIDEO_API_URL}?lang=${encodeURIComponent(language)}`)
         .then(res => res.json())
