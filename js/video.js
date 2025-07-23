@@ -14,13 +14,11 @@ function initPage() {
         return;
     }
 
-    // ✅ Gunakan 'languageDisplay' jika ada, jika tidak gunakan 'language' sebagai cadangan
     const pageTitle = languageDisplay ? languageDisplay : language.charAt(0).toUpperCase() + language.slice(1);
     
     // Perbarui judul tab
     document.title = `Cerita Bahasa ${pageTitle}`;
 
-    // ▼▼▼ TAMBAHKAN BLOK KODE INI ▼▼▼
     // Perbarui Meta Tag Open Graph (OG) untuk media sosial
     const ogTitle = document.getElementById('og-title');
     const ogDesc = document.getElementById('og-description');
@@ -35,11 +33,12 @@ function initPage() {
     if (ogUrl) {
         ogUrl.setAttribute('content', window.location.href);
     }
-    // ▲▲▲ BLOK KODE DI ATAS ▲▲▲
 
+    // ✅ Perbarui placeholder di pertanyaan diskusi
     const langPlaceholder = document.getElementById('language-name-placeholder');
-    // ... (sisa kode tidak perlu diubah)
-    // ------------------------------------
+    if (langPlaceholder) {
+        langPlaceholder.textContent = pageTitle;
+    }
 
     fetch(`${VIDEO_API_URL}?lang=${encodeURIComponent(language)}`)
         .then(res => res.json())
