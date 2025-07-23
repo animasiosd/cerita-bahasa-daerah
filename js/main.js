@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         // Tunggu satu frame render agar DOM siap, lalu jalankan
         requestAnimationFrame(() => {
+          console.log("Cek elemen #languagesDropdown:", document.getElementById("languagesDropdown"));
         // 🧠 Ini sangat penting: pastikan loadDynamicLanguages() dipanggil setelah navbar dimasukkan ke DOM
           highlightActiveMenu();
           loadDynamicLanguages();
@@ -71,5 +72,3 @@ function loadDynamicLanguages() {
       dropdown.innerHTML = '<li><span class="dropdown-item text-danger">Gagal memuat bahasa.</span></li>';
     });
 }
-
-console.log("Cek elemen #languagesDropdown:", document.getElementById("languagesDropdown"));
