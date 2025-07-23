@@ -47,42 +47,46 @@ function highlightActiveMenu() {
   });
 }
 
+// File: js/main.js
+
 function loadDynamicLanguages() {
-  const dropdown = document.getElementById('languagesDropdown');
-  if (!dropdown) {
-    console.warn("⚠️ Element #languagesDropdown tidak ditemukan");
-    return;
-  }
+  // Tunggu sebentar untuk memastikan navbar.html sudah sepenuhnya dimuat
+  setTimeout(() => {
+    const dropdown = document.getElementById('languagesDropdown');
+    if (!dropdown) {
+      console.error("❌ Element #languagesDropdown masih belum ditemukan. Cek kembali navbar.html.");
+      return;
+    }
 
-  fetch(BAHASA_API_URL)
-    .then(response => response.json())
-    .then(data => {
-      console.log("🧩 Data Bahasa dari API:", data);
+    fetch(BAHASA_API_URL)
+      .then(response => response.json())
+      .then(data => {
+        const bahasaList = data;
+        if (!Array.isArray(bahasaList) || bahasaList.length === 0) {
+          dropdown.innerHTML = '<li><span class="dropdown-item text-muted">Daftar bahasa kosong.</span></li>';
+          return;
+        }
 
-       // ✅ SEKARANG 'data' adalah array of objects, bukan data.headers
-      const bahasaList = data; 
-      if (!Array.isArray(bahasaList) || bahasaList.length === 0) {
-        dropdown.innerHTML = '<li><span class="dropdown-item text-muted">Daftar bahasa kosong.</span></li>';
-        return;
-      }
+        dropdown.innerHTML = ''; // Kosongkan placeholder
 
-      dropdown.innerHTML = '';
+        bahasaList.forEach(bahasa => {
+          if (!bahasa.value || !bahasa.display) return; // Lewati data yang tidak lengkap
 
-       // ✅ Sesuaikan perulangan untuk menggunakan properti .value dan .display
-      bahasaList.forEach(bahasa => {
-        const listItem = document.createElement('li');
-        const link = document.createElement('a');
-        link.className = 'dropdown-item';
-        // Gunakan 'bahasa.value' untuk URL
-        link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}`;
-        // Gunakan 'bahasa.display' untuk teks yang tampil
-        link.textContent = `Bahasa ${bahasa.display}`; 
-        listItem.appendChild(link);
-        dropdown.appendChild(listItem);
+          const listItem = document.createElement('li');
+          const link = document.createElement('a');
+          link.className = 'dropdown-item';
+          
+          // UBAH BAGIAN INI: Tambahkan 'display' sebagai parameter URL baru
+          link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}&display=${encodeURIComponent(bahasa.display)}`;
+          
+          link.textContent = `Bahasa ${bahasa.display}`; // Tampilkan nama yang rapi
+          listItem.appendChild(link);
+          dropdown.appendChild(listItem);
+        });
+      })
+      .catch((err) => {
+        console.error("❌ Gagal memuat bahasa:", err);
+        dropdown.innerHTML = '<li><span class="dropdown-item text-danger">Gagal memuat bahasa.</span></li>';
       });
-    })
-    .catch((err) => {
-      console.error("❌ Gagal memuat bahasa:", err);
-      dropdown.innerHTML = '<li><span class="dropdown-item text-danger">Gagal memuat bahasa.</span></li>';
-    });
+  }, 100); // Penundaan 100ms untuk stabilitas
 }

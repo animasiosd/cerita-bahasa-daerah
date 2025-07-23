@@ -1,23 +1,23 @@
-// File: js/video.js
-
 const VIDEO_API_URL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
 
-// Fungsi ini akan dipanggil dari main.js setelah navbar & komentar siap
 function initPage() {
     const videoSelect = document.getElementById('videoSelect');
     const videoPlayer = document.getElementById('videoPlayer');
     const videoTitle = document.getElementById('videoTitle');
     const urlParams = new URLSearchParams(window.location.search);
 
-    const language = urlParams.get('bahasa'); // ✅ Sesuai parameter URL
+    const language = urlParams.get('bahasa');
+    const languageDisplay = urlParams.get('display'); 
+
     if (!language) {
         videoTitle.textContent = "Parameter ?bahasa= tidak ditemukan.";
         return;
     }
 
-    // Perintah ini akan mengganti judul di tab browser.
-    document.title = `Cerita Bahasa ${language.charAt(0).toUpperCase() + language.slice(1)}`;
-    // ----------------------------------------------------
+    // ✅ Gunakan 'languageDisplay' jika ada, jika tidak gunakan 'language' sebagai cadangan
+    const pageTitle = languageDisplay ? languageDisplay : language.charAt(0).toUpperCase() + language.slice(1);
+    document.title = `Cerita Bahasa ${pageTitle}`;
+    // Baris duplikat yang salah sudah dihapus
 
     fetch(`${VIDEO_API_URL}?lang=${encodeURIComponent(language)}`)
         .then(res => res.json())
@@ -27,7 +27,6 @@ function initPage() {
                 return;
             }
 
-            // Simpan info global untuk komentar.js
             window.currentLanguagePage = language;
             window.currentVideoId = null;
 
@@ -56,10 +55,10 @@ function initPage() {
                 }
 
                 const selected = data.find(v => v.videoId === videoId);
+                // ✅ Format URL video sudah diperbaiki
                 videoPlayer.src = `https://www.youtube.com/embed/${videoId}`;
                 videoTitle.textContent = selected ? selected.title : "Video";
 
-                // Simpan untuk komentar
                 window.currentVideoId = videoId;
 
                 if (typeof loadComments === 'function') {
