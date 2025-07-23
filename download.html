@@ -22,38 +22,20 @@
     }
   </style>
 
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SFLNYPDQ04"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-SFLNYPDQ04');
-  </script>
-
-  <!-- Firebase -->
+  <!-- Firebase & Analytics -->
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
-  <script>
-    // config ini sesuai Firebase project Anda
-    const firebaseConfig = {
-      apiKey: "AIzaSyCAOg2aMzFVCQVx07t85lFpTXv3c2ugL1E",
-      authDomain: "animasiosd-github.firebaseapp.com",
-      projectId: "animasiosd-github",
-      storageBucket: "animasiosd-github.firebasestorage.app",
-      messagingSenderId: "424179260770",
-      appId: "1:424179260770:web:2f4a04a8c9643027bca03b",
-      measurementId: "G-SFLNYPDQ04"
-    };
-    const app = firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-  </script>
+  <script src="js/auth.js"></script>
+
 </head>
 
 <body>
+
+  <!-- Navigasi Halaman -->
   <div class="nav-group" style="margin-bottom: 2rem;">
+    <p style="text-align:center; font-weight:bold;">Pilih Halaman:</p>
     <select id="languageNav">
-      <option value="">-- Menu --</option>
+      <option value="">-- Navigasi Halaman --</option>
       <option value="index.html">🏠 Beranda</option>
       <option value="download.html">⬇️ Halaman Download</option>
       <option value="duano">Bahasa Duano</option>
@@ -91,7 +73,9 @@
         <th class="sortable" data-key="title">Title</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody>
+      <tr><td colspan="3" style="text-align:center; color:#555;">Memuat data...</td></tr>
+    </tbody>
   </table>
 
   <script>
@@ -103,12 +87,21 @@
 
     async function fetchData() {
       try {
+        document.querySelectorAll('.filter-group select').forEach(select => select.disabled = true);
+
+        document.querySelector('#downloadTable tbody').innerHTML =
+          '<tr><td colspan="3" style="text-align:center; color:#555;">Memuat data...</td></tr>';
+
         const res = await fetch(API_URL);
         const json = await res.json();
         if (!Array.isArray(json)) throw new Error("Format data tidak sesuai");
+
         fullData = json;
         populateFilters(json);
         renderTable(json);
+
+        document.querySelectorAll('.filter-group select').forEach(select => select.disabled = false);
+
       } catch (err) {
         alert('Gagal memuat data. Pastikan API Google Apps Script sudah dipublikasikan sebagai "Anyone".');
         console.error(err);
@@ -150,14 +143,12 @@
         sortedData.sort((a, b) => {
           let valA = a[sortKey];
           let valB = b[sortKey];
-
           const numA = parseFloat(valA);
           const numB = parseFloat(valB);
           if (!isNaN(numA) && !isNaN(numB)) {
             valA = numA;
             valB = numB;
           }
-
           if (valA < valB) return sortAsc ? -1 : 1;
           if (valA > valB) return sortAsc ? 1 : -1;
           return 0;
@@ -172,7 +163,6 @@
           <td>${row.title}</td>
         `;
         tr.onclick = () => {
-          // Kirim event ke GA4 saat download
           gtag('event', 'download_video', {
             bahasa: row.bahasa,
             urutan: row.urutan,
@@ -235,16 +225,13 @@
       }
     });
 
-    // Firebase Login Status & Analytics GA4 Identity
     auth.onAuthStateChanged(user => {
       if (user) {
         currentUser = user;
-
         const welcomeMessage = document.getElementById("welcomeMessage");
         if (welcomeMessage && user.displayName) {
           welcomeMessage.textContent = `Selamat datang ${user.displayName} di Cerita Bahasa Daerah!`;
         }
-
         gtag('set', {
           user_id: user.uid,
           user_name: user.displayName,

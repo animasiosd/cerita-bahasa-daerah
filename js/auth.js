@@ -1,6 +1,6 @@
-// File: js/auth.js (Revisi Final)
+// File: js/auth.js
 
-// 1. KONFIGURASI DAN INISIALISASI FIREBASE (tetap sama)
+// 1️⃣ KONFIGURASI DAN INISIALISASI FIREBASE
 const firebaseConfig = {
   apiKey: "AIzaSyCAOg2aMzFVCQVx07t85lFpTXv3c2ugL1E",
   authDomain: "animasiosd-github.firebaseapp.com",
@@ -12,47 +12,44 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// 2. FUNGSI LOGOUT (tetap sama)
+
+// 2️⃣ FUNGSI LOGOUT GLOBAL
 function logout() {
   auth.signOut();
 }
 
-// 3. LOGIKA UTAMA (diperbarui)
+
+// 3️⃣ PANTAU STATUS LOGIN DI SETIAP HALAMAN
 document.addEventListener('DOMContentLoaded', () => {
-  // Ambil semua elemen yang relevan
   const pageLoader = document.getElementById("page-loader");
   const loginContainer = document.getElementById("loginContainer");
   const mainContent = document.getElementById("mainContent");
-  const loginBtn = document.getElementById("loginBtn");
 
-  // Tambahkan event ke tombol login jika ada
+  const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) {
     loginBtn.onclick = () => {
       const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(error => console.error("Login Gagal:", error));
+      auth.signInWithPopup(provider).catch(error => {
+        console.error("Login Gagal:", error);
+        alert("Login gagal. Silakan coba lagi.");
+      });
     };
   }
 
-  // Pantau status login user
   auth.onAuthStateChanged(user => {
-    // Sembunyikan loader terlebih dahulu
-    if(pageLoader) pageLoader.classList.add('d-none');
+    if (pageLoader) pageLoader.classList.add('d-none');
 
     if (user) {
-      // Jika user login, tampilkan konten utama
-      if(mainContent) mainContent.classList.remove('d-none');
-      if(loginContainer) loginContainer.classList.add('d-none'); // Pastikan login form tersembunyi
-      
-      // Atur pesan selamat datang jika ada
+      if (mainContent) mainContent.classList.remove('d-none');
+      if (loginContainer) loginContainer.classList.add('d-none');
+
       const welcomeMessage = document.getElementById("welcomeMessage");
       if (welcomeMessage && user.displayName) {
         welcomeMessage.textContent = `Selamat datang, ${user.displayName}!`;
       }
-      
     } else {
-      // Jika user TIDAK login, tampilkan kontainer login
-      if(loginContainer) loginContainer.classList.remove('d-none');
-      if(mainContent) mainContent.classList.add('d-none'); // Pastikan konten utama tersembunyi
+      if (loginContainer) loginContainer.classList.remove('d-none');
+      if (mainContent) mainContent.classList.add('d-none');
     }
   });
 });

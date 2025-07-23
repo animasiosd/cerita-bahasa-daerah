@@ -1,44 +1,34 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
   <div class="container">
-    <a class="navbar-brand" href="./">🏠 Cerita Bahasa Daerah</a>
+    <a class="navbar-brand" href="./" data-page="index.html">🏠 Cerita Bahasa Daerah</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
+
         <li class="nav-item">
-          <a class="nav-link" href="./">Beranda</a>
+          <a class="nav-link" href="./" data-page="index.html">Beranda</a>
         </li>
+
         <li class="nav-item">
-          <a class="nav-link" href="download.html">Download</a>
+          <a class="nav-link" href="download.html" data-page="download.html">Download</a>
         </li>
-        
+
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLanguages" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Pilih Bahasa
           </a>
-          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownLanguages">
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=duano">Bahasa Duano</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=haloban">Bahasa Haloban</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=kaimbulawa">Bahasa Kaimbulawa</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=kaili-unde">Bahasa Kaili Unde</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=kamaru">Bahasa Kamaru</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=kioko">Bahasa Kioko</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=kumbewaha">Bahasa Kumbewaha</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=lasalimu">Bahasa Lasalimu</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=malimpung">Bahasa Malimpung</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=mandar">Bahasa Mandar</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=pancana">Bahasa Pancana</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=sarudu">Bahasa Sarudu</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=sikule">Bahasa Sikule</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=suwawa">Bahasa Suwawa</a></li>
-            <li><a class="dropdown-item" href="halaman-bahasa.html?bahasa=toli-toli">Bahasa Toli-Toli</a></li>
+          <ul class="dropdown-menu dropdown-menu-end" id="languagesDropdown">
+            <!-- Daftar bahasa akan diisi otomatis via main.js -->
+            <li><span class="dropdown-item text-muted">Memuat daftar bahasa...</span></li>
           </ul>
         </li>
 
         <li class="nav-item">
           <a class="nav-link" href="#" onclick="logout()">Logout</a>
         </li>
+
       </ul>
     </div>
   </div>

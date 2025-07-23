@@ -22,10 +22,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         #page-loader.hidden { opacity: 0; }
         #loader-text { color: #555; margin-top: 20px; font-size: 1.2em; }
-        .progress-container {
-            width: 80%; max-width: 400px;
-            background-color: #e0e0e0; border-radius: 25px; overflow: hidden;
-        }
+        .progress-container { width: 80%; max-width: 400px; background-color: #e0e0e0; border-radius: 25px; overflow: hidden; }
         #progress-bar {
             width: 0%; height: 20px; background-color: #0d6efd;
             border-radius: 25px; transition: width 0.1s linear;
@@ -35,6 +32,8 @@
 </head>
 
 <body>
+
+    <div id="navbar-placeholder"></div>
 
     <div id="page-loader">
         <div class="progress-container">
@@ -52,67 +51,82 @@
     </div>
 
     <div id="mainContent">
-        <div id="navbar-placeholder"></div>
         <main class="container my-4">
-            <div class="row justify-content-center">
-                <div class="col-lg-10 col-xl-8">
+            <h2 id="videoTitle" class="text-center mb-3">
+                <div class="google-spinner"></div>
+            </h2>
 
-                    <h2 id="videoTitle" class="text-center mb-3">
-                        <div class="google-spinner"></div>
-                    </h2>
+            <div class="input-group mb-3">
+                <label class="input-group-text" for="videoSelect">Pilih Video:</label>
+                <select class="form-select" id="videoSelect"></select>
+            </div>
 
-                    <div class="input-group mb-3">
-                        <label class="input-group-text" for="videoSelect">Pilih Video:</label>
-                        <select class="form-select" id="videoSelect"></select>
-                    </div>
+            <div class="ratio ratio-16x9 shadow-sm rounded overflow-hidden">
+                <iframe id="videoPlayer" src="" allowfullscreen title="Pemutar Video YouTube"></iframe>
+            </div>
 
-                    <div class="ratio ratio-16x9 shadow-sm rounded overflow-hidden">
-                        <iframe id="videoPlayer" src="" allowfullscreen title="Pemutar Video YouTube"></iframe>
-                    </div>
+            <div class="card mt-4">
+                <div class="card-header h5">Pertanyaan Diskusi</div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">1. Menurut Anda, cerita ini menceritakan tentang apa?</li>
+                        <li class="list-group-item">2. Apa yang paling menarik pada cerita ini?</li>
+                        <li class="list-group-item">3. Apa yang Anda pelajari dari cerita ini?</li>
+                        <li class="list-group-item">4. Bagaimana menerapkannya?</li>
+                        <li class="list-group-item">5. Apakah bahasa cerita mudah dipahami?</li>
+                        <li class="list-group-item">6. Harapan Anda terkait pelestarian bahasa <strong id="language-name-placeholder">ini</strong>?</li>
+                    </ul>
+                </div>
+            </div>
 
-                    <div class="card mt-4">
-                        <div class="card-header h5">Pertanyaan Diskusi</div>
-                        <div class="card-body">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item">1. Menurut Anda, cerita ini menceritakan tentang apa?</li>
-                                <li class="list-group-item">2. Apa yang paling menarik pada cerita ini?</li>
-                                <li class="list-group-item">3. Apa yang Anda pelajari dari cerita ini?</li>
-                                <li class="list-group-item">4. Bagaimana menerapkannya?</li>
-                                <li class="list-group-item">5. Apakah bahasa cerita mudah dipahami?</li>
-                                <li class="list-group-item">6. Harapan Anda terkait pelestarian bahasa <strong id="language-name-placeholder">ini</strong>?</li>
-                            </ul>
+            <div id="comment-feature" class="mt-5">
+                <h3 class="mb-3">Komentar</h3>
+                <form id="comment-form" class="mb-4">
+                    <div class="d-flex align-items-start">
+                        <div id="user-photo-container" class="me-3"></div>
+                        <div class="flex-grow-1">
+                            <textarea id="comment-input" class="form-control" rows="2" placeholder="Tulis komentar..." required></textarea>
+                            <div class="text-end mt-2">
+                                <button type="submit" class="btn btn-primary">Kirim</button>
+                            </div>
                         </div>
                     </div>
-
-                    <div id="comment-feature" class="mt-5">
-                        <h3 class="mb-3">Komentar</h3>
-                        <form id="comment-form" class="mb-4">
-                            <div class="d-flex align-items-start">
-                                <div id="user-photo-container" class="me-3"></div>
-                                <div class="flex-grow-1">
-                                    <textarea id="comment-input" class="form-control" rows="2" placeholder="Tulis komentar..." required></textarea>
-                                    <div class="text-end mt-2">
-                                        <button type="submit" class="btn btn-primary">Kirim</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                        <div id="comment-section"></div>
-                    </div>
-
-                </div>
+                </form>
+                <div id="comment-section"></div>
             </div>
         </main>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
     <script src="js/comments.js"></script>
     <script src="js/video.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const progressBar = document.getElementById('progress-bar');
+            const loaderText = document.getElementById('loader-text');
+            const pageLoader = document.getElementById('page-loader');
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress++;
+                progressBar.style.width = progress + '%';
+                loaderText.textContent = 'Memuat... ' + progress + '%';
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        pageLoader.classList.add('hidden');
+                        setTimeout(() => {
+                            pageLoader.style.display = 'none';
+                        }, 750);
+                    }, 500);
+                }
+            }, 10);
+        });
+    </script>
 
 </body>
 </html>

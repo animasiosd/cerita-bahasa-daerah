@@ -1,14 +1,16 @@
-// Konstanta URL
+// File: js/comments.js
+
+// Konstanta URL komentar (Google Apps Script Anda)
 const WEB_APP_URL_COMMENTS = "https://script.google.com/macros/s/AKfycbwlCVUzCu9GEdi2aCZnzj-HYFXJlNX25sBEBDvivqGg2kyJrpfQZ6Jr31cknT_fcGu5_g/exec";
 
-// Variabel status
-let currentVideoId = null;
-let currentLanguagePage = null;
+// Variabel status (harus global agar diisi dari video.js)
+var currentVideoId = null;
+var currentLanguagePage = null;
 
 // Event form komentar
 document.getElementById('comment-form').addEventListener('submit', handleCommentSubmit);
 
-// Delegasi klik di area komentar
+// Delegasi klik di area komentar (edit, hapus, like)
 document.getElementById('comment-section').addEventListener('click', function(event) {
     if (event.target.classList.contains('edit-btn')) {
         handleEditComment(event.target.dataset.commentId, event.target.dataset.commentText);
@@ -21,10 +23,16 @@ document.getElementById('comment-section').addEventListener('click', function(ev
     }
 });
 
-// Muat komentar
+// Fungsi utama: Memuat komentar berdasarkan videoId
 function loadComments(videoId) {
     const section = document.getElementById('comment-section');
     const user = auth.currentUser;
+
+    if (!videoId) {
+        section.innerHTML = '<p class="text-muted">Pilih video terlebih dahulu untuk melihat komentar.</p>';
+        return;
+    }
+
     section.innerHTML = `<div class="text-center py-5"><div class="google-spinner"></div></div>`;
 
     auth.currentUser.getIdToken(true).then(token => {
@@ -67,13 +75,15 @@ function loadComments(videoId) {
     });
 }
 
-// Kirim komentar
+// Fungsi mengirim komentar baru
 function handleCommentSubmit(event) {
     event.preventDefault();
     const input = document.getElementById('comment-input');
     const text = input.value.trim();
     const user = auth.currentUser;
+
     if (!text || !user) return alert("Anda harus login untuk berkomentar!");
+    if (!currentVideoId) return alert("Pilih video terlebih dahulu.");
 
     auth.currentUser.getIdToken(true).then(token => {
         fetch(WEB_APP_URL_COMMENTS, {
@@ -91,7 +101,7 @@ function handleCommentSubmit(event) {
         }).then(res => res.json()).then(result => {
             if (result.status === "success") {
                 input.value = '';
-                loadComments(currentVideoId);
+                loadComments(currentVideoId);  // Reload komentar
             } else {
                 alert('Gagal mengirim komentar.');
             }
@@ -99,7 +109,7 @@ function handleCommentSubmit(event) {
     });
 }
 
-// Edit komentar
+// Fungsi edit komentar (tanpa perubahan dari sebelumnya)
 function handleEditComment(commentId, currentText) {
     const commentTextEl = document.querySelector(`.comment-text[data-comment-id="${commentId}"]`);
     const editControlsEl = document.querySelector(`.edit-controls[data-comment-id="${commentId}"]`);
@@ -141,7 +151,7 @@ function handleEditComment(commentId, currentText) {
     editControlsEl.classList.remove('d-none');
 }
 
-// Hapus komentar
+// Fungsi hapus komentar (tanpa perubahan)
 function handleDeleteComment(commentId) {
     if (!confirm("Yakin ingin menghapus komentar ini?")) return;
 
@@ -164,7 +174,7 @@ function handleDeleteComment(commentId) {
     });
 }
 
-// Like komentar
+// Fungsi like komentar (tanpa perubahan)
 function handleLikeClick(buttonElement) {
     const user = auth.currentUser;
     if (!user) return alert("Login terlebih dahulu untuk menyukai komentar.");

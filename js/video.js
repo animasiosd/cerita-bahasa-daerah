@@ -1,4 +1,4 @@
-// File: js/halaman-bahasa.js
+// File: js/video.js
 
 const API_URL = "https://script.google.com/macros/s/AKfycbwCT57fhlebRz7nKvvtmPxjKrR54-mQU3syiuRqspHX9nRubS-gg7RYkHybOlIwxdhyTg/exec";
 
@@ -7,14 +7,15 @@ document.addEventListener("DOMContentLoaded", function () {
     const videoPlayer = document.getElementById('videoPlayer');
     const videoTitle = document.getElementById('videoTitle');
     const urlParams = new URLSearchParams(window.location.search);
-    const language = urlParams.get('lang');  // ?lang=kaili, dll
+
+    const language = urlParams.get('bahasa');  // ✅ Sesuai parameter URL Anda
 
     if (!language) {
-        videoTitle.textContent = "Parameter ?lang= tidak ditemukan.";
+        videoTitle.textContent = "Parameter ?bahasa= tidak ditemukan.";
         return;
     }
 
-    fetch(`${API_URL}?lang=${encodeURIComponent(language)}`)
+    fetch(`${API_URL}?bahasa=${encodeURIComponent(language)}`)  // ✅ Ambil berdasarkan nama bahasa
         .then(res => res.json())
         .then(data => {
             if (!Array.isArray(data) || data.length === 0) {
@@ -24,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             videoTitle.textContent = "Silakan pilih video.";
 
-            videoSelect.innerHTML = ''; // bersihkan dropdown jika ada isi sebelumnya
+            videoSelect.innerHTML = '';  // Bersihkan dropdown
 
             const defaultOption = document.createElement('option');
             defaultOption.value = "";
@@ -45,9 +46,24 @@ document.addEventListener("DOMContentLoaded", function () {
                     videoTitle.textContent = "Silakan pilih video.";
                     return;
                 }
+
                 const selected = data.find(v => v.videoId === videoId);
+
                 videoPlayer.src = `https://www.youtube.com/embed/${videoId}`;
                 videoTitle.textContent = selected ? selected.title : "Video";
+
+                // Tambahan untuk sistem komentar
+                if (typeof currentVideoId !== 'undefined') {
+                    currentVideoId = videoId;    // ✅ Kirim video ID ke sistem komentar
+                }
+                if (typeof currentLanguagePage !== 'undefined') {
+                    currentLanguagePage = language;   // ✅ Kirim bahasa ke sistem komentar
+                }
+
+                // Jika ada fungsi loadComments, otomatis jalankan
+                if (typeof loadComments === 'function') {
+                    loadComments(videoId);   // ✅ Muat komentar untuk video ini
+                }
             });
 
         })
