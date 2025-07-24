@@ -43,11 +43,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   auth.onAuthStateChanged(user => {
+        // Ambil elemen dropdown bahasa dari navbar
+    const languageDropdown = document.querySelector('#navbarDropdownLanguages');
+
     if (pageLoader) pageLoader.classList.add('d-none');
 
     if (user) {
       if (mainContent) mainContent.classList.remove('d-none');
       if (loginContainer) loginContainer.classList.add('d-none');
+
+            // Tampilkan kembali tombol "Pilih Bahasa"
+      if (languageDropdown) {
+        languageDropdown.parentElement.style.display = 'block';
+      }
 
       const welcomeMessage = document.getElementById("welcomeMessage");
       if (welcomeMessage && user.displayName) {
@@ -56,6 +64,10 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       if (loginContainer) loginContainer.classList.remove('d-none');
       if (mainContent) mainContent.classList.add('d-none');
+            // Sembunyikan tombol "Pilih Bahasa"
+      if (languageDropdown) {
+        languageDropdown.parentElement.style.display = 'none';
+      }
     }
   });
 });
