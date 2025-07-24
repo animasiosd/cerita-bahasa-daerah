@@ -15,7 +15,13 @@ const auth = firebase.auth();
 
 // 2️⃣ FUNGSI LOGOUT GLOBAL
 function logout() {
-  auth.signOut();
+  auth.signOut().then(() => {
+    // Arahkan pengguna kembali ke halaman utama setelah logout berhasil
+    window.location.href = 'index.html';
+  }).catch((error) => {
+    // Menangani jika terjadi error saat logout
+    console.error('Logout Error:', error);
+  });
 }
 
 
