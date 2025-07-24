@@ -12,16 +12,16 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
-// ▼▼▼ BUAT FUNGSI BARU INI ▼▼▼
-function toggleLanguageButton(user) {
-    const languageDropdown = document.querySelector('#navbarDropdownLanguages');
-    if (languageDropdown) {
+// ▼▼▼ FUNGSI BARU UNTUK MENGATUR SELURUH NAVBAR ▼▼▼
+function toggleNavbarVisibility(user) {
+    const navbarPlaceholder = document.getElementById('navbar-placeholder');
+    if (navbarPlaceholder) {
         if (user) {
-            // Jika ada user, tampilkan tombol
-            languageDropdown.parentElement.style.display = 'block';
+            // Jika ada user, tampilkan navbar
+            navbarPlaceholder.style.display = 'block';
         } else {
-            // Jika tidak ada user, sembunyikan tombol
-            languageDropdown.parentElement.style.display = 'none';
+            // Jika tidak ada user, sembunyikan navbar
+            navbarPlaceholder.style.display = 'none';
         }
     }
 }
@@ -56,8 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   auth.onAuthStateChanged(user => {
-    // Panggil fungsi yang baru kita buat
-    toggleLanguageButton(user);
+    // Panggil fungsi visibilitas navbar
+    toggleNavbarVisibility(user);
 
     if (pageLoader) pageLoader.classList.add('d-none');
 
