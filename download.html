@@ -11,13 +11,16 @@
     <style>
         /* Menambahkan gaya untuk loading & login dari halaman lain */
         #page-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #fff; display: flex; justify-content: center; align-items: center; z-index: 9999; transition: opacity 0.75s ease-out; }
-        #page-loader.hidden { opacity: 0; }
+        #page-loader.hidden { opacity: 0; pointer-events: none; }
         #loginContainer, #mainContent { display: none; }
         
         /* Gaya khusus untuk tabel agar lebih modern */
         #downloadTable { font-size: 0.9rem; }
         #downloadTable tr:hover { background-color: #e9ecef; cursor: pointer; }
-        #downloadTable th { background-color: #f8f9fa; }
+        #downloadTable th { background-color: #f8f9fa; cursor: pointer; }
+        .sortable::after { content: " \2195"; color: #aaa; }
+        .asc::after { content: " \2191"; }
+        .desc::after { content: " \2193"; }
     </style>
 </head>
 
@@ -93,20 +96,119 @@
             }
         });
 
-        // Semua logika lama dari halaman download Anda (fetchData, renderTable, dll)
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyVZHGfb2xf-uPtKzqZ0bD4oIDttsBgF-n_aNXB0-h_Xy-oxYChmT-a4SYDV3MwiUpI/exec';
+        // Logika khusus untuk halaman download
+        const DOWNLOAD_API_URL = 'https://script.google.com/macros/s/AKfycbyVZHGfb2xf-uPtKzqZ0bD4oIDttsBgF-n_aNXB0-h_Xy-oxYChmT-a4SYDV3MwiUpI/exec';
         let fullData = [];
         let sortKey = '';
         let sortAsc = true;
 
-        async function fetchData() { /* ... kode fetchData Anda ... */ }
-        function populateFilters(data) { /* ... kode populateFilters Anda ... */ }
-        function populateSelect(id, items) { /* ... kode populateSelect Anda ... */ }
-        function renderTable(data) { /* ... kode renderTable Anda ... */ }
-        function applyFilters() { /* ... kode applyFilters Anda ... */ }
-        function handleSort(event) { /* ... kode handleSort Anda ... */ }
+        async function fetchData() {
+            try {
+                const tbody = document.querySelector('#downloadTable tbody');
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Memuat data...</td></tr>';
+                const res = await fetch(DOWNLOAD_API_URL);
+                if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+                const json = await res.json();
+                if (!Array.isArray(json)) throw new Error("Format data tidak sesuai");
+
+                fullData = json;
+                populateFilters(json);
+                renderTable(json);
+            } catch (err) {
+                alert('Gagal memuat data. Pastikan API Google Apps Script sudah dipublikasikan dengan benar.');
+                console.error(err);
+                const tbody = document.querySelector('#downloadTable tbody');
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Gagal memuat data.</td></tr>';
+            }
+        }
+
+        function populateFilters(data) {
+            const bahasaSet = new Set(data.map(item => item.bahasa));
+            const urutanSet = new Set(data.map(item => item.urutan));
+            const judulSet = new Set(data.map(item => item.title));
+
+            populateSelect('filterBahasa', [...bahasaSet].sort());
+            populateSelect('filterUrutan', [...urutanSet].sort((a, b) => a - b));
+            populateSelect('filterJudul', [...judulSet].sort());
+        }
+
+        function populateSelect(id, items) {
+            const select = document.getElementById(id);
+            // Kosongkan opsi lama kecuali yang pertama
+            select.length = 1; 
+            items.forEach(val => {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = val;
+                select.appendChild(opt);
+            });
+        }
+
+        function renderTable(data) {
+            const tbody = document.querySelector('#downloadTable tbody');
+            tbody.innerHTML = '';
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Tidak ada data yang cocok.</td></tr>';
+                return;
+            }
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${row.bahasa}</td><td>${row.urutan}</td><td>${row.title}</td>`;
+                tr.onclick = () => { window.open(row.link_download, '_blank'); };
+                tbody.appendChild(tr);
+            });
+        }
+
+        function applyFilters() {
+            const bahasa = document.getElementById('filterBahasa').value;
+            const urutan = document.getElementById('filterUrutan').value;
+            const judul = document.getElementById('filterJudul').value;
+
+            let filteredData = fullData.filter(item => {
+                return (!bahasa || item.bahasa === bahasa) &&
+                       (!urutan || item.urutan.toString() === urutan) &&
+                       (!judul || item.title === judul);
+            });
+
+            // Setelah filter, lakukan sorting
+            if (sortKey) {
+                filteredData.sort((a, b) => {
+                    let valA = a[sortKey];
+                    let valB = b[sortKey];
+                    const numA = parseFloat(valA);
+                    const numB = parseFloat(valB);
+                    if (!isNaN(numA) && !isNaN(numB)) {
+                        valA = numA; valB = numB;
+                    }
+                    if (valA < valB) return sortAsc ? -1 : 1;
+                    if (valA > valB) return sortAsc ? 1 : -1;
+                    return 0;
+                });
+            }
+            renderTable(filteredData);
+        }
+
+        function handleSort(event) {
+            const key = event.target.getAttribute('data-key');
+            if (!key) return;
+
+            if (sortKey === key) {
+                sortAsc = !sortAsc;
+            } else {
+                sortKey = key;
+                sortAsc = true;
+            }
+            
+            document.querySelectorAll('th.sortable').forEach(th => {
+                th.classList.remove('asc', 'desc');
+                if (th.getAttribute('data-key') === sortKey) {
+                    th.classList.add(sortAsc ? 'asc' : 'desc');
+                }
+            });
+            applyFilters();
+        }
         
-        // Memastikan event listener terpasang dengan benar
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.filter-group select').forEach(select => {
                 select.addEventListener('change', applyFilters);
@@ -116,7 +218,6 @@
             });
             fetchData();
         });
-  </script>
-
+    </script>
 </body>
 </html>
