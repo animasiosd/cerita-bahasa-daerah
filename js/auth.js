@@ -12,6 +12,19 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 
+// ▼▼▼ BUAT FUNGSI BARU INI ▼▼▼
+function toggleLanguageButton(user) {
+    const languageDropdown = document.querySelector('#navbarDropdownLanguages');
+    if (languageDropdown) {
+        if (user) {
+            // Jika ada user, tampilkan tombol
+            languageDropdown.parentElement.style.display = 'block';
+        } else {
+            // Jika tidak ada user, sembunyikan tombol
+            languageDropdown.parentElement.style.display = 'none';
+        }
+    }
+}
 
 // 2️⃣ FUNGSI LOGOUT GLOBAL
 function logout() {
@@ -43,8 +56,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   auth.onAuthStateChanged(user => {
-        // Ambil elemen dropdown bahasa dari navbar
-    const languageDropdown = document.querySelector('#navbarDropdownLanguages');
+    // Panggil fungsi yang baru kita buat
+    toggleLanguageButton(user);
 
     if (pageLoader) pageLoader.classList.add('d-none');
 

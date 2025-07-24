@@ -12,6 +12,10 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(html => {
         navbarPlaceholder.innerHTML = html;
 
+                // ▼▼▼ TAMBAHKAN SATU BARIS INI ▼▼▼
+        // Periksa kembali visibilitas tombol setelah navbar dimuat
+        toggleLanguageButton(firebase.auth().currentUser);
+
         requestAnimationFrame(() => {
           console.log("Cek elemen #languagesDropdown:", document.getElementById("languagesDropdown"));
           highlightActiveMenu();
