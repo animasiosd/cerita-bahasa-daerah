@@ -55,6 +55,8 @@
                 <select id="filterBahasa" class="form-select w-auto"><option value="">Semua Bahasa</option></select>
                 <select id="filterUrutan" class="form-select w-auto"><option value="">Semua Urutan</option></select>
                 <select id="filterJudul" class="form-select w-auto"><option value="">Semua Judul</option></select>
+                <button id="resetFilters" class="btn btn-secondary">Reset Filter</button>
+                <button id="resetSort" class="btn btn-outline-secondary">Reset Urutan</button>
             </div>
 
             <div class="table-responsive">
@@ -209,6 +211,30 @@
             applyFilters();
         }
         
+        // ▼▼▼ TAMBAHKAN DUA FUNGSI BARU INI ▼▼▼
+        function resetAllFilters() {
+          // Kembalikan semua pilihan filter ke nilai default
+          document.getElementById('filterBahasa').value = '';
+          document.getElementById('filterUrutan').value = '';
+          document.getElementById('filterJudul').value = '';
+    
+        // Terapkan filter (yang sekarang kosong) untuk menampilkan semua data
+           applyFilters();
+      }
+        function resetTableSort() {
+          // Hapus kunci pengurutan
+          sortKey = '';
+          sortAsc = true;
+    
+          // Hapus kelas 'asc'/'desc' dari header tabel
+          document.querySelectorAll('th.sortable').forEach(th => {
+              th.classList.remove('asc', 'desc');
+          });
+    
+          // Terapkan filter lagi untuk mengembalikan urutan ke semula
+          applyFilters();
+      }
+
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.filter-group select').forEach(select => {
                 select.addEventListener('change', applyFilters);
@@ -216,6 +242,11 @@
             document.querySelectorAll('th.sortable').forEach(th => {
                 th.addEventListener('click', handleSort);
             });
+            
+            // ▼▼▼ TAMBAHKAN EVENT LISTENER UNTUK TOMBOL BARU ▼▼▼
+            document.getElementById('resetFilters').addEventListener('click', resetAllFilters);
+            document.getElementById('resetSort').addEventListener('click', resetTableSort);
+
             fetchData();
         });
     </script>
