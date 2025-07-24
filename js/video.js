@@ -44,7 +44,7 @@ function initPage() {
         .then(res => res.json())
         .then(data => {
             if (!Array.isArray(data) || data.length === 0) {
-                videoTitle.textContent = "Daftar video kosong.";
+                videoTitle.textContent = "Coming soon! Belum ada video untuk bahasa ini.";
                 return;
             }
 
