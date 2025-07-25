@@ -40,3 +40,13 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   background-color: #f4f7f6; /* Anda juga bisa memindahkan ini */
 }
+
+/* ===== Kustomisasi Ukuran Font Navbar ===== */
+/* Untuk tulisan judul/brand "🏠 Cerita Bahasa Daerah" */
+.navbar-brand {
+  font-size: 1.5rem; /* Ubah angka ini sesuai selera */
+}
+/* Untuk link menu seperti "Beranda", "Pilih Bahasa", "Download", dll. */
+.nav-link {
+  font-size: 1.5rem; /* Ubah angka ini sesuai selera */
+}
