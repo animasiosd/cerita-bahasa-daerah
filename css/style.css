@@ -35,3 +35,8 @@ body {
   border-top-color: #2575fc !important;
   border-left-color: #2575fc !important;
 }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background-color: #f4f7f6; /* Anda juga bisa memindahkan ini */
+}
