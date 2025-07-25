@@ -44,9 +44,9 @@ body {
 /* ===== Kustomisasi Ukuran Font Navbar ===== */
 /* Untuk tulisan judul/brand "🏠 Cerita Bahasa Daerah" */
 .navbar-brand {
-  font-size: 1.25rem; /* Ubah angka ini sesuai selera */
+  font-size: 1.15rem; /* Ubah angka ini sesuai selera */
 }
 /* Untuk link menu seperti "Beranda", "Pilih Bahasa", "Download", dll. */
 .nav-link {
-  font-size: 1.25rem; /* Ubah angka ini sesuai selera */
+  font-size: 1.15rem; /* Ubah angka ini sesuai selera */
 }
