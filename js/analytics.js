@@ -28,6 +28,22 @@ function getDeviceInfo() {
   return { os, browser, device };
 }
 
+// ⏰ Fungsi utilitas: Format timestamp sesuai zona waktu Jakarta (WIB)
+function getFormattedTimestampWIB() {
+  const now = new Date();
+  const options = {
+    timeZone: 'Asia/Jakarta',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  };
+  return new Intl.DateTimeFormat('id-ID', options).format(now).replace(",", "");
+}
+
 // Fungsi untuk kirim POST ke Google Apps Script
 function sendAnalyticsEvent(eventType, dataObject) {
   fetch(ANALYTICS_WEB_APP, {
@@ -81,7 +97,7 @@ function logPageView(user) {
   else if (path.includes("download")) tipe_halaman = "download_page";
 
   sendAnalyticsEvent("PAGE_VIEW", {
-    timestamp: new Date().toISOString(),
+    timestamp: getFormattedTimestampWIB(), // 🕓 Ganti ke format WIB
     user_id: user ? user.uid : "ANONYM",
     user_name: user ? user.displayName || "Tanpa Nama" : null,
     url_halaman: url,
