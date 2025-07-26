@@ -79,6 +79,7 @@ function logPageView(user) {
   sendAnalyticsEvent("PAGE_VIEW", {
     timestamp: new Date().toISOString(),
     user_id: user ? user.uid : "ANONYM",
+    user_name: user ? user.displayName || "Tanpa Nama" : null,
     url_halaman: url,
     tipe_halaman: tipe_halaman,
     nama_bahasa: nama_bahasa,
