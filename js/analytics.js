@@ -58,6 +58,10 @@ function logUserLogin(user) {
     first_login_country: null, // 🔕
     last_login_country: null   // 🔕
   });
+
+  //Debug sheet user_list
+  console.log("[DEBUG] Kirim login data:", data);  // 🧪 Tambahan debug
+  sendAnalyticsEvent("USER_LOGIN_ACTIVITY", data);
 }
 
 // Fungsi kirim page view
