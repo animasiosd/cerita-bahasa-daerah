@@ -92,12 +92,13 @@ function logPageView(user) {
 // Integrasi: pantau status auth Firebase
 document.addEventListener("DOMContentLoaded", () => {
   firebase.auth().onAuthStateChanged(user => {
-    // Kirim login analytics (sekali saja saat login)
-    if (user) {
-      logUserLogin(user);
+  if (user) {
+    setTimeout(() => {
+      logUserLogin(user);  // ⏱️ Delay agar data user stabil
       logPageView(user);
-    } else {
-      logPageView(null); // Untuk page view tanpa login
-    }
-  });
+    }, 500); // Delay 500ms untuk memastikan data user sudah siap
+  } else {
+    logPageView(null);
+  }
+});
 });
