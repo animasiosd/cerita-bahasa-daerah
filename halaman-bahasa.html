@@ -66,7 +66,7 @@
             </div>
 
             <div class="ratio ratio-16x9 shadow-sm rounded overflow-hidden">
-                <iframe id="videoPlayer" src="" allowfullscreen title="Pemutar Video YouTube"></iframe>
+                <div id="yt-player-placeholder"></div>
             </div>
 
             <div class="text-center my-4">
@@ -121,6 +121,39 @@
     <script src="js/analytics.js"></script>
     <script src="js/video.js"></script>
     <script src="js/comments.js"></script>
+    <script>
+    let ytPlayer;
+      function onYouTubeIframeAPIReady() {
+    // Fungsi akan dipanggil otomatis oleh API ketika siap
+    // Tapi kita belum muat video di sini — karena akan dikontrol oleh video.js
+    }
+    function loadVideoPlayer(videoId) {
+    if (ytPlayer) {
+      ytPlayer.loadVideoById(videoId);
+      return;
+    }
+
+    ytPlayer = new YT.Player('yt-player-placeholder', {
+      height: '390',
+      width: '640',
+      videoId: videoId,
+      playerVars: {
+        'autoplay': 0,
+        'controls': 1
+      },
+      events: {
+        'onReady': (event) => {
+          console.log("✅ YouTube Player siap");
+        },
+        'onStateChange': (event) => {
+          // ✨ Nanti akan kamu gunakan untuk pelacakan (play, pause, dll.)
+          console.log("🎬 Status player berubah:", event.data);
+        }
+      }
+    });
+  }
+  </script>
+    <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> <!-- 🧠 Tambahkan ini -->
 
     <script>

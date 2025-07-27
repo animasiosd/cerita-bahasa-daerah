@@ -1,13 +1,18 @@
+// File: js/video.js
+
 const VIDEO_API_URL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
+
+// ✅ Variabel global player (terhubung dengan YouTube IFrame API)
+window.currentLanguagePage = null;
+window.currentVideoId = null;
 
 function initPage() {
     const videoSelect = document.getElementById('videoSelect');
-    const videoPlayer = document.getElementById('videoPlayer');
     const videoTitle = document.getElementById('videoTitle');
     const urlParams = new URLSearchParams(window.location.search);
 
     const language = urlParams.get('bahasa');
-    const languageDisplay = urlParams.get('display'); 
+    const languageDisplay = urlParams.get('display');
 
     if (!language) {
         videoTitle.textContent = "Parameter ?bahasa= tidak ditemukan.";
@@ -15,31 +20,24 @@ function initPage() {
     }
 
     const pageTitle = languageDisplay ? languageDisplay : language.charAt(0).toUpperCase() + language.slice(1);
-    
-    // Perbarui judul tab
+
+    // Ubah judul tab
     document.title = `Cerita Bahasa ${pageTitle}`;
 
-    // Perbarui Meta Tag Open Graph (OG) untuk media sosial
+    // OG meta tag untuk share
     const ogTitle = document.getElementById('og-title');
     const ogDesc = document.getElementById('og-description');
     const ogUrl = document.getElementById('og-url');
 
-    if (ogTitle) {
-        ogTitle.setAttribute('content', `Cerita Bahasa ${pageTitle}`);
-    }
-    if (ogDesc) {
-        ogDesc.setAttribute('content', `Dengarkan dan tonton cerita menarik dalam Bahasa ${pageTitle}.`);
-    }
-    if (ogUrl) {
-        ogUrl.setAttribute('content', window.location.href);
-    }
+    if (ogTitle) ogTitle.setAttribute('content', `Cerita Bahasa ${pageTitle}`);
+    if (ogDesc) ogDesc.setAttribute('content', `Dengarkan dan tonton cerita menarik dalam Bahasa ${pageTitle}.`);
+    if (ogUrl) ogUrl.setAttribute('content', window.location.href);
 
-    // ✅ Perbarui placeholder di pertanyaan diskusi
+    // Update placeholder pertanyaan diskusi
     const langPlaceholder = document.getElementById('language-name-placeholder');
-    if (langPlaceholder) {
-        langPlaceholder.textContent = pageTitle;
-    }
+    if (langPlaceholder) langPlaceholder.textContent = pageTitle;
 
+    // Ambil data video dari Google Apps Script
     fetch(`${VIDEO_API_URL}?lang=${encodeURIComponent(language)}`)
         .then(res => res.json())
         .then(data => {
@@ -69,20 +67,25 @@ function initPage() {
             videoSelect.addEventListener('change', function () {
                 const videoId = this.value;
                 if (!videoId) {
-                    videoPlayer.src = '';
                     videoTitle.textContent = "Silakan pilih video.";
                     window.currentVideoId = null;
+
+                    // ⛔ Jangan hapus player, cukup kosongkan jika perlu
                     return;
                 }
 
                 const selected = data.find(v => v.videoId === videoId);
-                // ✅ Format URL video sudah diperbaiki
-                videoPlayer.src = `https://www.youtube.com/embed/${videoId}`;
                 videoTitle.textContent = selected ? selected.title : "Video";
 
                 window.currentVideoId = videoId;
 
-                if (typeof loadComments === 'function') {
+                // ✅ Gunakan fungsi dari halaman: loadVideoPlayer()
+                if (typeof loadVideoPlayer === "function") {
+                    loadVideoPlayer(videoId);
+                }
+
+                // ✅ Muat komentar jika fungsi tersedia
+                if (typeof loadComments === "function") {
                     loadComments(videoId);
                 }
             });
@@ -92,3 +95,6 @@ function initPage() {
             videoTitle.textContent = "Gagal memuat video.";
         });
 }
+
+// ✅ Jalankan initPage saat halaman dimuat
+document.addEventListener("DOMContentLoaded", initPage);
