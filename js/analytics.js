@@ -195,7 +195,7 @@ function startTrackingPlayerProgress(player) {
     const currentTime = player.getCurrentTime();
     const duration = player.getDuration();
     trackWatchProgress(currentTime, duration);
-  }, 5000);
+  }, 1000);
 }
 
 function attachPlayerEventListeners(player) {
