@@ -153,13 +153,14 @@ function trackWatchProgress(currentTime, duration) {
 
   // 🎯 Deteksi seek jika lompatan waktu terlalu besar dari sebelumnya
   const timeDelta = Math.abs(currentTime - lastTime);
+  const playerState = ytPlayer?.getPlayerState?.();
   if (
     !firstCheck &&
-    timeDelta > 2 &&
+    timeDelta >= 2 &&
     timeDelta < duration - 2 &&
-    typeof ytPlayer?.getPlayerState === "function" &&
-    ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING
+    (playerState !== YT.PlayerState.PLAYING || timeDelta > 5)
   ) {
+
     trackVideoInteraction("seek", {
       video_watch_percentage: percentage.toFixed(1)
     });
