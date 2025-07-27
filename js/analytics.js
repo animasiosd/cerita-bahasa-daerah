@@ -153,7 +153,13 @@ function trackWatchProgress(currentTime, duration) {
 
   // 🎯 Deteksi seek jika lompatan waktu terlalu besar dari sebelumnya
   const timeDelta = Math.abs(currentTime - lastTime);
-  if (!firstCheck && timeDelta > 2 && timeDelta < duration - 2) {
+  if (
+    !firstCheck &&
+    timeDelta > 2 &&
+    timeDelta < duration - 2 &&
+    typeof ytPlayer?.getPlayerState === "function" &&
+    ytPlayer.getPlayerState() !== YT.PlayerState.PLAYING
+  ) {
     trackVideoInteraction("seek", {
       video_watch_percentage: percentage.toFixed(1)
     });
@@ -161,13 +167,14 @@ function trackWatchProgress(currentTime, duration) {
   firstCheck = false;
 
   lastTime = currentTime; // update untuk perbandingan berikutnya
-
-  if (percentage - lastSent >= 10 || percentage === 100) {
+  const allowedPoints = [25, 50, 75, 95, 99, 100];
+  if ((allowedPoints.includes(percentage) && percentage !== lastSent)) {
+    
     videoProgressSession[videoId] = percentage;
-
+    
     if (isCompleted && videoCompletedSession[videoId]) return;
     if (isCompleted) videoCompletedSession[videoId] = true;
-
+    
     sendAnalyticsEvent("VIDEO_INTERACTION", {
       interaction_timestamp: getFormattedTimestampWIB(),
       user_id: user ? user.uid : "ANONYM",
@@ -180,8 +187,8 @@ function trackWatchProgress(currentTime, duration) {
       video_watch_percentage: percentage,
       video_completed: isCompleted ? "yes" : ""
     });
+    }
   }
-}
 
 let playerInterval = null;
 
