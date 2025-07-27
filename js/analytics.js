@@ -151,32 +151,9 @@ function trackWatchProgress(currentTime, duration) {
   const lastSent = videoProgressSession[videoId] || 0;
   const isCompleted = percentage >= 95;
 
-  const timeDelta = Math.abs(currentTime - lastTime);
-  const playerState = ytPlayer?.getPlayerState?.();
-
-  const isNotPlaying = playerState !== YT.PlayerState.PLAYING;
-  const isSignificantJump = timeDelta > 8 && timeDelta < duration - 5;
-
-  // 🧠 Deteksi seek hanya jika lompatan besar saat tidak playing
-  if (!firstCheck && isSignificantJump && isNotPlaying) {
-    trackVideoInteraction("seek", {
-      video_watch_percentage: percentage.toFixed(1)
-    });
-  }
-
-  // ✅ Simpan waktu terakhir hanya saat PLAYING untuk mencegah false seek
-  if (playerState === YT.PlayerState.PLAYING) {
-    lastTime = currentTime;
-  }
-
-  firstCheck = false;
-
-  const allowedPoints = [25, 50, 75, 95, 99, 100];
+  const allowedPoints = [25, 50, 75, 95];
   if (allowedPoints.includes(percentage) && percentage !== lastSent) {
     videoProgressSession[videoId] = percentage;
-
-    if (isCompleted && videoCompletedSession[videoId]) return;
-    if (isCompleted) videoCompletedSession[videoId] = true;
 
     sendAnalyticsEvent("VIDEO_INTERACTION", {
       interaction_timestamp: getFormattedTimestampWIB(),
@@ -185,10 +162,27 @@ function trackWatchProgress(currentTime, duration) {
       nama_bahasa: language,
       video_id: videoId,
       video_title: title,
-      interaction_type: isCompleted ? "video_completed" : "progress_update",
+      interaction_type: "progress_update",
       comment_id: "",
       video_watch_percentage: percentage,
-      video_completed: isCompleted ? "yes" : ""
+      video_completed: ""
+    });
+  }
+
+  if (isCompleted && !videoCompletedSession[videoId]) {
+    videoCompletedSession[videoId] = true;
+
+    sendAnalyticsEvent("VIDEO_INTERACTION", {
+      interaction_timestamp: getFormattedTimestampWIB(),
+      user_id: user ? user.uid : "ANONYM",
+      user_name: user ? user.displayName || "Tanpa Nama" : null,
+      nama_bahasa: language,
+      video_id: videoId,
+      video_title: title,
+      interaction_type: "video_completed",
+      comment_id: "",
+      video_watch_percentage: percentage,
+      video_completed: "yes"
     });
   }
 }
@@ -202,4 +196,20 @@ function startTrackingPlayerProgress(player) {
     const duration = player.getDuration();
     trackWatchProgress(currentTime, duration);
   }, 5000);
+}
+
+function attachPlayerEventListeners(player) {
+  player.addEventListener("onStateChange", function (event) {
+    const duration = player.getDuration();
+    const currentTime = player.getCurrentTime();
+    const percentage = Math.floor((currentTime / duration) * 100);
+
+    if (event.data === YT.PlayerState.PLAYING) {
+      trackVideoInteraction("play", { video_watch_percentage: percentage });
+    } else if (event.data === YT.PlayerState.PAUSED) {
+      trackVideoInteraction("pause", { video_watch_percentage: percentage });
+    } else if (event.data === YT.PlayerState.ENDED) {
+      trackVideoInteraction("ended", { video_watch_percentage: percentage });
+    }
+  });
 }
