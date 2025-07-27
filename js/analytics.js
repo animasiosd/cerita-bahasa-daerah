@@ -151,31 +151,33 @@ function trackWatchProgress(currentTime, duration) {
   const lastSent = videoProgressSession[videoId] || 0;
   const isCompleted = percentage >= 95;
 
-  // 🎯 Deteksi seek jika lompatan waktu terlalu besar dari sebelumnya
   const timeDelta = Math.abs(currentTime - lastTime);
   const playerState = ytPlayer?.getPlayerState?.();
-  if (
-    !firstCheck &&
-    timeDelta >= 2 &&
-    timeDelta < duration - 2 &&
-    (playerState !== YT.PlayerState.PLAYING || timeDelta > 5)
-  ) {
 
+  const isNotPlaying = playerState !== YT.PlayerState.PLAYING;
+  const isSignificantJump = timeDelta > 8 && timeDelta < duration - 5;
+
+  // 🧠 Deteksi seek hanya jika lompatan besar saat tidak playing
+  if (!firstCheck && isSignificantJump && isNotPlaying) {
     trackVideoInteraction("seek", {
       video_watch_percentage: percentage.toFixed(1)
     });
   }
+
+  // ✅ Simpan waktu terakhir hanya saat PLAYING untuk mencegah false seek
+  if (playerState === YT.PlayerState.PLAYING) {
+    lastTime = currentTime;
+  }
+
   firstCheck = false;
 
-  lastTime = currentTime; // update untuk perbandingan berikutnya
   const allowedPoints = [25, 50, 75, 95, 99, 100];
-  if ((allowedPoints.includes(percentage) && percentage !== lastSent)) {
-    
+  if (allowedPoints.includes(percentage) && percentage !== lastSent) {
     videoProgressSession[videoId] = percentage;
-    
+
     if (isCompleted && videoCompletedSession[videoId]) return;
     if (isCompleted) videoCompletedSession[videoId] = true;
-    
+
     sendAnalyticsEvent("VIDEO_INTERACTION", {
       interaction_timestamp: getFormattedTimestampWIB(),
       user_id: user ? user.uid : "ANONYM",
@@ -188,8 +190,8 @@ function trackWatchProgress(currentTime, duration) {
       video_watch_percentage: percentage,
       video_completed: isCompleted ? "yes" : ""
     });
-    }
   }
+}
 
 let playerInterval = null;
 
