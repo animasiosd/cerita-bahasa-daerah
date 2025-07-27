@@ -129,6 +129,10 @@
         }
         
         function loadVideoPlayer(videoId) {
+            if (!videoId || videoId.trim() === "") {
+                console.warn("⛔ Video ID kosong, tidak akan dimuat.");
+                return;
+            }
             if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
                 ytPlayer.cueVideoById(videoId); // 🛑 Tidak autoplay
                 firstCheck = true;
@@ -175,21 +179,34 @@
                             switch (state) {
                                 case YT.PlayerState.PLAYING:
                                     trackVideoInteraction("play");
+                                    startTrackingPlayerProgress(ytPlayer); // pastikan tracking aktif
                                     const currentTime = ytPlayer.getCurrentTime();
                                     const duration = ytPlayer.getDuration();
                                     trackWatchProgress(currentTime, duration);
                                     break;
-                                    case YT.PlayerState.PAUSED:
-                                        trackVideoInteraction("pause");
+                                    
+                                case YT.PlayerState.PAUSED:
+                                    trackVideoInteraction("pause");
+                                    break;
+                                
+                                case YT.PlayerState.ENDED:
+                                    trackVideoInteraction("ended");
+                                    const endTime = ytPlayer.getCurrentTime();
+                                    const endDuration = ytPlayer.getDuration();
+                                    const percentage = Math.floor((endTime / endDuration) * 100);
+                                    
+                                    if (percentage >= 95 && !videoCompletedSession[window.currentVideoId]) {
+                                        videoCompletedSession[window.currentVideoId] = true;
+                                        trackVideoInteraction("video_completed", {
+                                            video_watch_percentage: percentage,
+                                            video_completed: "yes"
+                                        });
+                                    }
+                                    break;
+                                    default:
                                         break;
-                                        
-                                        case YT.PlayerState.ENDED:
-                                            trackVideoInteraction("ended");
-                                            break;
-                                            default:
-                                                break;
-                                            }
-                                        }
+                                    }
+                                }
                                     }
                                 });
                             }

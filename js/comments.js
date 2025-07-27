@@ -104,7 +104,7 @@ function handleCommentSubmit(event) {
                 loadComments(currentVideoId);  // Reload komentar
                 // 🧠 Tracking komentar untuk video_interaction
                 if (typeof trackVideoInteraction === "function") {
-                    trackVideoInteraction("comment", result.comment_id);
+                    trackVideoInteraction("comment", { comment_id: result.comment_id });
                 }
             } else {
                 alert('Gagal mengirim komentar.');
