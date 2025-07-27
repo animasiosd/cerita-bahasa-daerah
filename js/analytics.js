@@ -139,8 +139,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-let lastTime = 0;
-
 function trackWatchProgress(currentTime, duration) {
   const percentage = Math.floor((currentTime / duration) * 100);
   const user = firebase.auth().currentUser || null;
@@ -155,12 +153,12 @@ function trackWatchProgress(currentTime, duration) {
 
   // 🎯 Deteksi seek jika lompatan waktu terlalu besar dari sebelumnya
   const timeDelta = Math.abs(currentTime - lastTime);
-  if (lastTime > 0 && timeDelta > 2 && timeDelta < duration - 2) {
-    // Bukan awal atau akhir, dan cukup besar untuk dianggap seek
+  if (!firstCheck && timeDelta > 2 && timeDelta < duration - 2) {
     trackVideoInteraction("seek", {
       video_watch_percentage: percentage.toFixed(1)
     });
   }
+  firstCheck = false;
 
   lastTime = currentTime; // update untuk perbandingan berikutnya
 

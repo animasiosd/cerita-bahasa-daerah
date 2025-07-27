@@ -157,6 +157,10 @@
                             });
                             if (pendingVideoId) {
                                 ytPlayer.cueVideoById(pendingVideoId); // cue saat siap
+                                  // Reset tracking state untuk video baru
+                                  lastTime = 0;
+                                  firstCheck = true;
+                                  // akhir dari kode Reset tracking state untuk video baru
                                     startTrackingPlayerProgress(ytPlayer); // 🔁 Restart tracking untuk video baru
                                 pendingVideoId = null;
                             }
