@@ -131,6 +131,9 @@
         function loadVideoPlayer(videoId) {
             if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
                 ytPlayer.cueVideoById(videoId); // 🛑 Tidak autoplay
+                firstCheck = true;
+                lastTime = 0;
+
                 } else {
                     console.warn("⏳ Player belum siap, simpan videoId:", videoId);
                     pendingVideoId = videoId;
@@ -172,6 +175,9 @@
                             switch (state) {
                                 case YT.PlayerState.PLAYING:
                                     trackVideoInteraction("play");
+                                    const currentTime = ytPlayer.getCurrentTime();
+                                    const duration = ytPlayer.getDuration();
+                                    trackWatchProgress(currentTime, duration);
                                     break;
                                     case YT.PlayerState.PAUSED:
                                         trackVideoInteraction("pause");
