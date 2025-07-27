@@ -105,6 +105,38 @@ function logPageView(user) {
   });
 }
 
+    // 🧠 Pastikan Firebase dan Analytics sudah siap digunakan
+    function trackVideoInteraction(interactionType) {
+      const user = firebase.auth().currentUser || null;
+      const videoTitle = document.getElementById("videoTitle")?.textContent || "Tanpa Judul";
+      const language = window.currentLanguagePage || null;
+      const videoId = window.currentVideoId || null;
+      
+      sendVideoInteraction({
+        user_id: user ? user.uid : "ANONYM",
+        user_name: user ? user.displayName : "TIDAK DIKETAHUI",
+        nama_bahasa: language,
+        video_id: videoId,
+        video_title: videoTitle,
+        interaction_type: interactionType
+      });
+    }
+
+            // Fungsi khusus untuk sheet: video_interaction
+            function sendVideoInteraction(data) {
+              sendAnalyticsEvent("VIDEO_INTERACTION", {
+                interaction_timestamp: getFormattedTimestampWIB(),
+                user_id: data.user_id,
+                user_name: data.user_name,
+                nama_bahasa: data.nama_bahasa,
+                video_id: data.video_id,
+                video_title: data.video_title,
+                interaction_type: data.interaction_type,
+                comment_id: data.comment_id || "",
+                video_watch_percentage: data.video_watch_percentage || ""
+              });
+            }
+        
 // Integrasi: pantau status auth Firebase
 document.addEventListener("DOMContentLoaded", () => {
   firebase.auth().onAuthStateChanged(user => {

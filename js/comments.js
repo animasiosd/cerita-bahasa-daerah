@@ -98,10 +98,14 @@ function handleCommentSubmit(event) {
                 commentText: text,
                 authToken: token
             })
-        }).then(res => res.json()).then(result => {
+        }).then(result => {
             if (result.status === "success") {
                 input.value = '';
                 loadComments(currentVideoId);  // Reload komentar
+                // 🧠 Tracking komentar untuk video_interaction
+                if (typeof trackVideoInteraction === "function") {
+                    trackVideoInteraction("comment", result.comment_id);
+                }
             } else {
                 alert('Gagal mengirim komentar.');
             }

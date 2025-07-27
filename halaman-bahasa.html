@@ -150,20 +150,41 @@
                     events: {
                         'onReady': (event) => {
                             console.log("✅ YouTube Player siap");
+                            document.addEventListener("fullscreenchange", () => {
+                                if (document.fullscreenElement) {
+                                    trackVideoInteraction("fullscreen");
+                                }
+                            });
                             if (pendingVideoId) {
                                 ytPlayer.cueVideoById(pendingVideoId); // cue saat siap
                                 pendingVideoId = null;
                             }
                         },
+                        
                         'onStateChange': (event) => {
-                            console.log("🎬 Status player berubah:", event.data);
-                        }
-                    }
-                });
-            }
-            
+                            const state = event.data;
+                            
+                            switch (state) {
+                                case YT.PlayerState.PLAYING:
+                                    trackVideoInteraction("play");
+                                    break;
+                                    case YT.PlayerState.PAUSED:
+                                        trackVideoInteraction("pause");
+                                        break;
+                                        
+                                        case YT.PlayerState.ENDED:
+                                            trackVideoInteraction("ended");
+                                            break;
+                                            default:
+                                                break;
+                                            }
+                                        }
+                                    }
+                                });
+                            }
             window.onYouTubeIframeAPIReady = setupYTPlayer;
     </script>
+
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> <!-- 🧠 Tambahkan ini -->
 
@@ -210,7 +231,7 @@
             }
             });
     </script>
-    
+
     <script>
   firebase.auth().onAuthStateChanged(function(user) {
     const mainContent = document.getElementById("mainContent");
