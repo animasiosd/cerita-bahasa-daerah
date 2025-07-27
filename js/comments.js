@@ -98,7 +98,7 @@ function handleCommentSubmit(event) {
                 commentText: text,
                 authToken: token
             })
-        }).then(result => {
+        }).then(res => res.json()).then(result => {
             if (result.status === "success") {
                 input.value = '';
                 loadComments(currentVideoId);  // Reload komentar
