@@ -122,44 +122,48 @@
     <script src="js/video.js"></script>
     <script src="js/comments.js"></script>
     <script>
-  let ytPlayer = null;
-  let pendingVideoId = null;
-
-  function onYouTubeIframeAPIReady() {
-    console.log("📡 YouTube IFrame API siap");
-
-    ytPlayer = new YT.Player('yt-player-placeholder', {
-      height: '390',
-      width: '640',
-      videoId: '', // default kosong
-      playerVars: {
-        'autoplay': 0,
-        'controls': 1
-      },
-      events: {
-        'onReady': (event) => {
-          console.log("✅ YouTube Player siap");
-          if (pendingVideoId) {
-            ytPlayer.loadVideoById(pendingVideoId);
-            pendingVideoId = null;
-          }
-        },
-        'onStateChange': (event) => {
-          console.log("🎬 Status player berubah:", event.data);
+    let ytPlayer;
+    let pendingVideoId = null;
+    function onYouTubeIframeAPIReady() {
+        // dipanggil otomatis oleh YouTube API
         }
-      }
-    });
-  }
-
-  function loadVideoPlayer(videoId) {
-    if (ytPlayer && typeof ytPlayer.loadVideoById === 'function') {
-      ytPlayer.loadVideoById(videoId);
-    } else {
-      console.warn("⏳ Player belum siap, simpan videoId:", videoId);
-      pendingVideoId = videoId;
-    }
-  }
-</script>
+        
+        function loadVideoPlayer(videoId) {
+            if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
+                ytPlayer.cueVideoById(videoId); // 🛑 Tidak autoplay
+                } else {
+                    console.warn("⏳ Player belum siap, simpan videoId:", videoId);
+                    pendingVideoId = videoId;
+                }
+            }
+            
+            function setupYTPlayer() {
+                ytPlayer = new YT.Player('yt-player-placeholder', {
+                    height: '390',
+                    width: '640',
+                    videoId: '', // Tidak muat video langsung
+                    playerVars: {
+                        'autoplay': 0,
+                        'controls': 1
+                    },
+                    
+                    events: {
+                        'onReady': (event) => {
+                            console.log("✅ YouTube Player siap");
+                            if (pendingVideoId) {
+                                ytPlayer.cueVideoById(pendingVideoId); // cue saat siap
+                                pendingVideoId = null;
+                            }
+                        },
+                        'onStateChange': (event) => {
+                            console.log("🎬 Status player berubah:", event.data);
+                        }
+                    }
+                });
+            }
+            
+            window.onYouTubeIframeAPIReady = setupYTPlayer;
+    </script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> <!-- 🧠 Tambahkan ini -->
 
