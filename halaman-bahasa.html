@@ -10,7 +10,6 @@
     <meta property="og:url" content="" id="og-url" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-
     <style>
         #page-loader {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -33,18 +32,14 @@
         #loginContainer, #mainContent { display: none; }
     </style>
 </head>
-
 <body>
-
     <div id="navbar-placeholder"></div>
-
     <div id="page-loader">
         <div class="progress-container">
             <div id="progress-bar"></div>
         </div>
         <div id="loader-text">Memuat... 0%</div>
     </div>
-
     <div id="loginContainer" class="d-flex justify-content-center align-items-center vh-100">
         <div class="text-center">
             <h1 class="mb-3">Cerita Bahasa Daerah</h1>
@@ -53,34 +48,25 @@
             <button id="loginBtn" class="btn btn-primary btn-lg">Login dengan Google</button>
         </div>
     </div>
-
     <div id="mainContent">
         <main class="container my-4">
             <h2 id="videoTitle" class="text-center mb-3">
                 <div class="google-spinner"></div>
             </h2>
-
             <div class="input-group mb-3">
                 <label class="input-group-text" for="videoSelect">Pilih Video:</label>
                 <select class="form-select" id="videoSelect"></select>
             </div>
-
             <div class="ratio ratio-16x9 shadow-sm rounded overflow-hidden">
                 <div id="yt-player-placeholder"></div>
             </div>
-
             <div class="text-center my-4">
                 <strong>Bagikan cerita ini:</strong>
                 <div class="mt-2">
-                    <a id="share-wa" class="btn btn-success me-2" href="#" target="_blank" rel="noopener noreferrer">
-                        Bagikan ke WhatsApp
-                    </a>
-                    <a id="share-fb" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer">
-                        Bagikan ke Facebook
-                    </a>
+                    <a id="share-wa" class="btn btn-success me-2" href="#" target="_blank" rel="noopener noreferrer">Bagikan ke WhatsApp</a>
+                    <a id="share-fb" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer">Bagikan ke Facebook</a>
                 </div>
             </div>
-
             <div class="card mt-4">
                 <div class="card-header h5">Pertanyaan Diskusi</div>
                 <div class="card-body">
@@ -94,7 +80,6 @@
                     </ul>
                 </div>
             </div>
-
             <div id="comment-feature" class="mt-5">
                 <h3 class="mb-3">Komentar</h3>
                 <form id="comment-form" class="mb-4">
@@ -113,81 +98,62 @@
         </main>
     </div>
 
+    <!-- Firebase dan Script utama -->
     <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
-
     <script src="js/auth.js"></script>
     <script src="js/main.js"></script>
     <script src="js/analytics.js"></script>
     <script src="js/video.js"></script>
     <script src="js/comments.js"></script>
+
+    <!-- Setup YouTube Player -->
     <script>
-    let ytPlayer;
-    let pendingVideoId = null;
-    function onYouTubeIframeAPIReady() {
-        // dipanggil otomatis oleh YouTube API
-        }
-        
-        function loadVideoPlayer(videoId) {
-            if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
-                ytPlayer.cueVideoById(videoId); // 🛑 Tidak autoplay
-                } else {
-                    console.warn("⏳ Player belum siap, simpan videoId:", videoId);
-                    pendingVideoId = videoId;
-                }
-            }
-            
-            function setupYTPlayer() {
-                ytPlayer = new YT.Player('yt-player-placeholder', {
-                    height: '390',
-                    width: '640',
-                    videoId: '', // Tidak muat video langsung
-                    playerVars: {
-                        'autoplay': 0,
-                        'controls': 1
+        let ytPlayer;
+        let pendingVideoId = null;
+
+        function setupYTPlayer() {
+            ytPlayer = new YT.Player('yt-player-placeholder', {
+                height: '390',
+                width: '640',
+                videoId: '',
+                playerVars: { 'autoplay': 0, 'controls': 1 },
+                events: {
+                    'onReady': (event) => {
+                        console.log("✅ YouTube Player siap");
+                        document.dispatchEvent(new Event("ytPlayerReady"));
+                        document.addEventListener("fullscreenchange", () => {
+                            if (document.fullscreenElement) trackVideoInteraction("fullscreen");
+                        });
+                        if (pendingVideoId) {
+                            ytPlayer.cueVideoById(pendingVideoId);
+                            startTrackingPlayerProgress(ytPlayer);
+                            pendingVideoId = null;
+                        }
                     },
-                    
-                    events: {
-                        'onReady': (event) => {
-                            console.log("✅ YouTube Player siap");
-                            document.addEventListener("fullscreenchange", () => {
-                                if (document.fullscreenElement) {
-                                    trackVideoInteraction("fullscreen");
-                                }
-                            });
-                            if (pendingVideoId) {
-                                ytPlayer.cueVideoById(pendingVideoId); // cue saat siap
-                                pendingVideoId = null;
-                            }
-                        },
-                        
-                        'onStateChange': (event) => {
-                            const state = event.data;
-                            
-                            switch (state) {
-                                case YT.PlayerState.PLAYING:
-                                    trackVideoInteraction("play");
-                                    break;
-                                    case YT.PlayerState.PAUSED:
-                                        trackVideoInteraction("pause");
-                                        break;
-                                        
-                                        case YT.PlayerState.ENDED:
-                                            trackVideoInteraction("ended");
-                                            break;
-                                            default:
-                                                break;
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-            window.onYouTubeIframeAPIReady = setupYTPlayer;
+                    'onStateChange': (event) => {
+                        const state = event.data;
+                        switch (state) {
+                            case YT.PlayerState.PLAYING: trackVideoInteraction("play"); break;
+                            case YT.PlayerState.PAUSED: trackVideoInteraction("pause"); break;
+                            case YT.PlayerState.ENDED: trackVideoInteraction("ended"); break;
+                        }
+                    }
+                }
+            });
+        }
+
+        function onYouTubeIframeAPIReady() {
+            setupYTPlayer();
+        }
+
+        window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
     </script>
 
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> <!-- 🧠 Tambahkan ini -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Loader -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const progressBar = document.getElementById('progress-bar');
@@ -210,72 +176,49 @@
             }, 10);
         });
     </script>
+
+    <!-- Auto-Rotate Fullscreen -->
     <script>
-    // 📱🔄 Auto landscape saat fullscreen aktif (khusus Android Chrome/Edge)
-    document.addEventListener("fullscreenchange", () => {
-        const isFullscreen = !!document.fullscreenElement;
-        if (isFullscreen && screen.orientation && screen.orientation.lock) {
-            // Hanya ubah orientasi jika user sedang portrait
-            if (window.innerHeight > window.innerWidth) {
-                screen.orientation.lock("landscape").catch(err => {
-                    console.warn("⚠️ Gagal mengunci orientasi:", err.message);
-                });
-            }
-        } else if (!isFullscreen && screen.orientation && screen.orientation.unlock) {
-            // Opsional: kembalikan orientasi (tidak semua browser mendukung)
-            try {
-                screen.orientation.unlock();
-            } catch (err) {
-                // Safari/iOS tidak mendukung unlock
+        document.addEventListener("fullscreenchange", () => {
+            const isFullscreen = !!document.fullscreenElement;
+            if (isFullscreen && screen.orientation && screen.orientation.lock) {
+                if (window.innerHeight > window.innerWidth) {
+                    screen.orientation.lock("landscape").catch(err => {
+                        console.warn("⚠️ Gagal mengunci orientasi:", err.message);
+                    });
                 }
+            } else if (!isFullscreen && screen.orientation && screen.orientation.unlock) {
+                try {
+                    screen.orientation.unlock();
+                } catch (err) {}
             }
-            });
+        });
     </script>
 
+    <!-- Share Setup -->
     <script>
-  firebase.auth().onAuthStateChanged(function(user) {
-    const mainContent = document.getElementById("mainContent");
-    const loginContainer = document.getElementById("loginContainer");
-
-    if (user) {
-      // Mengubah style display secara langsung, bukan via class
-      if (mainContent) mainContent.style.display = "block";
-      if (loginContainer) loginContainer.style.display = "none";
-    } else {
-      if (loginContainer) loginContainer.style.display = "flex";
-      if (mainContent) mainContent.style.display = "none";
-    }
-  });
-</script>
-
-<script>
-    // Fungsi untuk mengatur tombol bagikan
-    function setupShareButtons() {
-        const pageUrl = window.location.href;
-        const shareText = "Ayo lihat cerita menarik dalam bahasa daerah ini: " + document.title;
-
-        // Link untuk WhatsApp
-        const whatsappLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + pageUrl)}`;
-        
-        // Link untuk Facebook
-        const facebookLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
-
-        // Ambil elemen tombol
-        const shareWaBtn = document.getElementById('share-wa');
-        const shareFbBtn = document.getElementById('share-fb');
-
-        // Atur link pada tombol
-        if (shareWaBtn) {
-            shareWaBtn.href = whatsappLink;
+        function setupShareButtons() {
+            const pageUrl = window.location.href;
+            const shareText = "Ayo lihat cerita menarik dalam bahasa daerah ini: " + document.title;
+            document.getElementById('share-wa').href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + pageUrl)}`;
+            document.getElementById('share-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
         }
-        if (shareFbBtn) {
-            shareFbBtn.href = facebookLink;
-        }
-    }
+        document.addEventListener('DOMContentLoaded', setupShareButtons);
+    </script>
 
-    // Panggil fungsi setelah halaman dimuat
-    document.addEventListener('DOMContentLoaded', setupShareButtons);
-</script>
-
+    <!-- Tampilkan Konten Jika Login -->
+    <script>
+        firebase.auth().onAuthStateChanged(function(user) {
+            const mainContent = document.getElementById("mainContent");
+            const loginContainer = document.getElementById("loginContainer");
+            if (user) {
+                if (mainContent) mainContent.style.display = "block";
+                if (loginContainer) loginContainer.style.display = "none";
+            } else {
+                if (loginContainer) loginContainer.style.display = "flex";
+                if (mainContent) mainContent.style.display = "none";
+            }
+        });
+    </script>
 </body>
 </html>
