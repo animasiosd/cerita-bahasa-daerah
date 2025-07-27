@@ -1,4 +1,4 @@
-// File: js/analytics.js
+// File: js/analytics.js sudah berhasil 3 yaitu sheet user_list, user_per_page
 
 const ANALYTICS_WEB_APP = "https://script.google.com/macros/s/AKfycbxm5YQAB2kify_9SzPph5xgaEMlsKpE8UNfrPuvmghgDM9meNKCiDPABKHJ4a4p3Nak/exec";
 const videoProgressSession = {};
