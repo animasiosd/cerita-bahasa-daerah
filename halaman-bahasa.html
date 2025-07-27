@@ -189,7 +189,28 @@
             }, 10);
         });
     </script>
-
+    <script>
+    // 📱🔄 Auto landscape saat fullscreen aktif (khusus Android Chrome/Edge)
+    document.addEventListener("fullscreenchange", () => {
+        const isFullscreen = !!document.fullscreenElement;
+        if (isFullscreen && screen.orientation && screen.orientation.lock) {
+            // Hanya ubah orientasi jika user sedang portrait
+            if (window.innerHeight > window.innerWidth) {
+                screen.orientation.lock("landscape").catch(err => {
+                    console.warn("⚠️ Gagal mengunci orientasi:", err.message);
+                });
+            }
+        } else if (!isFullscreen && screen.orientation && screen.orientation.unlock) {
+            // Opsional: kembalikan orientasi (tidak semua browser mendukung)
+            try {
+                screen.orientation.unlock();
+            } catch (err) {
+                // Safari/iOS tidak mendukung unlock
+                }
+            }
+            });
+    </script>
+    
     <script>
   firebase.auth().onAuthStateChanged(function(user) {
     const mainContent = document.getElementById("mainContent");
