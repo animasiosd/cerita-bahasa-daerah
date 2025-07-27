@@ -155,7 +155,7 @@ function trackWatchProgress(currentTime, duration) {
 
   // 🎯 Deteksi seek jika lompatan waktu terlalu besar dari sebelumnya
   const timeDelta = Math.abs(currentTime - lastTime);
-  if (timeDelta > 4 && timeDelta < duration - 4) {
+  if (lastTime > 0 && timeDelta > 2 && timeDelta < duration - 2) {
     // Bukan awal atau akhir, dan cukup besar untuk dianggap seek
     trackVideoInteraction("seek", {
       video_watch_percentage: percentage.toFixed(1)
