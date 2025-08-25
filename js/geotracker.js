@@ -1,6 +1,5 @@
 // File: js/geotracker.js
-// Versi Final - Integrasi ke analytics.js dan video_interaction
-// Evan Rindi Silvanus - 2025
+// ✅ Versi Final - Integrasi analytics.js & video_interaction
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse";
 
@@ -9,7 +8,7 @@ let locationCache = null;
 let isTrackingInProgress = false;
 
 /**
- * Ambil lokasi pengguna menggunakan Geolocation API
+ * Ambil lokasi pengguna menggunakan Geolocation API + Reverse Geocoding Nominatim
  * @returns {Promise<Object>} Data lokasi lengkap
  */
 async function getUserLocation() {
@@ -24,20 +23,21 @@ async function getUserLocation() {
                 const { latitude, longitude } = position.coords;
 
                 try {
-                    // Cek cache terlebih dahulu
+                    // Cek cache → update koordinat biar akurat
                     if (locationCache) {
                         resolve({ ...locationCache, latitude, longitude });
                         return;
                     }
 
-                    // Panggil Nominatim API tanpa caching
+                    // Panggil Nominatim API
                     const response = await fetch(`${NOMINATIM_URL}?lat=${latitude}&lon=${longitude}&format=json`, {
                         method: "GET",
                         headers: {
                             "Accept": "application/json",
-                            "User-Agent": "CeritaBahasaDaerahApp/1.0"
+                            "User-Agent": "CeritaBahasaDaerahApp/1.0",
+                            "Referer": window.location.origin
                         },
-                        cache: "no-store" // Penting: tidak cache Nominatim API
+                        cache: "no-store"
                     });
 
                     if (!response.ok) throw new Error("Gagal ambil data lokasi");
@@ -97,19 +97,28 @@ async function trackVideoLocationInteraction(interactionData) {
     try {
         const location = await getUserLocation();
 
-        // Gabungkan data interaksi dengan data lokasi
+        // Gabungkan data interaksi dengan data lokasi lengkap
         const enrichedData = {
             ...interactionData,
             latitude: location.latitude,
             longitude: location.longitude,
+            continent: location.continent,
             country: location.country,
-            state_province: location.state_province,
+            country_code: location.country_code,
+            state: location.state,
+            county: location.county,
             city: location.city,
+            municipality: location.municipality,
+            town: location.town,
+            village: location.village,
+            suburb: location.suburb,
+            road: location.road,
             postcode: location.postcode,
+            display_name: location.display_name,
             timezone: location.timezone
         };
 
-        // Kirim ke analytics.js (pastikan fungsi ini sudah ada di analytics.js)
+        // Kirim ke analytics.js
         if (typeof sendVideoInteractionToAnalytics === "function") {
             sendVideoInteractionToAnalytics(enrichedData);
         } else {
