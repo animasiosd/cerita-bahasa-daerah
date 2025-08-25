@@ -26,7 +26,7 @@ document.getElementById('comment-section').addEventListener('click', function(ev
 // Listener global untuk modal delete (cancel)
 document.getElementById("deleteConfirmModal").addEventListener("hidden.bs.modal", function () {
     if (window.commentTextToDelete) {
-        logUserBehavior("delete_comment_cancelled", "halaman-bahasa", window.commentTextToDelete);
+        logUserBehavior("delete_comment_cancelled", "bahasa_page", window.commentTextToDelete);
         window.commentTextToDelete = null;
         window.commentIdToDelete = null;
     }
@@ -136,7 +136,7 @@ function handleCommentSubmit(event) {
 
 // Fungsi edit komentar
 function handleEditComment(commentId, currentText) {
-    logUserBehavior("edit_comment_clicked", "halaman-bahasa", currentText);
+    logUserBehavior("edit_comment_clicked", "bahasa_page", currentText);
     const commentTextEl = document.querySelector(`.comment-text[data-comment-id="${commentId}"]`);
     const editControlsEl = document.querySelector(`.edit-controls[data-comment-id="${commentId}"]`);
     const actionsEl = editControlsEl.parentElement.querySelector('.comment-actions');
@@ -155,7 +155,7 @@ function handleEditComment(commentId, currentText) {
     saveBtn.onclick = () => {
         const newText = textarea.value.trim();
         if (!newText) return;
-        logUserBehavior("edit_comment_saved", "halaman-bahasa", newText);
+        logUserBehavior("edit_comment_saved", "bahasa_page", newText);
 
         auth.currentUser.getIdToken(true).then(token => {
             fetch(WEB_APP_URL_COMMENTS, {
@@ -178,7 +178,7 @@ function handleEditComment(commentId, currentText) {
     };
 
     cancelBtn.onclick = () => {
-        logUserBehavior("edit_comment_cancelled", "halaman-bahasa", currentText);
+        logUserBehavior("edit_comment_cancelled", "bahasa_page", currentText);
         loadComments(currentVideoId);
     };
 
@@ -188,18 +188,18 @@ function handleEditComment(commentId, currentText) {
 
 // Fungsi hapus komentar
 function handleDeleteComment(commentId, commentText) {
-    logUserBehavior("delete_comment_clicked", "halaman-bahasa", commentText);
+    logUserBehavior("delete_comment_clicked", "bahasa_page", commentText);
     window.commentIdToDelete = commentId;
     window.commentTextToDelete = commentText;
 
     const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
     modal.show();
 
-    logUserBehavior("delete_comment_modal_shown", "halaman-bahasa", commentText);
+    logUserBehavior("delete_comment_modal_shown", "bahasa_page", commentText);
 
     const confirmBtn = document.getElementById('confirmDeleteBtn');
     confirmBtn.onclick = () => {
-        logUserBehavior("delete_comment_confirmed", "halaman-bahasa", window.commentTextToDelete);
+        logUserBehavior("delete_comment_confirmed", "bahasa_page", window.commentTextToDelete);
 
         auth.currentUser.getIdToken(true).then(token => {
             fetch(WEB_APP_URL_COMMENTS, {
@@ -253,7 +253,7 @@ function handleLikeClick(buttonElement) {
 
     // Tracking log
     const eventName = liked ? "liked_comment" : "unliked_comment";
-    logUserBehavior(eventName, "halaman-bahasa", commentText);
+    logUserBehavior(eventName, "bahasa_page", commentText);
 
     // Update jumlah likes (UI saja, biar terasa responsif)
     let likes = parseInt(likesCountEl.textContent || '0');

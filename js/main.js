@@ -97,7 +97,8 @@ function loadDynamicLanguages() {
           const listItem = document.createElement('li');
           const link = document.createElement('a');
           link.className = 'dropdown-item language-btn';
-          link.href = `halaman-bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}`;
+          // ✅ PERUBAHAN DI SINI: Menggunakan 'bahasa.html'
+          link.href = `bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}`;
           // Menggunakan format yang benar untuk teks
           link.textContent = `Bahasa ${bahasa.display}`; 
           link.addEventListener("click", () => {

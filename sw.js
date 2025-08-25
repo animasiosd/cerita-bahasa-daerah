@@ -4,7 +4,7 @@ const BASE_PATH = '/cerita-bahasa-daerah/';
 const urlsToCache = [
   `${BASE_PATH}`,
   `${BASE_PATH}index.html`,
-  `${BASE_PATH}halaman-bahasa.html`,
+  `${BASE_PATH}bahasa.html`,
   `${BASE_PATH}css/style.css`,
   `${BASE_PATH}js/auth.js`,
   `${BASE_PATH}js/main.js`,
