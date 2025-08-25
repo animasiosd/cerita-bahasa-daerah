@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const provider = new firebase.auth.GoogleAuthProvider();
       
       // ✅ PERBAIKAN: Menggunakan 'auth' bukan 'aauth'
-      provider.addScope('https://www.googleapis.com/auth/user.age.range.read');
+      provider.addScope('https://www.googleapis.com/auth/profile.agerange.read');
       provider.addScope('https://www.googleapis.com/auth/user.gender.read');
       provider.addScope('https://www.googleapis.com/auth/user.addresses.read');
 
