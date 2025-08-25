@@ -116,7 +116,7 @@ if (loginBtn) {
       
       // ✅ 2. Baru tambahkan scope ke provider yang sudah ada
       // Scope ini akan meminta izin pengguna untuk membaca rentang usia mereka.
-      provider.addScope('https://www.googleapis.com/auth/user.age.range.read');
+      // provider.addScope('https://www.googleapis.com/auth/user.age.range.read');
 
       auth
         .signInWithPopup(provider)
