@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <base href="/beta/">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Download Video - Cerita Bahasa Daerah</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d6efd">
 
     <style>
         /* Menambahkan gaya untuk loading & login dari halaman lain */
@@ -75,12 +79,13 @@
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script src="js/auth.js"></script>
+    <script src="js/userlocationnotification.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/geotracker.js"></script>
     <script src="js/analytics.js"></script>
 
     <script>
@@ -154,14 +159,23 @@
                 tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Tidak ada data yang cocok.</td></tr>';
                 return;
             }
-
+            
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td>${row.bahasa}</td><td>${row.urutan}</td><td>${row.title}</td>`;
-                tr.onclick = () => { window.open(row.link_download, '_blank'); };
-                tbody.appendChild(tr);
-            });
-        }
+                
+                tr.onclick = () => {
+                    logDownloadPageInteraction(
+                        "download_video",      // action_type
+                        row.bahasa,            // action_key
+                        row.title,             // action_value
+                        row.urutan             // action_detail
+                        );
+                        window.open(row.link_download, '_blank');
+                    };        
+                    tbody.appendChild(tr);
+                });
+            }
 
         function applyFilters() {
             const bahasa = document.getElementById('filterBahasa').value;
@@ -209,6 +223,10 @@
                     th.classList.add(sortAsc ? 'asc' : 'desc');
                 }
             });
+
+            // Tracking Sortir Tabel
+            logDownloadPageInteraction("sort_table", key, sortAsc ? "asc" : "desc");
+
             applyFilters();
         }
         
@@ -238,18 +256,60 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.filter-group select').forEach(select => {
-                select.addEventListener('change', applyFilters);
+                select.addEventListener('change', function () {
+                    applyFilters();
+                    
+                    if (this.id === "filterBahasa") {
+                        logDownloadPageInteraction("filter_bahasa", "bahasa", this.value || "Semua");
+                    }
+                    
+                    if (this.id === "filterUrutan") {
+                        logDownloadPageInteraction("filter_urutan", "urutan", this.value || "Semua");
+                    }
+                    
+                    if (this.id === "filterJudul") {
+                        logDownloadPageInteraction("filter_judul", "judul" , this.value || "Semua");
+                    }
+                });
             });
+            
             document.querySelectorAll('th.sortable').forEach(th => {
                 th.addEventListener('click', handleSort);
             });
             
-            // ▼▼▼ TAMBAHKAN EVENT LISTENER UNTUK TOMBOL BARU ▼▼▼
-            document.getElementById('resetFilters').addEventListener('click', resetAllFilters);
-            document.getElementById('resetSort').addEventListener('click', resetTableSort);
-
+            // Reset Filter
+            document.getElementById('resetFilters').addEventListener('click', () => {
+                resetAllFilters();
+                logDownloadPageInteraction("reset_filter", "Filter", "Default");
+            });
+            
+            // Reset Urutan
+            document.getElementById('resetSort').addEventListener('click', () => {
+                resetTableSort();
+                logDownloadPageInteraction("reset_urutan", "Urutan", "Default");
+            });
+            
             fetchData();
         });
+
     </script>
+
+    <script>
+  /*
+  Service Worker Registration
+  Digunakan untuk PWA agar website bisa diinstal
+  di layar utama handphone.
+  */
+ if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js')
+    .then(reg => console.log('Service Worker terdaftar.', reg))
+    .catch(err => console.error('Service Worker gagal:', err));
+  });
+  }
+  </script>
+  
+  <script src="js/footer.js"></script>
+
 </body>
 </html>

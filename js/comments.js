@@ -16,10 +16,19 @@ document.getElementById('comment-section').addEventListener('click', function(ev
         handleEditComment(event.target.dataset.commentId, event.target.dataset.commentText);
     }
     if (event.target.classList.contains('delete-btn')) {
-        handleDeleteComment(event.target.dataset.commentId);
+        handleDeleteComment(event.target.dataset.commentId, event.target.dataset.commentText);
     }
     if (event.target.classList.contains('like-btn')) {
         handleLikeClick(event.target);
+    }
+});
+
+// Listener global untuk modal delete (cancel)
+document.getElementById("deleteConfirmModal").addEventListener("hidden.bs.modal", function () {
+    if (window.commentTextToDelete) {
+        logUserBehavior("delete_comment_cancelled", "halaman-bahasa", window.commentTextToDelete);
+        window.commentTextToDelete = null;
+        window.commentIdToDelete = null;
     }
 });
 
@@ -59,11 +68,19 @@ function loadComments(videoId) {
                             <p class="mb-1 mt-1 comment-text" data-comment-id="${comment.comment_id}" style="white-space: pre-wrap;">${comment.comments_description}</p>
                             <div class="edit-controls d-none" data-comment-id="${comment.comment_id}"></div>
                             <div class="comment-actions d-flex align-items-center small mt-1">
-                                <span class="like-btn ${liked ? 'liked' : ''}" data-comment-id="${comment.comment_id}">👍</span>
-                                <span class="ms-2 likes-count">${comment.likes_count > 0 ? comment.likes_count : ''}</span>
+                            <button class="btn btn-sm ${liked ? 'btn-primary' : 'btn-outline-primary'} like-btn" 
+                            data-comment-id="${comment.comment_id}">
+                            ${liked ? 'Disukai' : 'Suka'}
+                            </button>
+                            <span class="ms-2 likes-count">${comment.likes_count > 0 ? comment.likes_count : ''}</span>
+
                                 ${isOwner ? `
-                                    <button class="btn btn-sm btn-outline-primary ms-3 edit-btn" data-comment-id="${comment.comment_id}" data-comment-text="${comment.comments_description}">Edit</button>
-                                    <button class="btn btn-sm btn-outline-danger ms-2 delete-btn" data-comment-id="${comment.comment_id}">Hapus</button>
+                                    <button class="btn btn-sm btn-outline-primary ms-3 edit-btn" 
+                                        data-comment-id="${comment.comment_id}" 
+                                        data-comment-text="${comment.comments_description}">Edit Komentar</button>
+                                    <button class="btn btn-sm btn-outline-danger ms-2 delete-btn" 
+                                        data-comment-id="${comment.comment_id}" 
+                                        data-comment-text="${comment.comments_description}">Hapus Komentar</button>
                                 ` : ''}
                             </div>
                         </div>
@@ -101,8 +118,12 @@ function handleCommentSubmit(event) {
         }).then(res => res.json()).then(result => {
             if (result.status === "success") {
                 input.value = '';
-                loadComments(currentVideoId);  // Reload komentar
-                // 🧠 Tracking komentar untuk video_interaction
+
+                const currentVideoTitle = document.getElementById('videoTitle')?.textContent || "Tanpa Judul";
+                logUserBehavior("comment_submit", currentVideoTitle, text);
+
+                loadComments(currentVideoId);
+
                 if (typeof trackVideoInteraction === "function") {
                     trackVideoInteraction("comment", { comment_id: result.comment_id });
                 }
@@ -113,15 +134,20 @@ function handleCommentSubmit(event) {
     });
 }
 
-// Fungsi edit komentar (tanpa perubahan dari sebelumnya)
+// Fungsi edit komentar
 function handleEditComment(commentId, currentText) {
+    logUserBehavior("edit_comment_clicked", "halaman-bahasa", currentText);
     const commentTextEl = document.querySelector(`.comment-text[data-comment-id="${commentId}"]`);
     const editControlsEl = document.querySelector(`.edit-controls[data-comment-id="${commentId}"]`);
+    const actionsEl = editControlsEl.parentElement.querySelector('.comment-actions');
+
+    const editBtn = actionsEl.querySelector(`.edit-btn[data-comment-id="${commentId}"]`);
+    if (editBtn) editBtn.classList.add("d-none");
 
     editControlsEl.innerHTML = `
         <textarea class="form-control mb-2">${currentText}</textarea>
-        <button class="btn btn-sm btn-success me-2">Simpan</button>
-        <button class="btn btn-sm btn-secondary">Batal</button>
+        <button class="btn btn-sm btn-success me-2">Simpan Komentar</button>
+        <button class="btn btn-sm btn-secondary">Batal Edit</button>
     `;
 
     const [textarea, saveBtn, cancelBtn] = editControlsEl.children;
@@ -129,6 +155,8 @@ function handleEditComment(commentId, currentText) {
     saveBtn.onclick = () => {
         const newText = textarea.value.trim();
         if (!newText) return;
+        logUserBehavior("edit_comment_saved", "halaman-bahasa", newText);
+
         auth.currentUser.getIdToken(true).then(token => {
             fetch(WEB_APP_URL_COMMENTS, {
                 method: 'POST',
@@ -149,46 +177,89 @@ function handleEditComment(commentId, currentText) {
         });
     };
 
-    cancelBtn.onclick = () => loadComments(currentVideoId);
+    cancelBtn.onclick = () => {
+        logUserBehavior("edit_comment_cancelled", "halaman-bahasa", currentText);
+        loadComments(currentVideoId);
+    };
 
     commentTextEl.classList.add('d-none');
     editControlsEl.classList.remove('d-none');
 }
 
-// Fungsi hapus komentar (tanpa perubahan)
-function handleDeleteComment(commentId) {
-    if (!confirm("Yakin ingin menghapus komentar ini?")) return;
+// Fungsi hapus komentar
+function handleDeleteComment(commentId, commentText) {
+    logUserBehavior("delete_comment_clicked", "halaman-bahasa", commentText);
+    window.commentIdToDelete = commentId;
+    window.commentTextToDelete = commentText;
 
-    auth.currentUser.getIdToken(true).then(token => {
-        fetch(WEB_APP_URL_COMMENTS, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: 'delete_comment',
-                commentId: commentId,
-                userId: auth.currentUser.uid,
-                authToken: token
-            })
-        }).then(res => res.json()).then(result => {
-            if (result.status === "success") {
-                loadComments(currentVideoId);
-            } else {
-                alert("Gagal menghapus komentar.");
-            }
+    const modal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+    modal.show();
+
+    logUserBehavior("delete_comment_modal_shown", "halaman-bahasa", commentText);
+
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    confirmBtn.onclick = () => {
+        logUserBehavior("delete_comment_confirmed", "halaman-bahasa", window.commentTextToDelete);
+
+        auth.currentUser.getIdToken(true).then(token => {
+            fetch(WEB_APP_URL_COMMENTS, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'delete_comment',
+                    commentId: window.commentIdToDelete,
+                    userId: auth.currentUser.uid,
+                    authToken: token
+                })
+            }).then(res => res.json()).then(result => {
+                if (result.status === "success") {
+                    loadComments(currentVideoId);
+                } else {
+                    alert("Gagal menghapus komentar.");
+                }
+            });
         });
-    });
+
+        modal.hide();
+    };
 }
 
-// Fungsi like komentar (tanpa perubahan)
+// Fungsi like komentar
 function handleLikeClick(buttonElement) {
     const user = auth.currentUser;
     if (!user) return alert("Login terlebih dahulu untuk menyukai komentar.");
 
     const commentId = buttonElement.dataset.commentId;
+
+    // Ambil teks komentar untuk log
+    const commentTextEl = document.querySelector(`.comment-text[data-comment-id="${commentId}"]`);
+    const commentText = commentTextEl ? commentTextEl.textContent.trim() : "(Komentar tidak ditemukan)";
+
     const likesCountEl = buttonElement.nextElementSibling;
-    const liked = buttonElement.classList.toggle('liked');
+
+    // Toggle liked (cek apakah sebelumnya liked atau tidak)
+    const wasLiked = buttonElement.classList.contains('btn-primary');
+    const liked = !wasLiked;
+
+    // Ubah tampilan tombol
+    if (liked) {
+        buttonElement.classList.remove("btn-outline-primary");
+        buttonElement.classList.add("btn-primary");
+        buttonElement.textContent = "Disukai";
+    } else {
+        buttonElement.classList.remove("btn-primary");
+        buttonElement.classList.add("btn-outline-primary");
+        buttonElement.textContent = "Suka";
+    }
+
+    // Tracking log
+    const eventName = liked ? "liked_comment" : "unliked_comment";
+    logUserBehavior(eventName, "halaman-bahasa", commentText);
+
+    // Update jumlah likes (UI saja, biar terasa responsif)
     let likes = parseInt(likesCountEl.textContent || '0');
     likesCountEl.textContent = liked ? likes + 1 : (likes - 1 > 0 ? likes - 1 : '');
 
+    // Kirim ke server
     auth.currentUser.getIdToken(true).then(token => {
         fetch(WEB_APP_URL_COMMENTS, {
             method: 'POST',
@@ -198,6 +269,6 @@ function handleLikeClick(buttonElement) {
                 userId: user.uid,
                 authToken: token
             })
-        }).catch(() => loadComments(currentVideoId)); // fallback reload
+        }).catch(() => loadComments(currentVideoId));
     });
 }

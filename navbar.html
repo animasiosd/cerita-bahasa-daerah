@@ -1,28 +1,37 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm sticky-top">
   <div class="container">
-    <a class="navbar-brand" href="./" data-page="index.html">🏠 Cerita Bahasa Daerah</a>
+    <a class="navbar-brand" href="./" data-page="index.html" onclick="logUserBehavior('home_logo_button','navbar')">
+      <img src="assets/home_logo.png" alt="Home" height="40"> Cerita BETA VERSION
+    </a>
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto">
 
+        <!-- Tombol Install PWA -->
         <li class="nav-item">
-          <a class="nav-link" href="./" data-page="index.html">Beranda</a>
+          <button id="manualInstallBtn" class="btn btn-outline-light btn-sm me-2" style="cursor:pointer; display: none;">
+            Install
+          </button>
         </li>
 
-                <li class="nav-item dropdown">
+        <li class="nav-item">
+          <a class="nav-link" href="./" data-page="index.html" onclick="logUserBehavior('beranda_button','navbar')">Beranda</a>
+        </li>
+
+        <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownLanguages" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             Pilih Bahasa
           </a>
           <ul class="dropdown-menu dropdown-menu-end" id="languagesDropdown">
-            <!-- Daftar bahasa akan diisi otomatis via main.js -->
             <li><span class="dropdown-item text-muted">Memuat daftar bahasa...</span></li>
           </ul>
         </li>
 
         <li class="nav-item">
-          <a class="nav-link" href="download.html" data-page="download.html">Download</a>
+          <a class="nav-link" href="download.html" data-page="download.html" onclick="logUserBehavior('download_button','navbar')">Download</a>
         </li>
 
         <li class="nav-item">
@@ -33,3 +42,4 @@
     </div>
   </div>
 </nav>
+

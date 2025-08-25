@@ -1,0 +1,35 @@
+📌 Dimana Menambahkan <script src="js/client_performance_and_errors.js"></script> ?
+
+Semua halaman utama yang user bisa akses:
+
+index.html
+
+halaman-bahasa.html
+
+download.html
+
+Posisi penempatan:
+Tempatkan setelah analytics.js, supaya firebase dan fungsi analitik sudah siap digunakan.
+Contoh (di download.html):
+
+<script src="js/auth.js"></script>
+<script src="js/main.js"></script>
+<script src="js/analytics.js"></script>
+<script src="js/client_performance_and_errors.js"></script>
+
+
+Jadi urutannya:
+
+auth.js (login/logout)
+
+main.js (logic aplikasi)
+
+analytics.js (tracking behavior/video)
+
+client_performance_and_errors.js (tracking error & performa)
+
+✅ Kesimpulan
+
+File baru: js/client_performance_and_errors.js (isi sesuai kode di atas).
+
+Tambahkan <script> di semua halaman HTML utama setelah analytics.js.

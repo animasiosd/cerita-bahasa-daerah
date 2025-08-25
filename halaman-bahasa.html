@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <base href="/beta/">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cerita Bahasa Daerah</title>
@@ -10,6 +11,9 @@
     <meta property="og:url" content="" id="og-url" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="assets/favicon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0d6efd">
 
     <style>
         #page-loader {
@@ -47,7 +51,7 @@
 
     <div id="loginContainer" class="d-flex justify-content-center align-items-center vh-100">
         <div class="text-center">
-            <h1 class="mb-3">Cerita Bahasa Daerah</h1>
+            <h1 class="mb-3">Cerita Bahasa Daerah Beta Version</h1>
             <p class="mb-4">Masuk untuk menjelajahi cerita dari berbagai daerah.</p>
             <p class="text-danger mt-3 bg-white p-2 rounded">Anda harus login terlebih dahulu untuk mengakses halaman ini.</p>
             <button id="loginBtn" class="btn btn-primary btn-lg">Login dengan Google</button>
@@ -72,12 +76,18 @@
             <div class="text-center my-4">
                 <strong>Bagikan cerita ini:</strong>
                 <div class="mt-2">
-                    <a id="share-wa" class="btn btn-success me-2" href="#" target="_blank" rel="noopener noreferrer">
-                        Bagikan ke WhatsApp
-                    </a>
-                    <a id="share-fb" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer">
-                        Bagikan ke Facebook
-                    </a>
+                    <a id="share-wa" class="btn btn-success me-2" href="#"
+                    onclick="logShareWhatsapp('sharebtn_whatsapp','whatsapp')"
+                    target="_blank" rel="noopener noreferrer">
+                    Bagikan ke WhatsApp
+                </a>
+
+                    <a id="share-fb" class="btn btn-primary" href="#" 
+                    onclick="logShareFacebook()" 
+                    target="_blank" rel="noopener noreferrer">
+                    Bagikan ke Facebook
+                </a>
+
                 </div>
             </div>
 
@@ -113,14 +123,72 @@
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> <!-- 🧠 Tambahkan ini -->
     <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
 
+    <!-- Modal Bootstrap -->
+<div class="modal fade" id="tutorialModal" tabindex="-1" aria-labelledby="tutorialModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="tutorialModalLabel">Cara Mengizinkan Lokasi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <!-- Body: Bootstrap Carousel -->
+      <div class="modal-body">
+        <div id="tutorialCarousel" class="carousel slide" data-bs-ride="carousel">
+          <div class="carousel-inner" id="carousel-images"></div>
+
+          <!-- Control Buttons -->
+          <button class="carousel-control-prev" type="button" data-bs-target="#tutorialCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          </button>
+          <button class="carousel-control-next" type="button" data-bs-target="#tutorialCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="modal-footer">
+        <button id="allowLocationBtn" class="btn btn-primary">Saya Sudah Mengizinkan</button>
+        <button id="denyLocationBtn" class="btn btn-danger">Tetap Tolak</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Konfirmasi Hapus -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title">Konfirmasi Hapus</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Apakah Anda yakin ingin menghapus komentar ini?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Hapus</button>
+      </div>
+    </div>
+  </div>
+</div>
+
     <script src="js/auth.js"></script>
+    <script src="js/userlocationnotification.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/geotracker.js"></script>
     <script src="js/analytics.js"></script>
     <script src="js/video.js"></script>
     <script src="js/comments.js"></script>
+
     <script>
     let ytPlayer;
     let pendingVideoId = null;
@@ -130,7 +198,7 @@
         
         function loadVideoPlayer(videoId) {
             if (!videoId || videoId.trim() === "") {
-                console.warn("⛔ Video ID kosong, tidak akan dimuat.");
+                console.warn("⛔ Judul Video kosong, silahkan pilih judul video terlebih dahulu.");
                 return;
             }
             if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
@@ -156,7 +224,6 @@
                     
                     events: {
                         'onReady': (event) => {
-                            console.log("✅ YouTube Player siap");
                             document.addEventListener("fullscreenchange", () => {
                                 if (document.fullscreenElement) {
                                     trackVideoInteraction("fullscreen");
@@ -214,7 +281,6 @@
     </script>
 
     <script src="https://www.youtube.com/iframe_api"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script> <!-- 🧠 Tambahkan ini -->
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -305,5 +371,35 @@
     document.addEventListener('DOMContentLoaded', setupShareButtons);
 </script>
 
+<script>
+function logShareFacebook() {
+    const videoTitle = document.getElementById("videoTitle")?.textContent || "Tanpa Judul";
+    logUserBehavior("share_button", "facebook", videoTitle);
+}
+
+function logShareWhatsapp() {
+    const videoTitle = document.getElementById("videoTitle")?.textContent || "Tanpa Judul";
+    logUserBehavior("share_button", "whatsapp", videoTitle);
+}
+</script>
+
+<script>
+/*
+Service Worker Registration
+Digunakan untuk PWA agar website bisa diinstal
+di layar utama handphone.
+*/
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js')
+      .then(reg => console.log('Service Worker terdaftar.', reg))
+      .catch(err => console.error('Service Worker gagal:', err));
+  });
+}
+</script>
+
+<script src="js/footer.js"></script>
+
 </body>
+
 </html>
