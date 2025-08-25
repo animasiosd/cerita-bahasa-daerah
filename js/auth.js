@@ -97,11 +97,10 @@ document.addEventListener("DOMContentLoaded", () => {
       provider.addScope('https://www.googleapis.com/auth/user.addresses.read');
 
       try {
-        // ✅ PERBAIKAN: signInWithPopup hanya sekali + await
         const result = await auth.signInWithPopup(provider);
         const user = result.user;
         const credential = result.credential;
-        const accessToken = credential && credential.accessToken ? credential.accessToken : null;
+        const accessToken = credential?.accessToken || null;
         // Ambil umur & gender dari Google People API (jika token tersedia)
         let profileData = {};
         try {
@@ -116,13 +115,13 @@ document.addEventListener("DOMContentLoaded", () => {
         
         // ✅ Pastikan sessionStorage diisi lebih awal
         sessionStorage.setItem("ageData", JSON.stringify(profileData || {}));
-        
-        // ✅ Tunggu sampai sessionStorage terisi sebelum memanggil logUserLogin()
+
+        // ✅ Kirim data ke analytics.js → Panggil logUserLogin HANYA DI SINI
         if (typeof logUserLogin === "function") {
-          await logUserLogin(user, profileData);  // 🔹 Pastikan dikirim ke analytics.js
-          }
+          await logUserLogin(user, profileData);
+        }
           
-          // ✅ Kirim data user ke Google Apps Script
+          // ✅ Kirim data user ke Google Sheets
           await sendUserLoginToSheet(user, profileData || {});
           
           // Redirect ke halaman utama
@@ -292,3 +291,4 @@ document.addEventListener("DOMContentLoaded", () => {
     if (mainContent) mainContent.classList.add("d-none");
   }
 });
+

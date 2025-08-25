@@ -68,7 +68,7 @@ function sendAnalyticsEvent(eventType, dataObject) {
   }).catch(err => console.error("❌ Gagal kirim analytics:", err));
 }
 
-async function waitForAgeData(maxWait = 3000) {
+async function waitForAgeData(maxWait = 7000) {
   const start = Date.now();
   while (Date.now() - start < maxWait) {
     const ageData = sessionStorage.getItem("ageData");
@@ -138,13 +138,6 @@ function logPageView(user) {
 
 document.addEventListener("DOMContentLoaded", () => {
   firebase.auth().onAuthStateChanged(user => {
-    if (user) {
-      setTimeout(() => {
-        logUserLogin(user);
-        logPageView(user);
-      }, 3000);
-    } else {
-      logPageView(null);
-    }
+    logPageView(user || null);
   });
 });
