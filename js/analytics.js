@@ -115,6 +115,26 @@ async function logUserLogin(user, profileData = {}) {
   }
 }
 
+function logPageView(user) {
+  const deviceInfo = getDeviceInfo();
+  const geoData = window.latestGeoData || {};
+  const currentUrl = window.location.href;
+
+  const data = {
+    timestamp: getFormattedTimestampWIB(),
+    user_id: user ? user.uid : "GUEST",
+    user_name: user ? user.displayName : "Pengunjung",
+    url_halaman: currentUrl,
+    tipe_halaman: document.title || "Halaman",
+    nama_bahasa: geoData.language || "",
+    device_type: deviceInfo.device,
+    operating_system: deviceInfo.os,
+    browser_name: deviceInfo.browser
+  };
+
+  sendAnalyticsEvent("PAGE_VIEW", data);
+  console.log("[Analytics] Page view terkirim:", data);
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   firebase.auth().onAuthStateChanged(user => {
