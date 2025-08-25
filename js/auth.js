@@ -96,6 +96,11 @@ document.addEventListener("DOMContentLoaded", () => {
       provider.addScope("https://www.googleapis.com/auth/user.birthday.read");
       provider.addScope('https://www.googleapis.com/auth/user.addresses.read');
 
+      provider.setCustomParameters({
+        prompt: 'consent',   // 🔹 Paksa user melihat & menyetujui izin
+        access_type: 'offline'
+      });
+
       try {
         const result = await auth.signInWithPopup(provider);
         const user = result.user;
