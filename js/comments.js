@@ -7,30 +7,46 @@ const WEB_APP_URL_COMMENTS = "https://script.google.com/macros/s/AKfycbwlCVUzCu9
 var currentVideoId = null;
 var currentLanguagePage = null;
 
-// Event form komentar
-document.getElementById('comment-form').addEventListener('submit', handleCommentSubmit);
+// ✅ SOLUSI: Bungkus semua event listener di dalam DOMContentLoaded
+// Ini memastikan semua elemen HTML sudah ada sebelum JavaScript mencoba mengaksesnya.
+document.addEventListener('DOMContentLoaded', function() {
+    
+    const commentForm = document.getElementById('comment-form');
+    const commentSection = document.getElementById('comment-section');
+    const deleteConfirmModal = document.getElementById("deleteConfirmModal");
 
-// Delegasi klik di area komentar (edit, hapus, like)
-document.getElementById('comment-section').addEventListener('click', function(event) {
-    if (event.target.classList.contains('edit-btn')) {
-        handleEditComment(event.target.dataset.commentId, event.target.dataset.commentText);
+    // Event form komentar
+    if (commentForm) {
+        commentForm.addEventListener('submit', handleCommentSubmit);
     }
-    if (event.target.classList.contains('delete-btn')) {
-        handleDeleteComment(event.target.dataset.commentId, event.target.dataset.commentText);
+
+    // Delegasi klik di area komentar (edit, hapus, like)
+    if (commentSection) {
+        commentSection.addEventListener('click', function(event) {
+            if (event.target.classList.contains('edit-btn')) {
+                handleEditComment(event.target.dataset.commentId, event.target.dataset.commentText);
+            }
+            if (event.target.classList.contains('delete-btn')) {
+                handleDeleteComment(event.target.dataset.commentId, event.target.dataset.commentText);
+            }
+            if (event.target.classList.contains('like-btn')) {
+                handleLikeClick(event.target);
+            }
+        });
     }
-    if (event.target.classList.contains('like-btn')) {
-        handleLikeClick(event.target);
+
+    // Listener global untuk modal delete (cancel)
+    if (deleteConfirmModal) {
+        deleteConfirmModal.addEventListener("hidden.bs.modal", function () {
+            if (window.commentTextToDelete) {
+                logUserBehavior("delete_comment_cancelled", "bahasa_page", window.commentTextToDelete);
+                window.commentTextToDelete = null;
+                window.commentIdToDelete = null;
+            }
+        });
     }
 });
 
-// Listener global untuk modal delete (cancel)
-document.getElementById("deleteConfirmModal").addEventListener("hidden.bs.modal", function () {
-    if (window.commentTextToDelete) {
-        logUserBehavior("delete_comment_cancelled", "bahasa_page", window.commentTextToDelete);
-        window.commentTextToDelete = null;
-        window.commentIdToDelete = null;
-    }
-});
 
 // Fungsi utama: Memuat komentar berdasarkan videoId
 function loadComments(videoId) {
