@@ -2,7 +2,7 @@
 function requestUserGeolocation() {
     if (!navigator.geolocation) {
         // Jika browser tidak mendukung geolocation → arahkan ke halaman tutorial
-        window.location.href = "/beta/locationtutorial.html";
+        window.location.href = "/cerita-bahasa-daerah/locationtutorial.html";
         return;
     }
 
@@ -18,7 +18,7 @@ function requestUserGeolocation() {
             if (error.code === error.PERMISSION_DENIED) {
                 console.log("Lokasi ditolak ❌, menampilkan tutorial...");
                 // Arahkan ke halaman tutorial izinkan lokasi
-                window.location.href = "/beta/locationtutorial.html";
+                window.location.href = "/cerita-bahasa-daerah/locationtutorial.html";
             } else {
                 console.log("Terjadi kesalahan lain:", error.message);
             }

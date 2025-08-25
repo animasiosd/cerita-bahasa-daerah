@@ -2,8 +2,8 @@
   "name": "Cerita Bahasa Daerah",
   "short_name": "Cerita Bahasa",
   "description": "Jelajahi cerita dari berbagai bahasa daerah di Indonesia.",
-  "start_url": "/beta/index.html",
-  "scope": "/beta/",
+  "start_url": "/cerita-bahasa-daerah/index.html",
+  "scope": "/cerita-bahasa-daerah/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#0d6efd",
@@ -21,13 +21,13 @@
   ],
   "screenshots": [
     {
-      "src": "/beta/screenshots/ss-wide.png",
+      "src": "/cerita-bahasa-daerah/screenshots/ss-wide.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide" 
     },
     {
-      "src": "/beta/screenshots/ss-mobile.png",
+      "src": "/cerita-bahasa-daerah/screenshots/ss-mobile.png",
       "sizes": "720x1280",
       "type": "image/png"
     }

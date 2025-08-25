@@ -1,5 +1,5 @@
-const CACHE_NAME = 'cerita-bahasa-beta-v1';
-const BASE_PATH = '/beta/';
+const CACHE_NAME = 'cerita-bahasa-daerah-v1.1.1';
+const BASE_PATH = '/cerita-bahasa-daerah/';
 
 const urlsToCache = [
   `${BASE_PATH}`,

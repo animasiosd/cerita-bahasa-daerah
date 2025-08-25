@@ -12,14 +12,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const brandText = document.createElement('span');
 
     // 2. Atur atribut dan konten untuk link Ketentuan Layanan
-    termsLink.href = 'https://animasiosd.github.io/beta/terms_of_service.html';
+    termsLink.href = 'https://animasiosd.github.io/cerita-bahasa-daerah/terms_of_service.html';
     termsLink.textContent = 'Ketentuan Layanan';
     termsLink.style.color = '#ffffff';
     termsLink.style.textDecoration = 'underline';
     termsLink.style.margin = '0 10px';
 
     // 3. Atur atribut dan konten untuk link Kebijakan Privasi
-    privacyLink.href = 'https://animasiosd.github.io/beta/privacy_policy.html';
+    privacyLink.href = 'https://animasiosd.github.io/cerita-bahasa-daerah/privacy_policy.html';
     privacyLink.textContent = 'Kebijakan Privasi';
     privacyLink.style.color = '#ffffff';
     privacyLink.style.textDecoration = 'underline';

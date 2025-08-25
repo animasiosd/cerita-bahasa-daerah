@@ -26,9 +26,9 @@ let navbarLoaded = false;
 
 // URL helper
 const URLS = {
-  login: "https://animasiosd.github.io/beta/login",
-  index: "https://animasiosd.github.io/beta/index.html", // bisa diganti ke .../beta/ jika ingin URL bersih
-  tutorial: "https://animasiosd.github.io/beta/locationtutorial.html",
+  login: "https://animasiosd.github.io/cerita-bahasa-daerah/login",
+  index: "https://animasiosd.github.io/cerita-bahasa-daerah/index.html", // bisa diganti ke .../cerita-bahasa-daerah/ jika ingin URL bersih
+  tutorial: "https://animasiosd.github.io/cerita-bahasa-daerah/locationtutorial.html",
 };
 
 // Fungsi untuk redirect halaman
@@ -182,8 +182,8 @@ if (loginBtn) {
    auth.onAuthStateChanged((user) => {
     const currentPath = window.location.pathname;
 
-    const onLoginPage = currentPath.includes("/beta/login");
-    const onTutorialPage = currentPath.includes("/beta/locationtutorial.html");
+    const onLoginPage = currentPath.includes("/cerita-bahasa-daerah/login");
+    const onTutorialPage = currentPath.includes("/cerita-bahasa-daerah/locationtutorial.html");
 
     // PRIORITAS #1: TANGANI PENGGUNA YANG BELUM LOGIN
     if (!user) {
