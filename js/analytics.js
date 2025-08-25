@@ -79,6 +79,43 @@ async function waitForAgeData(maxWait = 3000) {
   return {};
 }
 
+async function logUserLogin(user, profileData = {}) {
+  if (!user) return;
+
+  // ✅ Pastikan ageData sudah siap
+  const ageData = Object.keys(profileData).length
+    ? profileData
+    : await waitForAgeData();
+
+  const geoData = window.latestGeoData || {};
+
+  const payload = {
+    eventType: "USER_LOGIN_ACTIVITY",
+    data: {
+      user_id: user.uid,
+      email: user.email,
+      user_name: user.displayName,
+      birthday: ageData.birthday || "",
+      gender: ageData.gender || "Tidak Diketahui",
+      minAge: ageData.minAge || "",
+      age_range: ageData.age_range || "",
+      age_range_category: ageData.age_range_category || "",
+      ...geoData
+    }
+  };
+
+  try {
+    await fetch(ANALYTICS_WEB_APP, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    console.log("[Analytics] Data login user berhasil dikirim:", payload);
+  } catch (err) {
+    console.error("[Analytics] Gagal kirim data login:", err);
+  }
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
   firebase.auth().onAuthStateChanged(user => {
     if (user) {
