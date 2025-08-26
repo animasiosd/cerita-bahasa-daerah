@@ -1,6 +1,24 @@
 // File: js/analytics.js
 // ✅ Versi Final – Fix integrasi geoTracker.js & ageData
 
+/**
+ * Mengirim event kustom HANYA ke Google Tag Manager untuk GA4.
+ * @param {string} eventName - Nama event yang akan muncul di GA4 (contoh: 'select_language').
+ * @param {Object} eventParams - Objek berisi detail tambahan (contoh: { language: 'Jawa' }).
+ */
+function trackGAEvent(eventName, eventParams = {}) {
+  // Pastikan dataLayer sudah ada
+  window.dataLayer = window.dataLayer || [];
+  
+  // Kirim event ke dataLayer
+  window.dataLayer.push({
+    'event': eventName,
+    ...eventParams
+  });
+
+  console.log(`GA Event Sent: ${eventName}`, eventParams); // Untuk debugging
+}
+
 const ANALYTICS_WEB_APP = "https://script.google.com/macros/s/AKfycbxm5YQAB2kify_9SzPph5xgaEMlsKpE8UNfrPuvmghgDM9meNKCiDPABKHJ4a4p3Nak/exec";
 const videoProgressSession = {};
 const videoCompletedSession = {};
