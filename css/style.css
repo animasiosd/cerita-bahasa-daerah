@@ -15,7 +15,7 @@ body {
 }
 #loginBtn {
   border: 2px solid #2575fc;
-  background-color: transparent;
+  background-color: white;
   color: #2575fc;
   transition: all 0.3s ease;
 }
