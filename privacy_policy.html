@@ -51,27 +51,37 @@
         }
 
         .brand-header {
-            display: flex;              /* Atur jadi sejajar horizontal */
-            align-items: center;        /* Vertikal center */
-            gap: 10px;                  /* Jarak antara logo dan teks */
+            display: flex;
+            justify-content: space-between; /* Logo di kiri, tombol di kanan */
+            align-items: center;            /* Rata tengah vertikal */
+            padding: 10px 20px;
+            background-color: #fff;         /* Opsional */
+            border-bottom: 1px solid #ddd;  /* Opsional */
+        }
+
+        .brand-left {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Jarak logo dan teks */
         }
 
         .brand-logo {
-            width: 48px;                /* Atur ukuran logo */
-            height: 48px;               /* Sesuaikan tinggi logo */
-            object-fit: contain;        /* Supaya proporsional */
+            width: 48px;   /* Ubah sesuai kebutuhan */
+            height: 48px;
+            object-fit: contain;
         }
+
         .btn-loginpage {
             padding: 6px 14px;
             background-color: #007bff;
-            color: rgb(22, 22, 22);
+            color: white;
             text-decoration: none;
             border-radius: 6px;
             font-size: 14px;
             transition: background-color 0.2s ease;
         }
-        
-        .btn-logipage:hover {
+
+        .btn-loginpage:hover {
             background-color: #0056b3;
         }
     </style>
@@ -85,11 +95,13 @@
 
     <main class="container my-5">
 
-        <!-- Header dengan Logo + Teks -->
-        <div class="brand-header">
-            <img src="assets/favicon-192.png" alt="Logo Cerita Bahasa Daerah" class="brand-logo">
-            <h1>Cerita Bahasa Daerah</h1>
-            <a href="login.html" class="btn-loginpage">Kembali ke Halaman Login</a>
+        <!-- Header dengan Logo + Teks + Tombol -->
+         <div class="brand-header">
+            <div class="brand-left">
+                <img src="assets/favicon-192.png" alt="Logo Cerita Bahasa Daerah" class="brand-logo">
+                <h1>Cerita Bahasa Daerah</h1>
+            </div>
+            <a href="login.html" class="btn-loginpage">Kembali ke Login</a>
         </div>
 
         <div class="policy-container">
