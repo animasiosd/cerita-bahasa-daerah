@@ -104,15 +104,17 @@ async function logUserLogin(user, profileData = {}) {
     }
   };
 
-  try {
-    await fetch(ANALYTICS_WEB_APP, {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-    console.log("[Analytics] Data login user berhasil dikirim:", payload);
-  } catch (err) {
-    console.error("[Analytics] Gagal kirim data login:", err);
+  // ✅ Tunggu fetch selesai
+  const response = await fetch(ANALYTICS_WEB_APP, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error("Gagal kirim data login!");
   }
+
+  console.log("[Analytics] Data login user berhasil dikirim:", payload);
 }
 
 function logPageView(user) {
@@ -246,17 +248,28 @@ function sendVideoInteractionToAnalytics(enrichedData) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  firebase.auth().onAuthStateChanged(user => {
+  firebase.auth().onAuthStateChanged(async (user) => {
     if (user) {
-      setTimeout(() => {
-        logUserLogin(user);
+      try {
+        // Tunggu sampai ageData siap dan data analitik terkirim
+        await logUserLogin(user);
         logPageView(user);
-      }, 500);
+
+        console.log("[Analytics] Semua data berhasil dikirim, siap redirect");
+
+        // Jika ada redirect, jalankan di sini
+        if (window.pendingRedirectUrl) {
+          window.location.href = window.pendingRedirectUrl;
+        }
+      } catch (err) {
+        console.error("[Analytics] Gagal menyimpan data login:", err);
+      }
     } else {
       logPageView(null);
     }
   });
 });
+
 
 function trackWatchProgress(currentTime, duration) {
   const percentage = Math.floor((currentTime / duration) * 100);
