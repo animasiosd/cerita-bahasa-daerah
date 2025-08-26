@@ -1,6 +1,6 @@
 // File: js/main.js - Versi Final yang Diperbaiki
 
-const BAHASA_API_URL = "https://script.google.com/macros/s/AKfycbwCT57fhlebRz7nKvvtmPxjKrR54-mQU3syiuRqspHX9nRubS-gg7RYkHybOlIwxdhyTg/exec";
+const BAHASA_API_URL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
 
 // Listener utama yang akan berjalan di setiap halaman
 document.addEventListener("DOMContentLoaded", function () {

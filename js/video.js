@@ -19,7 +19,7 @@ function initPage() {
     }
 
     // Ambil data video dari Google Apps Script
-    fetch(`${VIDEO_API_URL}?lang=${encodeURIComponent(language)}`)
+    fetch(`${VIDEO_API_URL}?action=getVideos&lang=${encodeURIComponent(language)}`)
         .then(res => res.json())
         .then(responseData => {
             // BARU: Gunakan displayName dari API untuk judul halaman
