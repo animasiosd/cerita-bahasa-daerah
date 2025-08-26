@@ -8,6 +8,21 @@ body {
   background-color: #f8f9fa; /* Warna latar belakang lembut */
 }
 
+/* Styling icon pada fitur utama */
+#features .feature-item h4 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* jarak antara icon dan teks */
+  font-weight: bold;
+}
+
+#features .feature-item h4 .feature-icon {
+  height: 1.5em; /* otomatis mengikuti tinggi teks */
+  width: auto;
+  display: inline-block;
+}
+
 /* Tampilan halaman login */
 #loginContainer {
   background: linear-gradient(to right, #c7c7c7, #f4f7f6);
@@ -16,7 +31,8 @@ body {
 #loginBtn {
   border: 2px solid #2575fc;
   background-color: #2575fc;
-  color: #333;
+  color: white;
+  font-weight: 600;
   transition: all 0.1s ease;
 }
 #loginBtn:hover {
