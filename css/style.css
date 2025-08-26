@@ -11,7 +11,7 @@ body {
 /* Tampilan halaman login */
 #loginContainer {
   background: linear-gradient(to right, #c7c7c7, #f4f7f6);
-  color: white;
+  color: rgb(22, 22, 22);
 }
 #loginBtn {
   border: 2px solid white;
