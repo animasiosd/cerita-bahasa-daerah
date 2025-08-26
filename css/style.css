@@ -10,7 +10,7 @@ body {
 
 /* Tampilan halaman login */
 #loginContainer {
-  background: linear-gradient(to right, #6a11cb, #2575fc);
+  background: linear-gradient(to right, #c7c7c7, #f4f7f6);
   color: white;
 }
 #loginBtn {
