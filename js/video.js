@@ -99,6 +99,3 @@ function initPage() {
             videoTitle.textContent = "Gagal memuat data bahasa.";
         });
 }
-
-// ✅ Jalankan initPage saat halaman dimuat
-document.addEventListener("DOMContentLoaded", initPage);
