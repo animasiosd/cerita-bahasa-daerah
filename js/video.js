@@ -99,3 +99,5 @@ function initPage() {
             videoTitle.textContent = "Gagal memuat data bahasa.";
         });
 }
+
+//menghapus initpage
