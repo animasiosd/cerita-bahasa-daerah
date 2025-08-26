@@ -32,6 +32,35 @@
         #downloadTable { font-size: 0.9rem; }
         #downloadTable tr:hover { background-color: #e9ecef; cursor: pointer; }
         #downloadTable th { background-color: #f8f9fa; cursor: pointer; }
+        /* Membatasi tinggi tabel agar maksimal 15 baris, lalu bisa scroll */
+.table-scroll {
+  max-height: calc(15 * 2.5em); /* Tinggi baris ±2.5em */
+  overflow-y: auto;
+  display: block;
+  border: 1px solid #dee2e6;
+}
+
+/* Supaya header tabel tetap di atas saat scroll */
+.table-scroll thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: #f8f9fa;
+}
+
+/* Pastikan kolom tidak mengecil saat scroll */
+.table-scroll table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-scroll td,
+.table-scroll th {
+  padding: 10px;
+  text-align: left;
+  vertical-align: middle;
+  white-space: nowrap;
+}
         .sortable::after { content: " \2195"; color: #aaa; }
         .asc::after { content: " \2191"; }
         .desc::after { content: " \2193"; }
@@ -77,8 +106,8 @@
                 <button id="resetSort" class="btn btn-outline-secondary">Reset Urutan</button>
             </div>
 
-            <div class="table-responsive">
-                <table id="downloadTable" class="table table-bordered table-hover">
+            <div class="table-responsive table-scroll">
+                <table id="downloadTable" class="table table-bordered table-hover mb-0">
                     <thead>
                         <tr>
                             <th class="sortable" data-key="bahasa">Bahasa</th>
@@ -86,8 +115,7 @@
                             <th class="sortable" data-key="title">Judul</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </main>
