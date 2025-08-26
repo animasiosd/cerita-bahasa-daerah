@@ -17,7 +17,7 @@ body {
   border: 2px solid #2575fc;
   background-color: white;
   color: #333;
-  transition: all 0.3s ease;
+  transition: all 0.1s ease;
 }
 #loginBtn:hover {
   background-color: white;
