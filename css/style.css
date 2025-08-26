@@ -14,7 +14,7 @@ body {
   color: rgb(22, 22, 22);
 }
 #loginBtn {
-  border: 2px solid white;
+  border: 2px solid #2575fc;
   background-color: transparent;
   transition: all 0.3s ease;
 }
