@@ -11,37 +11,35 @@ function initPage() {
     const videoTitle = document.getElementById('videoTitle');
     const urlParams = new URLSearchParams(window.location.search);
 
+// GANTI DENGAN BLOK KODE BARU INI
     const language = urlParams.get('bahasa');
-    const languageDisplay = urlParams.get('value');
-
     if (!language) {
         videoTitle.textContent = "Parameter ?bahasa= tidak ditemukan.";
         return;
     }
 
-    const pageTitle = languageDisplay ? languageDisplay : language.charAt(0).toUpperCase() + language.slice(1);
-
-    // Ubah judul tab
-    document.title = `Cerita Bahasa ${pageTitle}`;
-
-    // OG meta tag untuk share
-    const ogTitle = document.getElementById('og-title');
-    const ogDesc = document.getElementById('og-description');
-    const ogUrl = document.getElementById('og-url');
-
-    if (ogTitle) ogTitle.setAttribute('content', `Cerita Bahasa ${pageTitle}`);
-    if (ogDesc) ogDesc.setAttribute('content', `Dengarkan dan tonton cerita menarik dalam Bahasa ${pageTitle}.`);
-    if (ogUrl) ogUrl.setAttribute('content', window.location.href);
-
-    // Update placeholder pertanyaan diskusi
-    const langPlaceholder = document.getElementById('language-name-placeholder');
-    if (langPlaceholder) langPlaceholder.textContent = pageTitle;
-
     // Ambil data video dari Google Apps Script
     fetch(`${VIDEO_API_URL}?lang=${encodeURIComponent(language)}`)
         .then(res => res.json())
-        .then(data => {
-            if (!Array.isArray(data) || data.length === 0) {
+        .then(responseData => {
+            // BARU: Gunakan displayName dari API untuk judul halaman
+            const pageTitle = responseData.displayName || "Daerah"; // Fallback
+            document.title = `Cerita Bahasa ${pageTitle}`;
+
+            // BARU: Update meta tags menggunakan displayName yang akurat
+            const ogTitle = document.getElementById('og-title');
+            const ogDesc = document.getElementById('og-description');
+            const ogUrl = document.getElementById('og-url');
+            if (ogTitle) ogTitle.setAttribute('content', `Cerita Bahasa ${pageTitle}`);
+            if (ogDesc) ogDesc.setAttribute('content', `Dengarkan dan tonton cerita menarik dalam Bahasa ${pageTitle}.`);
+            if (ogUrl) ogUrl.setAttribute('content', window.location.href);
+            const langPlaceholder = document.getElementById('language-name-placeholder');
+            if (langPlaceholder) langPlaceholder.textContent = pageTitle;
+
+            // BARU: Ambil daftar video dari properti 'videos'
+            const videos = responseData.videos;
+
+            if (!Array.isArray(videos) || videos.length === 0) {
                 videoTitle.textContent = "Coming soon! Belum ada video untuk bahasa ini.";
                 return;
             }
@@ -57,7 +55,8 @@ function initPage() {
             defaultOption.textContent = "-- Pilih Video --";
             videoSelect.appendChild(defaultOption);
 
-            data.forEach(video => {
+            // BARU: Gunakan variabel 'videos' untuk perulangan
+            videos.forEach(video => {
                 const option = document.createElement('option');
                 option.value = video.videoId;
                 option.textContent = video.title;
@@ -73,15 +72,14 @@ function initPage() {
                 }
                 
                 if (videoId === window.currentVideoId) {
-                    // ⛔ Jangan log kalau pilihannya sama
                     return;
                 }
                 
-                const selected = data.find(v => v.videoId === videoId);
+                // BARU: Gunakan variabel 'videos' untuk mencari video yang dipilih
+                const selected = videos.find(v => v.videoId === videoId);
                 videoTitle.textContent = selected ? selected.title : "Video";
                 window.currentVideoId = videoId;
                 
-                // 🔥 Tracking analytics: choose_video
                 if (typeof logUserBehavior === "function") {
                     logUserBehavior("choose_video", selected?.title || "Tanpa Judul", videoId);
                 }
@@ -93,12 +91,12 @@ function initPage() {
                 if (typeof loadComments === "function") {
                     loadComments(videoId);
                 }
-            };  // ✅ cukup tutup dengan titik koma
+            };
             
         })
         .catch(err => {
-            console.error("❌ Gagal memuat video:", err);
-            videoTitle.textContent = "Gagal memuat video.";
+            console.error("❌ Gagal memuat data bahasa:", err);
+            videoTitle.textContent = "Gagal memuat data bahasa.";
         });
 }
 
