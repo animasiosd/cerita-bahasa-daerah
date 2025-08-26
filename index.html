@@ -53,50 +53,63 @@
   </style>
 </head>
 <body>
-
-  <!-- Google Tag Manager (noscript) -->
-   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MP4G2NCV"
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MP4G2NCV"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
+  <div id="navbar-placeholder"></div>
 
-<!-- Navbar placeholder -->
-<div id="navbar-placeholder"></div>
+  <main class="container my-5">
+    
+    <section class="text-center py-5">
+      <h1 class="display-4 fw-bold">Selamat Datang di Cerita Bahasa Daerah</h1>
+      <p class="lead text-muted col-lg-8 mx-auto">
+        Jelajahi dan lestarikan kekayaan budaya Indonesia melalui kumpulan cerita rakyat dalam berbagai bahasa daerah yang autentik.
+      </p>
+      <a href="login.html" class="btn btn-primary btn-lg mt-3" onclick="logUserBehavior('login_button_homepage')">
+        Login dengan Google untuk Memulai
+      </a>
+    </section>
 
-<!-- Loader Spinner Fullscreen -->
-<div id="page-loader">
-  <div class="spinner-border text-primary" role="status">
-    <span class="visually-hidden">Loading...</span>
-  </div>
-  <div id="loader-text">Memuat halaman...</div>
-</div>
+    <hr class="my-5">
 
-<!-- Halaman Login -->
-<div id="loginContainer" class="d-flex">
-  <div class="text-center">
-    <h1>Selamat Datang di Cerita Bahasa Daerah</h1>
-    <p class="mb-4">Silakan masuk untuk melanjutkan.</p>
-    <button id="loginBtn" class="btn btn-primary btn-lg">Login dengan Google</button>
-  </div>
-</div>
+    <section class="row text-center" id="features">
+      <h2 class="mb-4">Apa yang Anda Dapatkan?</h2>
+      <div class="col-md-4">
+        <h4>Koleksi Cerita Beragam</h4>
+        <p>Dengarkan cerita dari berbagai suku dan daerah, langsung dalam bahasa aslinya, lengkap dengan subtitle dan visual yang menarik.</p>
+      </div>
+      <div class="col-md-4">
+        <h4>Interaksi Komunitas</h4>
+        <p>Bergabunglah dalam diskusi, tinggalkan komentar, dan bagikan cerita favorit Anda dengan teman dan keluarga.</p>
+      </div>
+      <div class="col-md-4">
+        <h4>Mendukung Pelestarian</h4>
+        <p>Setiap kali Anda mendengarkan, Anda turut serta dalam upaya penting untuk menjaga agar bahasa daerah kita tetap hidup.</p>
+      </div>
+    </section>
 
-<!-- Halaman Utama -->
-<div id="mainContent" class="d-none">
-  <header>
-    <h1 id="welcome-text">🎉 Selamat Datang!</h1>
-    <p>Mau dengar cerita dari mana? Pilih bahasanya di tombol <strong>Pilih Bahasa</strong> ↗️</p>
-  </header>
-</div>
+    <hr class="my-5">
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/userlocationnotification.js"></script>
-<script src="js/main.js"></script>
-<script src="js/geotracker.js"></script>
-<script src="js/analytics.js"></script>
-<script src="js/footer.js"></script>
+    <section class="text-center" id="data-transparency">
+      <h2 class="mb-4">Tujuan Kami & Permintaan Data</h2>
+      <p class="col-lg-8 mx-auto">
+        Misi kami adalah menyediakan konten edukatif yang aman dan relevan. Untuk itu, saat Anda login, kami meminta akses ke informasi dasar seperti **rentang usia** dan **gender**. Data ini kami gunakan secara anonim untuk memahami demografi audiens kami, sehingga kami bisa menyajikan cerita yang lebih sesuai dan meningkatkan pengalaman belajar Anda. Kami tidak akan pernah membagikan data pribadi Anda.
+      </p>
+    </section>
 
-</body>
+  </main>
+
+  <footer class="text-center text-muted py-4 mt-5 bg-light">
+    <p>&copy; 2025 Cerita Bahasa Daerah</p>
+    <p>
+      <a href="privacy_policy.html">Kebijakan Privasi</a> | <a href="terms_of_service.html">Syarat & Ketentuan</a>
+    </p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/footer.js"></script>
+
+  </body>
 </html>
