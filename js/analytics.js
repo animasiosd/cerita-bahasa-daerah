@@ -109,43 +109,66 @@ async function waitForGeoData(maxWait = 7000) {
   return {};
 }
 
-async function logUserLogin(user, profileData = {}) {
-  if (!user) return;
-
-  // ✅ Pastikan ageData sudah siap
-  const ageData = Object.keys(profileData).length
-    ? profileData
-    : await waitForAgeData();
-
-  // ✅ Tunggu geoData
-  const geoData = await waitForGeoData();
-
-  const payload = {
-    eventType: "USER_LOGIN_ACTIVITY",
-    data: {
-      user_id: user.uid,
-      email: user.email,
-      user_name: user.displayName,
-      birthday: ageData.birthday || "",
-      gender: ageData.gender || "Tidak Diketahui",
-      minAge: ageData.minAge || "",
-      age_range: ageData.age_range || "",
-      age_range_category: ageData.age_range_category || "",
-      ...geoData
-    }
-  };
-
-  // ✅ Tunggu fetch selesai
-  const response = await fetch(ANALYTICS_WEB_APP, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    throw new Error("Gagal kirim data login!");
+async function logUserLogin(user) {
+  if (!user || user.isAnonymous) {
+    return;
   }
 
-  console.log("[Analytics] Data login user berhasil dikirim:", payload);
+  let locationData = {};
+  let ageData = { age_range: null, minAge: null }; // Default value
+
+  try {
+    locationData = await getUserLocation();
+  } catch (error) {
+    console.warn("[Analytics] Gagal mendapatkan data lokasi.", error.message);
+  }
+
+  // ======================================================================
+  // ✅ BACA DATA USIA DARI SESSIONSTORAGE
+  // ======================================================================
+  try {
+    const storedAgeData = sessionStorage.getItem('ageData');
+    if (storedAgeData) {
+      ageData = JSON.parse(storedAgeData);
+      console.log("[Analytics] Berhasil membaca data usia dari sessionStorage:", ageData);
+      // Hapus data dari session setelah dibaca agar bersih
+      sessionStorage.removeItem('ageData');
+    }
+  } catch(e) {
+    console.error("[Analytics] Gagal mem-parsing data usia dari sessionStorage", e);
+  }
+
+  // Siapkan payload lengkap
+  const payload = {
+    user_id: user.uid,
+    email: user.email,
+    user_name: user.displayName || "Tanpa Nama",
+    
+    // Data usia yang baru didapat
+    age_range: ageData.age_range,
+    minAge: ageData.minAge,
+    
+    // Data lokasi
+    latitude: locationData.latitude || "",
+    longitude: locationData.longitude || "",
+    continent: locationData.continent || "",
+    country: locationData.country || "",
+    country_code: locationData.country_code || "",
+    state: locationData.state || "",
+    county: locationData.county || "",
+    city: locationData.city || "",
+    municipality: locationData.municipality || "",
+    town: locationData.town || "",
+    village: locationData.village || "",
+    suburb: locationData.suburb || "",
+    road: locationData.road || "",
+    postcode: locationData.postcode || "",
+    display_name: locationData.display_name || "",
+    timezone: locationData.timezone || ""
+  };
+
+  console.log("[Analytics] Mengirim data login (termasuk usia) ke server...", payload);
+  sendAnalyticsEvent("USER_LOGIN_ACTIVITY", payload);
 }
 
 function logPageView(user) {
