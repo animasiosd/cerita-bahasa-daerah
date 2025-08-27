@@ -20,9 +20,9 @@ const mainContent = document.getElementById("mainContent");
 
 // URL helper
 const URLS = {
-  login: "https://animasiosd.github.io/cerita-bahasa-daerah/login",
-  index: "https://animasiosd.github.io/cerita-bahasa-daerah/index.html",
-  tutorial: "https://animasiosd.github.io/cerita-bahasa-daerah/locationtutorial.html",
+  login: "login",
+  index: "index",
+  tutorial: "locationtutorial",
 };
 
 // Fungsi-fungsi helper
@@ -130,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
           await sendUserLoginToSheet(user, profileData || {});
           
           // Redirect ke halaman utama
-          window.location.href = "index.html";
+          window.location.href = "index";
         
         } catch (error) {
           console.error("Login Gagal:", error);
@@ -240,8 +240,8 @@ document.addEventListener("DOMContentLoaded", () => {
   auth.onAuthStateChanged((user) => {
     // ... (kode onAuthStateChanged Anda sudah benar dan tidak perlu diubah)
     const currentPath = window.location.pathname;
-    const onLoginPage = currentPath.includes("/cerita-bahasa-daerah/login");
-    const onTutorialPage = currentPath.includes("/cerita-bahasa-daerah/locationtutorial.html");
+    const onLoginPage = currentPath.includes("login");
+    const onTutorialPage = currentPath.includes("locationtutorial");
 
     if (!user) {
       if (!onLoginPage) {
@@ -288,7 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // (Dihapus pemanggilan signInWithPopup ganda yang ada di luar handler — perbaikan bug)
+  // (Dihapus pemanggilan signInWithPopup ganda yang ada di luar handler — perbaikan bug) test setelah create CNAME
 
   function hideLoader() {
     if (pageLoader) pageLoader.classList.add("d-none");
