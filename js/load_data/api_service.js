@@ -5,10 +5,6 @@
 // ======================================================================
 
 const api_service = {
-    /**
-     * Mengambil daftar bahasa dari API untuk navbar.
-     * Asal Kode: main.js
-     */
     async fetchLanguages() {
         const BAHASA_API_URL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
         try {
@@ -19,14 +15,10 @@ const api_service = {
             return await response.json();
         } catch (error) {
             console.error("Gagal mengambil daftar bahasa:", error);
-            return []; // Kembalikan array kosong jika gagal
+            return [];
         }
     },
 
-    /**
-     * Mengambil daftar video yang bisa diunduh.
-     * Asal Kode: download.html (inline script)
-     */
     async fetchDownloadableContent() {
         const DOWNLOAD_API_URL = 'https://script.google.com/macros/s/AKfycbyVZHGfb2xf-uPtKzqZ0bD4oIDttsBgF-n_aNXB0-h_Xy-oxYChmT-a4SYDV3MwiUpI/exec';
         try {
@@ -41,10 +33,10 @@ const api_service = {
             return data;
         } catch (error) {
             console.error("Gagal mengambil konten unduhan:", error);
-            return []; // Kembalikan array kosong jika gagal
+            return [];
         }
     }
+};
 
     // Catatan: Fungsi untuk mengambil video dan komentar akan ditambahkan di sini
     // saat kita merefaktor halaman bahasa.html, agar file ini lengkap.
-};
