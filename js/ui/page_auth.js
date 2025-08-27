@@ -1,7 +1,6 @@
 // ======================================================================
-// File: js/ui/page_auth.js
+// File: js/ui/page_auth.js (VERSI PERBAIKAN)
 // Deskripsi: Menangani UI dan PROSES otentikasi.
-// Asal Kode: auth.js, login.html, index.html, download.html, bahasa.html
 // ======================================================================
 
 const firebaseConfig = {
@@ -35,13 +34,10 @@ function initializeLoginPage() {
             try {
                 const result = await auth.signInWithPopup(provider);
                 const user = result.user;
-                const credential = result.credential;
-                const accessToken = credential?.accessToken || null;
+                const accessToken = result.credential?.accessToken || null;
 
-                let profileData = {};
-                if (accessToken) {
-                    profileData = await fetchUserAgeGender(accessToken);
-                }
+                // Memanggil service dari load_data untuk mengambil data profil
+                const profileData = await user_data_service.fetchGoogleProfile(accessToken);
                 
                 // Menyimpan data usia ke sessionStorage agar bisa diakses analytics.js
                 sessionStorage.setItem("ageData", JSON.stringify(profileData || {}));
@@ -63,34 +59,6 @@ function initializeLoginPage() {
                 showLoginFailModal(error.message);
             }
         });
-    }
-}
-
-/**
- * Mengambil data usia dan gender dari Google People API.
- * Fungsi ini adalah dependensi dari proses login.
- * Asal Kode: auth.js
- */
-async function fetchUserAgeGender(accessToken) {
-    try {
-        const response = await fetch("https://people.googleapis.com/v1/people/me?personFields=genders,birthdays", {
-            headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        if (!response.ok) return {};
-        
-        const profile = await response.json();
-        const gender = profile.genders?.[0]?.value || "Tidak Diketahui";
-        const birthday = profile.birthdays?.[0]?.date || null;
-        let minAge = null;
-        if (birthday?.year) {
-            minAge = new Date().getFullYear() - birthday.year;
-        }
-
-        return { gender, minAge };
-
-    } catch (err) {
-        console.error("Error fetch data umur & gender:", err);
-        return {};
     }
 }
 
@@ -117,14 +85,12 @@ function handleAuthUIState(user) {
         }
     } else {
         if (mainContent) mainContent.style.display = "none";
-        // Di login.html, loginContainer tidak ada, jadi ini tidak akan error
         if (loginContainer) loginContainer.style.display = "flex";
     }
 }
 
 /**
  * Fungsi untuk logout.
- * Asal Kode: auth.js
  */
 function logout() {
     EventTracker.auth.logoutClick(); // Tracking dari events.js
@@ -135,7 +101,6 @@ function logout() {
 
 /**
  * Menampilkan modal Bootstrap saat login gagal.
- * Asal Kode: auth.js
  */
 function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
     let modalEl = document.getElementById("loginFailModal");
@@ -165,7 +130,6 @@ function showLoginFailModal(message = "Login gagal. Silakan coba lagi.") {
 
 /**
  * Logika utama untuk memeriksa status login dan mengarahkan pengguna.
- * Ini akan menggantikan logika onAuthStateChanged di setiap halaman.
  */
 function managePageAccess() {
     auth.onAuthStateChanged((user) => {
@@ -174,30 +138,25 @@ function managePageAccess() {
         const onTutorialPage = currentPath.includes("locationtutorial");
         const onPolicyPage = currentPath.includes("privacy_policy") || currentPath.includes("terms_of_service");
 
-        // Halaman kebijakan bisa diakses siapa saja
         if (onPolicyPage) {
-            handleAuthUIState(user); // Cukup atur UI tanpa redirect
+            handleAuthUIState(user);
             return;
         }
 
-        if (!user) { // Jika TIDAK LOGIN
+        if (!user) {
             if (!onLoginPage) {
                 sessionStorage.setItem('redirectAfterPermission', window.location.href);
                 window.location.href = 'login';
             } else {
-                // Jika sudah di halaman login, tampilkan tombol login
                 const pageLoader = document.getElementById('page-loader');
                 if(pageLoader) pageLoader.style.display = 'none';
             }
-        } else { // Jika SUDAH LOGIN
+        } else {
             if (onLoginPage) {
-                // Jangan di halaman login jika sudah login, arahkan ke index
                 window.location.href = 'index';
             } else {
-                // Tampilkan konten utama di halaman yang dilindungi
                 handleAuthUIState(user);
 
-                // Panggil initPage jika ada (untuk halaman video/download)
                 if (typeof initPage === 'function') {
                     initPage();
                 }
