@@ -143,7 +143,7 @@ function logPageView(user) {
   let nama_bahasa = null;
 
   if (path.includes("index.html") || path === "/" || path === "/index") tipe_halaman = "homepage";
-  else if (path.includes("halaman-bahasa")) {
+  else if (path.includes("bahasa.html")) {
     tipe_halaman = "video_page";
     const params = new URLSearchParams(window.location.search);
     nama_bahasa = params.get("bahasa") || null;

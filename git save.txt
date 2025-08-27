@@ -6,3 +6,10 @@ git commit -m "deskripsi perubahan Anda, cth: memperbaiki judul halaman"
 
 # 3. Kirim perubahan ke repositori di GitHub
 git push
+
+
+cara reset GitHub
+
+git reset --hard kode_commit
+
+git push origin main --force
