@@ -122,28 +122,26 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.8.1/firebase-auth-compat.js"></script>
+    
+    <script src="js/load_data/user_data_service.js"></script>
+    <script src="js/load_data/api_service.js"></script>
+    <script src="js/send_data/analytics_service.js"></script>
 
-<script src="js/load_data/user_data_service.js"></script>
-<script src="js/load_data/api_service.js"></script>
-<script src="js/send_data/analytics_service.js"></script>
+    <script src="js/events.js"></script>
+    <script src="js/ui/common.js"></script>
+    <script src="js/ui/page_auth.js"></script>
+    <script src="js/ui/page_download.js"></script>
+    <script src="js/footer.js"></script>
 
-<script src="js/events.js"></script>
-<script src="js/ui/common.js"></script>
-<script src="js/ui/page_auth.js"></script>
-<script src="js/ui/page_download.js"></script>
-<script src="js/ui/api_service.js"></script>
-<script src="js/footer.js"></script>
+    <script>
+    const initPage = initializeDownloadPage;
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeNavbar();
+        managePageAccess();
+        });
+    </script>
 
-<script>
-  // Definisikan initPage agar bisa dipanggil oleh managePageAccess
-  const initPage = initializeDownloadPage;
-
-  document.addEventListener('DOMContentLoaded', () => {
-    initializeNavbar();
-    managePageAccess(); 
-  });
-</script>
 </body>
 </html>
