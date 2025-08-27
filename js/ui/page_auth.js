@@ -63,7 +63,7 @@ function initializeLoginPage() {
 }
 
 /**
- * Mengatur tampilan halaman berdasarkan status login pengguna.
+ * Mengatur tampilan halaman berdasarkan status login pengguna. (VERSI ROBUST)
  * @param {object|null} user - Objek user dari Firebase, atau null.
  */
 function handleAuthUIState(user) {
@@ -72,24 +72,32 @@ function handleAuthUIState(user) {
     const pageLoader = document.getElementById('page-loader');
 
     if (pageLoader) {
-        // CARA YANG BENAR: Tambahkan class d-none untuk menyembunyikan loader.
         pageLoader.classList.add('d-none');
     }
 
     if (user) {
-        if (mainContent) mainContent.classList.remove("d-none");
-        // Di halaman download, loginContainer memang ada untuk ditampilkan jika user logout.
-        if (loginContainer) loginContainer.classList.add("d-none");
+        // --- PERBAIKAN DI SINI ---
+        if (mainContent) {
+            mainContent.classList.remove("d-none"); // Menangani halaman seperti index.html
+            mainContent.style.display = "block";     // Menangani halaman seperti download.html
+        }
+        if (loginContainer) {
+            loginContainer.classList.add("d-none");
+            loginContainer.style.display = "none";
+        }
         
         const welcomeText = document.getElementById("welcome-text");
         if (welcomeText) {
             welcomeText.textContent = `🎉 Selamat Datang, ${user.displayName}!`;
         }
     } else {
-        if (mainContent) mainContent.classList.add("d-none");
+        // --- PERBAIKAN DI SINI ---
+        if (mainContent) {
+            mainContent.classList.add("d-none");
+            mainContent.style.display = "none";
+        }
         if (loginContainer) {
             loginContainer.classList.remove("d-none");
-            // Pastikan loginContainer terlihat dengan benar
             loginContainer.style.display = "flex";
         }
     }
