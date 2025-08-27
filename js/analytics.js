@@ -97,6 +97,18 @@ async function waitForAgeData(maxWait = 7000) {
   return {};
 }
 
+async function waitForGeoData(maxWait = 7000) {
+  const start = Date.now();
+  while (Date.now() - start < maxWait) {
+    if (window.latestGeoData && window.latestGeoData.latitude) {
+      return window.latestGeoData;
+    }
+    await new Promise(res => setTimeout(res, 300));
+  }
+  console.warn("[Analytics] geoData tidak tersedia, gunakan default kosong.");
+  return {};
+}
+
 async function logUserLogin(user, profileData = {}) {
   if (!user) return;
 
@@ -105,7 +117,8 @@ async function logUserLogin(user, profileData = {}) {
     ? profileData
     : await waitForAgeData();
 
-  const geoData = window.latestGeoData || {};
+  // ✅ Tunggu geoData
+  const geoData = await waitForGeoData();
 
   const payload = {
     eventType: "USER_LOGIN_ACTIVITY",
