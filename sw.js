@@ -1,10 +1,10 @@
 const CACHE_NAME = 'cerita-bahasa-daerah-v1.1.1';
-const BASE_PATH = '/cerita-bahasa-daerah/';
+const BASE_PATH = '';
 
 const urlsToCache = [
   `${BASE_PATH}`,
-  `${BASE_PATH}index.html`,
-  `${BASE_PATH}bahasa.html`,
+  `${BASE_PATH}index`,
+  `${BASE_PATH}bahasa`,
   `${BASE_PATH}css/style.css`,
   `${BASE_PATH}js/auth.js`,
   `${BASE_PATH}js/main.js`,
