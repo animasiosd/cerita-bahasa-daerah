@@ -1,196 +1,231 @@
-// 🔒 Verifikasi Firebase ID Token
-function verifyFirebaseToken(idToken) {
-  if (!idToken) throw new Error("Unauthorized: Missing token");
+/**
+ * =================================================================
+ * KONFIGURASI DAN PENGATURAN UTAMA UPDATE: 27-08-2025 19:48 WIB
+ * =================================================================
+ */
 
-  const firebaseProjectId = "animasiosd-github";  // ⬅️ Ganti dengan Project ID Firebase kamu
-  const apiKey = "AIzaSyCAOg2aMzFVCQVx07t85lFpTXv3c2ugL1E";  // ⬅️ Ganti dengan API Key Firebase kamu
+// Ganti dengan ID Google Spreadsheet Anda
+const SPREADSHEET_ID = "160wtXsGBJXdEcaiwHduTE70SnkjL4lL4KVNUNL-ouCo"; 
 
-  const url = "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=" + apiKey;
-  const options = {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify({ idToken: idToken }),
-    muteHttpExceptions: true
-  };
+// Konfigurasi untuk setiap sheet
+const SHEETS = {
+  USER_LIST: {
+    NAME: 'user_list',
+    HEADERS: ['user_id','email','user_name','first_login','last_login','login_count','birthday','age_range','minAge','age_range_category','gender','first_latitude','first_longitude','first_continent','first_country','first_country_code','first_state','first_county','first_city','first_municipality','first_town','first_village','first_suburb','first_road','first_postcode','first_display_name','first_timezone','last_latitude','last_longitude','last_continent','last_country','last_country_code','last_state','last_county','last_city','last_municipality','last_town','last_village','last_suburb','last_road','last_postcode','last_display_name','last_timezone']
+  },
+  USER_PER_PAGE: {
+    NAME: 'user_per_page',
+    HEADERS: ['timestamp','user_id','user_name','url_halaman','tipe_halaman','nama_bahasa','device_type','operating_system','browser_name']
+  },
+  USER_BEHAVIOR: {
+    NAME: 'user_behavior',
+    HEADERS: ['event_date','event_timestamp','user_id','user_name','event_name','event_details_1','event_details_2']
+  },
+  DOWNLOAD_INTERACTION: {
+    NAME: 'download_page_interaction',
+    HEADERS: ['timestamp','user_id','user_name','action_type','action_key','action_value','action_detail']
+  },
+  VIDEO_INTERACTION: {
+    NAME: 'video_interaction',
+    HEADERS: ['interaction_timestamp','user_id','user_name','birthday','age_range','minAge','age_range_category','gender','nama_bahasa','video_id','video_title','interaction_type','comment_id','video_watch_percentage','video_completed','latitude','longitude','continent','country','country_code','state','county','city','municipality','town','village','suburb','road','postcode','display_name','timezone']
+  },
+  PERFORMANCE_ERRORS: {
+    NAME: 'client_performance_and_errors',
+    HEADERS: ['timestamp','user_id','user_name','event_type','page_url','load_time_ms','error_message','browser_name']
+  },
+  USER_CATEGORY: { NAME: 'user_category' }
+};
 
-  const response = UrlFetchApp.fetch(url, options);
-  const result = JSON.parse(response.getContentText());
 
-  if (result.users && result.users.length > 0) {
-    return result.users[0];
-  } else {
-    throw new Error("Unauthorized: Invalid token");
+/**
+ * =================================================================
+ * FUNGSI INISIALISASI (JALANKAN SEKALI SAJA)
+ * =================================================================
+ */
+function setupInitial() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  for (const key in SHEETS) {
+    if (SHEETS[key].HEADERS) {
+      const sheet = ss.getSheetByName(SHEETS[key].NAME);
+      if (sheet && sheet.getLastRow() === 0) {
+        sheet.appendRow(SHEETS[key].HEADERS);
+        sheet.getRange(1, 1, 1, SHEETS[key].HEADERS.length).setFontWeight('bold');
+        sheet.setFrozenRows(1);
+      }
+    }
   }
 }
 
 
-// ✅ Endpoint GET
-function doGet(e) {
-  try {
-    const authToken = e.parameter.authToken;
-    verifyFirebaseToken(authToken);
-
-    const videoId = e.parameter.video_id;
-    if (!videoId) return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
-
-    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("comments-database");
-    const data = sheet.getDataRange().getValues();
-
-    const comments = data.filter(row => row[0] === videoId).map(row => ({
-      video_id: row[0],
-      comment_id: row[1],
-      comments_description: row[2],
-      user_id: row[3],
-      user_name: row[4],
-      parent_id: row[5],
-      user_photo_url: row[6],
-      timestamp: row[7],
-      likes_count: row[8],
-      likers_user_ids: row[9] ? row[9].split(",") : [],
-      video_title: row[10],
-      language_page: row[11]
-    }));
-
-
-    return ContentService.createTextOutput(JSON.stringify(comments)).setMimeType(ContentService.MimeType.JSON);
-
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ error: error.message }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-
-// ✅ Endpoint POST
+/**
+ * =================================================================
+ * ENDPOINT WEB APP (FUNGSI UTAMA)
+ * =================================================================
+ */
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
+    const payload = JSON.parse(e.postData.contents);
 
-    verifyFirebaseToken(data.authToken);
+    // 🔹 Tangani komentar jika ada
+    if (payload.commentText && payload.videoId) {
+      const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+      const sheet = ss.getSheetByName("comments");
+      const newCommentId = Utilities.getUuid();
 
-    let response;
-    if (data.action === 'toggle_like') {
-      response = handleToggleLike(data);
-      } else if (data.action === 'edit_comment') {
-        response = handleEditComment(data);
-        } else if (data.action === 'delete_comment') {
-          response = handleDeleteComment(data);
-          } else {
-            response = handleAddComment(data);
-            }
+      sheet.appendRow([
+        new Date(),
+        newCommentId,
+        payload.userId || "",
+        payload.userName || "",
+        payload.userPhotoUrl || "",
+        payload.videoId || "",
+        payload.videoTitle || "",
+        payload.languagePage || "",
+        payload.commentText || ""
+      ]);
 
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'success',
+        comment_id: newCommentId
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
 
-    return ContentService.createTextOutput(JSON.stringify({ status: "success", response: response }))
+    const eventType = payload.eventType;
+    if (!eventType) throw new Error("Properti 'eventType' tidak ditemukan di payload.");
+
+    const lock = LockService.getScriptLock();
+    lock.waitLock(15000);
+    const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+
+    // Routing event berdasarkan tipe
+    switch (eventType) {
+      case 'USER_LOGIN_ACTIVITY':
+        handleUserList(ss, payload.data);
+        break;
+      case 'PAGE_VIEW':
+        handleGenericAppend(ss, SHEETS.USER_PER_PAGE.NAME, payload.data, SHEETS.USER_PER_PAGE.HEADERS);
+        break;
+      case 'USER_BEHAVIOR':
+        handleGenericAppend(ss, SHEETS.USER_BEHAVIOR.NAME, payload.data, SHEETS.USER_BEHAVIOR.HEADERS);
+        break;
+      case 'DOWNLOAD_INTERACTION':
+        handleGenericAppend(ss, SHEETS.DOWNLOAD_INTERACTION.NAME, payload.data, SHEETS.DOWNLOAD_INTERACTION.HEADERS);
+        break;
+      case 'VIDEO_INTERACTION':
+        handleGenericAppend(ss, SHEETS.VIDEO_INTERACTION.NAME, payload.data, SHEETS.VIDEO_INTERACTION.HEADERS);
+        break;
+      case 'CLIENT_EVENT':
+        handleGenericAppend(ss, SHEETS.PERFORMANCE_ERRORS.NAME, payload.data, SHEETS.PERFORMANCE_ERRORS.HEADERS);
+        break;
+      default:
+        throw new Error(`eventType '${eventType}' tidak dikenal.`);
+    }
+
+    lock.releaseLock();
+    return ContentService.createTextOutput(JSON.stringify({ status: 'success', event: eventType }))
       .setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ error: error.message }))
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: error.toString() }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
 
-// 🎬 Tambahkan fungsi handleAddComment dan handleToggleLike sesuai milikmu sebelumnya
+/**
+ * =================================================================
+ * FUNGSI PEMBANTU: USER_LIST
+ * =================================================================
+ */
+function handleUserList(ss, data) {
+  const sheet = ss.getSheetByName(SHEETS.USER_LIST.NAME);
+  const uidColumn = 1;
+  const lastRow = sheet.getLastRow();
+  const dataValues = lastRow > 1 ? sheet.getRange(2, uidColumn, lastRow - 1, 1).getValues() : [];
+  let userRowIndex = -1;
 
-function handleAddComment(data) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("comments-database");
-  
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  const newRow = [];
+  for (let i = 0; i < dataValues.length; i++) {
+    if (dataValues[i][0] == data.user_id) {
+      userRowIndex = i + 2;
+      break;
+    }
+  }
 
-  newRow[headers.indexOf('video_id')] = data.videoId;
-  newRow[headers.indexOf('comment_id')] = "c" + new Date().getTime();
-  newRow[headers.indexOf('comments_description')] = data.commentText;
-  newRow[headers.indexOf('user_id')] = data.userId;
-  newRow[headers.indexOf('user_name')] = data.userName;
-  newRow[headers.indexOf('parent_id')] = "";  // kosongkan
-  newRow[headers.indexOf('user_photo_url')] = data.userPhotoUrl;
-  newRow[headers.indexOf('timestamp')] = new Date().toISOString();
-  newRow[headers.indexOf('likes_count')] = 0;
-  newRow[headers.indexOf('likers_user_ids')] = "";
-  newRow[headers.indexOf('video_title')] = data.videoTitle;
-  newRow[headers.indexOf('language_page')] = data.languagePage;
+  const currentLocationData = [
+    data.latitude || "", data.longitude || "", data.continent || "", data.country || "",
+    data.country_code || "", data.state || "", data.county || "", data.city || "",
+    data.municipality || "", data.town || "", data.village || "", data.suburb || "",
+    data.road || "", data.postcode || "", data.display_name || "", data.timezone || ""
+  ];
 
+  if (userRowIndex > -1) {
+    // PENGGUNA LAMA
+    const now = new Date();
+    const wibTime = Utilities.formatDate(now, "Asia/Jakarta", "yyyy-MM-dd HH:mm:ss");
+    sheet.getRange(userRowIndex, 5).setValue(wibTime);
+    const loginCountCell = sheet.getRange(userRowIndex, 6);
+    loginCountCell.setValue((loginCountCell.getValue() || 0) + 1);
+
+    const currentValues = sheet.getRange(userRowIndex, 7, 1, 5).getValues()[0];
+    const updatedValues = [
+      data.birthday ?? currentValues[0],
+      data.age_range ?? currentValues[1],
+      data.minAge ?? currentValues[2],
+      data.minAge ? getAgeCategory(data.minAge) : currentValues[3],
+      data.gender ?? currentValues[4]
+    ];
+    sheet.getRange(userRowIndex, 7, 1, 5).setValues([updatedValues]);
+
+    sheet.getRange(userRowIndex, 29, 1, currentLocationData.length).setValues([currentLocationData]);
+
+  } else {
+    // PENGGUNA BARU
+    const now = new Date();
+    const wibTime = Utilities.formatDate(now, "Asia/Jakarta", "yyyy-MM-dd HH:mm:ss");
+    const ageCategory = getAgeCategory(data.minAge);
+    const newRow = [
+      data.user_id || "",
+      data.email || "",
+      data.user_name || "",
+      wibTime, // ✅ first_login WIB
+      wibTime, // ✅ last_login WIB
+      1,
+      data.birthday || "",
+      data.age_range || "",
+      data.minAge || "",
+      ageCategory,
+      data.gender || "Tidak Diketahui",
+      ...currentLocationData,
+      ...currentLocationData
+    ];
+    sheet.appendRow(newRow);
+  }
+}
+
+
+/**
+ * =================================================================
+ * FUNGSI GENERIK UNTUK APPEND DATA
+ * =================================================================
+ */
+function handleGenericAppend(ss, sheetName, data, headers) {
+  const sheet = ss.getSheetByName(sheetName);
+  const newRow = headers.map(header => (data.hasOwnProperty(header) ? data[header] : ""));
   sheet.appendRow(newRow);
-
-  return { status: "success" };
 }
 
 
-
-
-function handleToggleLike(data) {
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  const commentIdCol = headers.indexOf('comment_id');
-  const likesCountCol = headers.indexOf('likes_count');
-  const likersCol = headers.indexOf('likers_user_ids');
-
-  
-  const dataRange = sheet.getDataRange();
-  const values = dataRange.getValues();
-
-  for (let i = 1; i < values.length; i++) {
-    if (values[i][commentIdCol] == data.commentId) {
-      let currentLikes = Number(values[i][likesCountCol]) || 0;
-      let likers = values[i][likersCol] ? values[i][likersCol].toString().split(',') : [];
-      likers = likers.filter(id => id.trim() !== ''); // Membersihkan entri kosong
-      
-      const userIndex = likers.indexOf(data.userId);
-      
-      if (userIndex > -1) {
-        likers.splice(userIndex, 1);
-        currentLikes--;
-      } else {
-        if(data.userId) likers.push(data.userId);
-        currentLikes++;
-      }
-      
-      sheet.getRange(i + 1, likesCountCol + 1).setValue(currentLikes < 0 ? 0 : currentLikes);
-      sheet.getRange(i + 1, likersCol + 1).setValue(likers.join(','));
-      
-      return { status: "success", newLikesCount: currentLikes };
-    }
-  }
-  return { status: "error", message: "Comment not found" };
+/**
+ * =================================================================
+ * FUNGSI KATEGORI USIA
+ * =================================================================
+ */
+function getAgeCategory(minAge) {
+  if (!minAge || isNaN(minAge)) return "Tidak Diketahui";
+  if (minAge >= 60) return "Lansia";
+  if (minAge >= 40) return "Dewasa Paruh Baya";
+  if (minAge >= 20) return "Dewasa Muda";
+  if (minAge >= 12) return "Remaja";
+  if (minAge >= 5) return "Anak-anak";
+  return "Di Bawah Umur";
 }
-
-
-// FUNGSI EDIT COMMENTS
-function handleEditComment(data) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("comments-database");
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  const commentIdCol = headers.indexOf('comment_id');
-  const userIdCol = headers.indexOf('user_id');
-  const commentDescCol = headers.indexOf('comments_description');
-
-  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
-
-  for (let i = 0; i < values.length; i++) {
-    if (values[i][commentIdCol] == data.commentId && values[i][userIdCol] == data.userId) {
-      sheet.getRange(i + 2, commentDescCol + 1).setValue(data.newCommentText);
-      return { status: "success", message: "Komentar berhasil diedit" };
-    }
-  }
-
-  return { status: "error", message: "Komentar tidak ditemukan atau bukan milik Anda" };
-}
-
-// FUNGSI DELETE COMMENTS
-function handleDeleteComment(data) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("comments-database");
-  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-  const commentIdCol = headers.indexOf('comment_id');
-  const userIdCol = headers.indexOf('user_id');
-
-  const values = sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn()).getValues();
-
-  for (let i = 0; i < values.length; i++) {
-    if (values[i][commentIdCol] == data.commentId && values[i][userIdCol] == data.userId) {
-      sheet.deleteRow(i + 2);
-      return { status: "success", message: "Komentar berhasil dihapus" };
-    }
-  }
-
-  return { status: "error", message: "Komentar tidak ditemukan atau bukan milik Anda" };
-}
-
