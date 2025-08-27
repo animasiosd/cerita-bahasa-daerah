@@ -176,12 +176,6 @@ function logPageView(user) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  firebase.auth().onAuthStateChanged(user => {
-    logPageView(user || null);
-  });
-});
-
 function trackVideoInteraction(interactionType, additionalData = {}) {
   const user = firebase.auth().currentUser || null;
   const videoTitle = document.getElementById("videoTitle")?.textContent || "Tanpa Judul";
