@@ -1,4 +1,4 @@
-// File: js/video.js
+// File: js/video.js ulang karena failed to deploy
 
 const VIDEO_API_URL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
 
