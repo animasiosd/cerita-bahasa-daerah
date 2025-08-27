@@ -76,16 +76,16 @@ function handleAuthUIState(user) {
     }
 
     if (user) {
-        if (mainContent) mainContent.style.display = "block";
-        if (loginContainer) loginContainer.style.display = "none";
+        if (mainContent) mainContent.classList.remove("d-none"); // Hapus class d-none untuk menampilkan
+        if (loginContainer) loginContainer.classList.add("d-none"); // Tambah class d-none untuk menyembunyikan
         
         const welcomeText = document.getElementById("welcome-text");
         if (welcomeText) {
             welcomeText.textContent = `🎉 Selamat Datang, ${user.displayName}!`;
         }
     } else {
-        if (mainContent) mainContent.style.display = "none";
-        if (loginContainer) loginContainer.style.display = "flex";
+        if (mainContent) mainContent.classList.add("d-none"); // Tambah class d-none untuk menyembunyikan
+        if (loginContainer) loginContainer.classList.remove("d-none"); // Hapus class d-none untuk menampilkan
     }
 }
 
