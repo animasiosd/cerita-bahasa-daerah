@@ -161,9 +161,6 @@ function logPageView(user) {
     operating_system: os,
     browser_name: browser
   });
-
-  sendAnalyticsEvent("PAGE_VIEW", data);
-  console.log("Page view sent:", data);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
