@@ -1,17 +1,20 @@
 // ======================================================================
-// File: js/load_data/api_service.js
-// Deskripsi: Bertanggung jawab untuk MENGAMBIL semua data dari API
+// File: js/load_data/api_service.js (VERSI FINAL)
+// Deskripsi: Bertanggung jawab untuk MENGAMBIL & MENGIRIM semua data dari/ke API
 //            Google Apps Script (bahasa, video, download, komentar).
 // ======================================================================
 
 const api_service = {
+    // URL Endpoints
+    _URL_LANGUAGES_VIDEOS: "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec",
+    _URL_DOWNLOADS: 'https://script.google.com/macros/s/AKfycbyVZHGfb2xf-uPtKzqZ0bD4oIDttsBgF-n_aNXB0-h_Xy-oxYChmT-a4SYDV3MwiUpI/exec',
+    _URL_COMMENTS: "https://script.google.com/macros/s/AKfycbwlCVUzCu9GEdi2aCZnzj-HYFXJlNX25sBEBDvivqGg2kyJrpfQZ6Jr31cknT_fcGu5_g/exec",
+
+    /** Mengambil daftar bahasa dari API untuk navbar. */
     async fetchLanguages() {
-        const BAHASA_API_URL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
         try {
-            const response = await fetch(BAHASA_API_URL);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            const response = await fetch(this._URL_LANGUAGES_VIDEOS);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             return await response.json();
         } catch (error) {
             console.error("Gagal mengambil daftar bahasa:", error);
@@ -19,24 +22,56 @@ const api_service = {
         }
     },
 
-    async fetchDownloadableContent() {
-        const DOWNLOAD_API_URL = 'https://script.google.com/macros/s/AKfycbyVZHGfb2xf-uPtKzqZ0bD4oIDttsBgF-n_aNXB0-h_Xy-oxYChmT-a4SYDV3MwiUpI/exec';
+    /** Mengambil daftar video berdasarkan bahasa yang dipilih. */
+    async fetchVideos(language) {
         try {
-            const response = await fetch(DOWNLOAD_API_URL);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+            const response = await fetch(`${this._URL_LANGUAGES_VIDEOS}?action=getVideos&lang=${encodeURIComponent(language)}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            console.error("Gagal mengambil daftar video:", error);
+            return { videos: [], displayName: language }; // Return default object on error
+        }
+    },
+
+    /** Mengambil daftar video yang bisa diunduh. */
+    async fetchDownloadableContent() {
+        try {
+            const response = await fetch(this._URL_DOWNLOADS);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
-            if (!Array.isArray(data)) {
-                 throw new Error("Format data unduhan tidak sesuai.");
-            }
+            if (!Array.isArray(data)) throw new Error("Format data unduhan tidak sesuai.");
             return data;
         } catch (error) {
             console.error("Gagal mengambil konten unduhan:", error);
             return [];
         }
-    }
-};
+    },
 
-    // Catatan: Fungsi untuk mengambil video dan komentar akan ditambahkan di sini
-    // saat kita merefaktor halaman bahasa.html, agar file ini lengkap.
+    /** Mengambil komentar untuk videoId tertentu. */
+    async fetchComments(videoId) {
+        try {
+            const token = await auth.currentUser.getIdToken(true);
+            const response = await fetch(`${this._URL_COMMENTS}?video_id=${videoId}&authToken=${token}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            console.error("Gagal mengambil komentar:", error);
+            return [];
+        }
+    },
+    
+    /** Mengirim komentar baru. */
+    async postComment(commentData) {
+        commentData.authToken = await auth.currentUser.getIdToken(true);
+        const response = await fetch(this._URL_COMMENTS, {
+            method: 'POST',
+            body: JSON.stringify(commentData)
+        });
+        return await response.json();
+    }
+
+    // CATATAN: Fungsi untuk edit, hapus, dan like komentar juga akan menggunakan
+    // endpoint _URL_COMMENTS dengan body yang berbeda, sama seperti postComment.
+    // Untuk mempersingkat, mereka dapat digabungkan di sini jika diperlukan.
+};
