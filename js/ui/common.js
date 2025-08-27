@@ -21,10 +21,7 @@ function initializeNavbar() {
   }
 
   fetch('navbar.html')
-    .then(res => {
-      if (!res.ok) throw new Error(`Status: ${res.status}`);
-      return res.text();
-    })
+    .then(res => res.ok ? res.text() : Promise.reject(`Status: ${res.status}`))
     .then(html => {
       if (html !== cachedNavbar) {
         navbarPlaceholder.innerHTML = html;
@@ -41,7 +38,6 @@ function initializeNavbar() {
 function setupNavbarFunctionality() {
   if (window.navbarInitialized) return;
 
-  // Highlight menu aktif
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   document.querySelectorAll('a[data-page]').forEach(link => {
     if (link.getAttribute('data-page') === currentPage) {
@@ -49,21 +45,21 @@ function setupNavbarFunctionality() {
     }
   });
 
-  // Memuat daftar bahasa secara dinamis
   const dropdown = document.getElementById('languagesDropdown');
   if (dropdown) {
-    fetch(BAHASA_API_URL)
-      .then(response => response.json())
-      .then(data => {
-        dropdown.innerHTML = ''; // Kosongkan placeholder
-        data.forEach(bahasa => {
+    // --- PERUBAHAN DI SINI ---
+    // Memanggil service, bukan fetch langsung.
+    api_service.fetchLanguages()
+      .then(bahasaList => {
+        dropdown.innerHTML = '';
+        if (bahasaList.length === 0) throw new Error("Daftar bahasa kosong.");
+        bahasaList.forEach(bahasa => {
           if (!bahasa.value || !bahasa.display) return;
           const listItem = document.createElement('li');
           const link = document.createElement('a');
-          link.className = 'dropdown-item language-btn';
+          link.className = 'dropdown-item';
           link.href = `bahasa.html?bahasa=${encodeURIComponent(bahasa.value)}`;
           link.textContent = `Bahasa ${bahasa.display}`;
-          // Pemanggilan EventTracker yang sudah terdefinisi di events.js
           link.addEventListener("click", () => EventTracker.navigation.languageSelect(bahasa.display));
           listItem.appendChild(link);
           dropdown.appendChild(listItem);
@@ -71,13 +67,11 @@ function setupNavbarFunctionality() {
       })
       .catch(err => {
         console.error("Gagal memuat bahasa:", err);
-        dropdown.innerHTML = '<li><span class="dropdown-item text-danger">Gagal memuat bahasa.</span></li>';
+        dropdown.innerHTML = '<li><span class="dropdown-item text-danger">Gagal memuat.</span></li>';
       });
   }
 
-  // Inisialisasi tombol install PWA
   initializePWAInstallButton();
-
   window.navbarInitialized = true;
 }
 

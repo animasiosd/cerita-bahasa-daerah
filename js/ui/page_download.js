@@ -1,7 +1,8 @@
 // ======================================================================
 // File: js/ui/page_download.js
-// Deskripsi: Menangani semua logika UI di halaman download, termasuk
-//            rendering tabel, filter, dan sorting.
+// Deskripsi: Menangani semua logika UI di halaman download:
+//            merender tabel, filter, dan sorting.
+// Asal Kode: download.html (inline script)
 // ======================================================================
 
 let fullData = [];
@@ -11,41 +12,51 @@ let sortAsc = true;
 /**
  * Fungsi utama untuk inisialisasi halaman download.
  */
-function initializeDownloadPage() {
+async function initializeDownloadPage() {
     const tbody = document.querySelector('#downloadTable tbody');
-    tbody.innerHTML = '<tr><td colspan="3">Memuat data...</td></tr>';
-
-    // ASUMSI: `api_service.fetchDownloadableContent()` ada di 'load_data/api_service.js'
-    api_service.fetchDownloadableContent()
-        .then(data => {
-            fullData = data;
-            populateFilters(data);
-            renderTable(data);
-            setupEventListeners();
-        })
-        .catch(err => {
-            tbody.innerHTML = '<tr><td colspan="3" class="text-danger">Gagal memuat data.</td></tr>';
-            console.error(err);
-        });
+    tbody.innerHTML = '<tr><td colspan="3" class="text-center">Memuat data...</td></tr>';
+    
+    // Memanggil service untuk mengambil data, bukan fetch langsung
+    const data = await api_service.fetchDownloadableContent();
+    
+    if (data.length > 0) {
+        fullData = data;
+        populateFilters(data);
+        renderTable(data);
+        setupEventListeners();
+    } else {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Gagal memuat data atau data kosong.</td></tr>';
+    }
 }
 
-/**
- * Mengisi dropdown filter dengan data unik.
- * @param {Array} data 
- */
 function populateFilters(data) {
     const bahasaSet = new Set(data.map(item => item.bahasa));
-    // ... (logika populate filter lainnya) ...
-    // Ini murni manipulasi DOM, jadi tetap di sini.
+    const urutanSet = new Set(data.map(item => item.urutan));
+    const judulSet = new Set(data.map(item => item.title));
+
+    populateSelect('filterBahasa', [...bahasaSet].sort());
+    populateSelect('filterUrutan', [...urutanSet].sort((a, b) => a - b));
+    populateSelect('filterJudul', [...judulSet].sort());
 }
 
-/**
- * Merender data ke dalam tabel HTML.
- * @param {Array} data 
- */
+function populateSelect(id, items) {
+    const select = document.getElementById(id);
+    select.length = 1; // Hapus opsi lama kecuali yang pertama
+    items.forEach(val => {
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = val;
+        select.appendChild(opt);
+    });
+}
+
 function renderTable(data) {
     const tbody = document.querySelector('#downloadTable tbody');
     tbody.innerHTML = '';
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Tidak ada data yang cocok dengan filter.</td></tr>';
+        return;
+    }
     
     data.forEach(row => {
         const tr = document.createElement('tr');
@@ -58,33 +69,84 @@ function renderTable(data) {
     });
 }
 
-/**
- * Memasang semua event listener untuk filter dan sorting.
- */
-function setupEventListeners() {
-    document.querySelectorAll('.filter-group select').forEach(select => {
-        select.addEventListener('change', applyFiltersAndSort);
-    });
-    document.querySelectorAll('th.sortable').forEach(th => {
-        th.addEventListener('click', handleSort);
-    });
-    document.getElementById('resetFilters').addEventListener('click', () => {
-        // ... (reset filter logic) ...
-        EventTracker.downloadPage.resetFilter();
-        applyFiltersAndSort();
-    });
-    // ... (event listener untuk reset sort) ...
-}
-
 function applyFiltersAndSort() {
-    // Logika untuk memfilter dan mengurutkan `fullData` berdasarkan pilihan UI
-    // ...
-    // Lalu panggil renderTable(filteredData)
+    const bahasa = document.getElementById('filterBahasa').value;
+    const urutan = document.getElementById('filterUrutan').value;
+    const judul = document.getElementById('filterJudul').value;
+
+    let filteredData = fullData.filter(item => 
+        (!bahasa || item.bahasa === bahasa) &&
+        (!urutan || item.urutan.toString() === urutan) &&
+        (!judul || item.title === judul)
+    );
+
+    if (sortKey) {
+        filteredData.sort((a, b) => {
+            let valA = a[sortKey];
+            let valB = b[sortKey];
+            if (typeof valA === 'string') valA = valA.toLowerCase();
+            if (typeof valB === 'string') valB = valB.toLowerCase();
+            if (valA < valB) return sortAsc ? -1 : 1;
+            if (valA > valB) return sortAsc ? 1 : -1;
+            return 0;
+        });
+    }
+    renderTable(filteredData);
 }
 
 function handleSort(event) {
-    // Logika untuk menentukan sortKey dan sortAsc
-    // ...
+    const key = event.target.getAttribute('data-key');
+    if (!key) return;
+
+    if (sortKey === key) {
+        sortAsc = !sortAsc;
+    } else {
+        sortKey = key;
+        sortAsc = true;
+    }
+    
+    document.querySelectorAll('th.sortable').forEach(th => {
+        th.classList.remove('asc', 'desc');
+        if (th.getAttribute('data-key') === sortKey) {
+            th.classList.add(sortAsc ? 'asc' : 'desc');
+        }
+    });
+
     EventTracker.downloadPage.sortTable(key, sortAsc ? "asc" : "desc");
     applyFiltersAndSort();
+}
+
+function setupEventListeners() {
+    document.getElementById('filterBahasa').addEventListener('change', (e) => {
+        EventTracker.downloadPage.filterByBahasa(e.target.value);
+        applyFiltersAndSort();
+    });
+    document.getElementById('filterUrutan').addEventListener('change', (e) => {
+        EventTracker.downloadPage.filterByUrutan(e.target.value);
+        applyFiltersAndSort();
+    });
+    document.getElementById('filterJudul').addEventListener('change', (e) => {
+        EventTracker.downloadPage.filterByJudul(e.target.value);
+        applyFiltersAndSort();
+    });
+    
+    document.querySelectorAll('th.sortable').forEach(th => {
+        th.addEventListener('click', handleSort);
+    });
+    
+    document.getElementById('resetFilters').addEventListener('click', () => {
+        document.getElementById('filterBahasa').value = '';
+        document.getElementById('filterUrutan').value = '';
+        document.getElementById('filterJudul').value = '';
+        EventTracker.downloadPage.resetFilter();
+        applyFiltersAndSort();
+    });
+    
+    document.getElementById('resetSort').addEventListener('click', () => {
+        sortKey = '';
+        sortAsc = true;
+        document.querySelectorAll('th.sortable').forEach(th => th.classList.remove('asc', 'desc'));
+        EventTracker.downloadPage.resetSort();
+        applyFiltersAndSort();
+    });
 }
