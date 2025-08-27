@@ -72,20 +72,26 @@ function handleAuthUIState(user) {
     const pageLoader = document.getElementById('page-loader');
 
     if (pageLoader) {
-        pageLoader.style.display = 'none';
+        // CARA YANG BENAR: Tambahkan class d-none untuk menyembunyikan loader.
+        pageLoader.classList.add('d-none');
     }
 
     if (user) {
-        if (mainContent) mainContent.classList.remove("d-none"); // Hapus class d-none untuk menampilkan
-        if (loginContainer) loginContainer.classList.add("d-none"); // Tambah class d-none untuk menyembunyikan
+        if (mainContent) mainContent.classList.remove("d-none");
+        // Di halaman download, loginContainer memang ada untuk ditampilkan jika user logout.
+        if (loginContainer) loginContainer.classList.add("d-none");
         
         const welcomeText = document.getElementById("welcome-text");
         if (welcomeText) {
             welcomeText.textContent = `🎉 Selamat Datang, ${user.displayName}!`;
         }
     } else {
-        if (mainContent) mainContent.classList.add("d-none"); // Tambah class d-none untuk menyembunyikan
-        if (loginContainer) loginContainer.classList.remove("d-none"); // Hapus class d-none untuk menampilkan
+        if (mainContent) mainContent.classList.add("d-none");
+        if (loginContainer) {
+            loginContainer.classList.remove("d-none");
+            // Pastikan loginContainer terlihat dengan benar
+            loginContainer.style.display = "flex";
+        }
     }
 }
 
