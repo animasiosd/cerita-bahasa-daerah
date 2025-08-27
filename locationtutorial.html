@@ -23,7 +23,7 @@
      <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
      <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 
-    <script src="/cerita-bahasa-daerah/js/auth.js"></script>
+    <script src="js/auth.js"></script>
 
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
@@ -158,7 +158,7 @@
                 <img src="assets/favicon-192.png" alt="Logo Cerita Bahasa Daerah" class="brand-logo">
                 <h1>Cerita Bahasa Daerah</h1>
             </div>
-            <a href="https://animasiosd.github.io/cerita-bahasa-daerah/login" class="btn-loginpage">Kembali ke Login</a>
+            <a href="login" class="btn-loginpage">Kembali ke Login</a>
         </div>
 
     <!-- Header -->
@@ -168,7 +168,7 @@
     <p>Data lokasi aman, tidak diperjualbelikan, dan hanya digunakan untuk meningkatkan pengalaman Anda.</p>
     <p>Kami menghormati privasi Anda dan memproses data sesuai standar internasional <strong>GDPR</strong> dan <strong>CCPA</strong>.</p>
     <!-- ✅ TAMBAHKAN BARIS DI BAWAH INI -->
-    <p>Dengan melanjutkan, Anda menyetujui pengumpulan data seperti yang dijelaskan dalam <a href="https://animasiosd.github.io/cerita-bahasa-daerah/privacy_policy.html" target="_blank" rel="noopener noreferrer">Kebijakan Privasi</a> kami.</p>
+    <p>Dengan melanjutkan, Anda menyetujui pengumpulan data seperti yang dijelaskan dalam <a href="privacy_policy" rel="noopener noreferrer">Kebijakan Privasi</a> kami.</p>
     <p>Ikuti panduan di bawah ini untuk memberikan izin lokasi.</p>
 </div>
 
@@ -243,7 +243,7 @@ btnLanjutkan.addEventListener("click", function () {
         // 👈 LOG 3: Tambahkan log ini di sini
         console.log(`[TUTORIAL-LOG] Tombol Lanjutkan diklik. URL dari sessionStorage: ${redirectUrl}`);
 
-        const finalDestination = redirectUrl || "/cerita-bahasa-daerah/index.html";
+        const finalDestination = redirectUrl || "index";
 
         if (result.state === "granted") {
             localStorage.setItem("locationPermission", "granted");
@@ -279,15 +279,15 @@ function handleLogout() {
         // Logout via Firebase
         firebase.auth().signOut()
             .then(() => {
-                window.location.href = "/cerita-bahasa-daerah/login";
+                window.location.href = "login";
             })
             .catch(err => {
                 console.error("Gagal logout:", err);
-                window.location.href = "/cerita-bahasa-daerah/login";
+                window.location.href = "login";
             });
     } else {
         // Kalau sudah tidak login, langsung ke halaman login
-        window.location.href = "/cerita-bahasa-daerah/login";
+        window.location.href = "login";
     }
 }
 </script>
