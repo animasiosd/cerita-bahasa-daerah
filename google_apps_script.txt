@@ -1,6 +1,6 @@
 /**
  * =================================================================
- * KONFIGURASI DAN PENGATURAN UTAMA UPDATE: 27-08-2025 19:48 WIB
+ * KONFIGURASI DAN PENGATURAN UTAMA
  * =================================================================
  */
 
@@ -152,10 +152,10 @@ function handleUserList(ss, data) {
   }
 
   const currentLocationData = [
-    data.latitude || "", data.longitude || "", data.continent || "", data.country || "",
-    data.country_code || "", data.state || "", data.county || "", data.city || "",
-    data.municipality || "", data.town || "", data.village || "", data.suburb || "",
-    data.road || "", data.postcode || "", data.display_name || "", data.timezone || ""
+    data.latitude || "blank", data.longitude || "blank", data.continent || "blank", data.country || "blank",
+    data.country_code || "blank", data.state || "blank", data.county || "blank", data.city || "blank",
+    data.municipality || "blank", data.town || "blank", data.village || "blank", data.suburb || "blank",
+    data.road || "blank", data.postcode || "blank", data.display_name || "blank", data.timezone || "blank"
   ];
 
   if (userRowIndex > -1) {
