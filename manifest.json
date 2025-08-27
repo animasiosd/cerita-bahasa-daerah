@@ -2,7 +2,7 @@
   "name": "Cerita Bahasa Daerah",
   "short_name": "Cerita Bahasa",
   "description": "Jelajahi cerita dari berbagai bahasa daerah di Indonesia.",
-  "start_url": "index",
+  "start_url": "/index",
   "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",

@@ -136,24 +136,34 @@ async function logUserLogin(user, profileData = {}) {
 }
 
 function logPageView(user) {
-  const deviceInfo = getDeviceInfo();
-  const geoData = window.latestGeoData || {};
-  const currentUrl = window.location.href;
+  const { os, browser, device } = getDeviceInfo();
+  const url = window.location.href;
+  const path = window.location.pathname;
+  let tipe_halaman = "unknown";
+  let nama_bahasa = null;
 
-  const data = {
+  if (path.includes("index.html") || path === "/" || path === "/index") tipe_halaman = "homepage";
+  else if (path.includes("halaman-bahasa")) {
+    tipe_halaman = "video_page";
+    const params = new URLSearchParams(window.location.search);
+    nama_bahasa = params.get("bahasa") || null;
+  }
+  else if (path.includes("download")) tipe_halaman = "download_page";
+
+  sendAnalyticsEvent("PAGE_VIEW", {
     timestamp: getFormattedTimestampWIB(),
-    user_id: user ? user.uid : "GUEST",
-    user_name: user ? user.displayName : "Pengunjung",
-    url_halaman: currentUrl,
-    tipe_halaman: document.title || "Halaman",
-    nama_bahasa: geoData.language || "",
-    device_type: deviceInfo.device,
-    operating_system: deviceInfo.os,
-    browser_name: deviceInfo.browser
-  };
+    user_id: user ? user.uid : "ANONYM",
+    user_name: user ? user.displayName || "Tanpa Nama" : null,
+    url_halaman: url,
+    tipe_halaman,
+    nama_bahasa,
+    device_type: device,
+    operating_system: os,
+    browser_name: browser
+  });
 
   sendAnalyticsEvent("PAGE_VIEW", data);
-  console.log("[Analytics] Page view terkirim:", data);
+  console.log("Page view sent:", data);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
