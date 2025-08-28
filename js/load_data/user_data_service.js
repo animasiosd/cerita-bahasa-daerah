@@ -1,14 +1,9 @@
-// ======================================================================
 // File: js/load_data/user_data_service.js
-// Deskripsi: Bertanggung jawab untuk MENGAMBIL data terkait pengguna
-//            dari API eksternal (Lokasi, Profil Google).
-// Asal Kode: geotracker.js, page_auth.js (refactored)
-// ======================================================================
 
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse";
 let locationCache = null;
 
-const user_data_service = {
+export const user_data_service = {
     /**
      * Mengambil lokasi pengguna menggunakan Geolocation & Nominatim API.
      * Asal Kode: geotracker.js

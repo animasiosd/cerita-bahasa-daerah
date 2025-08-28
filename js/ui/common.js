@@ -1,16 +1,10 @@
-// ======================================================================
 // File: js/ui/common.js
-// Deskripsi: Menangani logika UI untuk komponen umum seperti navbar,
-//            PWA install button, dan page loader.
-// Asal Kode: main.js
-// ======================================================================
-
-const BAHASA_API_URL = "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec";
-
+import { api_service } from '../load_data/api_service.js';
+import { EventTracker } from '../events.js';
 /**
  * Memuat dan menginisialisasi navbar.
  */
-function initializeNavbar() {
+export function initializeNavbar() {
   const navbarPlaceholder = document.getElementById("navbar-placeholder");
   if (!navbarPlaceholder) return;
 
@@ -31,6 +25,7 @@ function initializeNavbar() {
     })
     .catch(err => console.error("Gagal memuat navbar:", err));
 }
+
 
 /**
  * Menjalankan fungsi-fungsi setelah navbar dirender.

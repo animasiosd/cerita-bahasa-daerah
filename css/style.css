@@ -68,3 +68,9 @@ body {
 .nav-link {
   font-size: 1.15rem; /* Ubah angka ini sesuai selera */
 }
+
+.btn:disabled, button:disabled {
+  /* Ubah pointer mouse menjadi simbol 'dilarang/blocked' */
+  cursor: not-allowed;
+  pointer-events: none;
+}

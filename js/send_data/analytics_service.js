@@ -151,3 +151,11 @@ function logDownloadPageInteraction(action_type, action_key = "", action_value =
         action_detail: action_detail
     });
 }
+
+export {
+    logUserLogin,
+    logPageView,
+    logUserBehavior,
+    trackVideoInteraction,
+    logDownloadPageInteraction
+};

@@ -4,6 +4,8 @@
 //            merender tabel, filter, dan sorting.
 // Asal Kode: download.html (inline script)
 // ======================================================================
+import { api_service } from '../load_data/api_service.js';
+import { EventTracker } from '../events.js';
 
 let fullData = [];
 let sortKey = '';
@@ -12,7 +14,7 @@ let sortAsc = true;
 /**
  * Fungsi utama untuk inisialisasi halaman download.
  */
-async function initializeDownloadPage() {
+export async function initializeDownloadPage() {
     const tbody = document.querySelector('#downloadTable tbody');
     tbody.innerHTML = '<tr><td colspan="3" class="text-center">Memuat data...</td></tr>';
     

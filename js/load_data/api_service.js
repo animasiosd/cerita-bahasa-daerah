@@ -3,12 +3,16 @@
 // Deskripsi: Bertanggung jawab untuk MENGAMBIL & MENGIRIM semua data dari/ke API
 //            Google Apps Script (bahasa, video, download, komentar).
 // ======================================================================
+import { auth } from "../ui/page_auth.js";
+
+export { api_service };
 
 const api_service = {
     // URL Endpoints
     _URL_LANGUAGES_VIDEOS: "https://script.google.com/macros/s/AKfycbz0r5Tvw0M2ptBsD4oKDtuCe8Hi1ygfVfM2ubDObGEWMuv04N382-Y0dZFCsBi9RUpv/exec",
     _URL_DOWNLOADS: 'https://script.google.com/macros/s/AKfycbyVZHGfb2xf-uPtKzqZ0bD4oIDttsBgF-n_aNXB0-h_Xy-oxYChmT-a4SYDV3MwiUpI/exec',
-    _URL_COMMENTS: "https://script.google.com/macros/s/AKfycbwlCVUzCu9GEdi2aCZnzj-HYFXJlNX25sBEBDvivqGg2kyJrpfQZ6Jr31cknT_fcGu5_g/exec",
+    _URL_COMMENTS: "https://script.google.com/macros/s/AKfycbyMPttPRKP1VMzSOEqesIR1thmb7iLqklziJRhGs25vXg6sIvd4yhogTJmUig5yYl8dQg/exec",
+
 
     /** Mengambil daftar bahasa dari API untuk navbar. */
     async fetchLanguages() {
