@@ -26,7 +26,7 @@ function initializeVideoPage() {
 
     if (!language) {
         document.title = "Bahasa Tidak Ditemukan";
-        videoTitleEl.textContent = "Parameter ?bahasa= tidak ditemukan.";
+        videoTitleEl.textContent = "Bahasa tidak ditemukan. Silahkan pilih bahasa terlebih dahulu.";
         return;
     }
 
@@ -49,29 +49,38 @@ function initializeVideoPage() {
     currentLanguagePage = language;
 
     api_service.fetchVideos(language)
-        .then(responseData => {
-            const videos = responseData.videos;
-            const pageTitle = responseData.displayName || language;
+    .then(responseData => {
+        const videos = responseData.videos;
+        const pageTitle = responseData.displayName || language;
 
-            document.title = `Cerita Bahasa ${pageTitle}`;
-            document.getElementById('language-name-placeholder').textContent = pageTitle;
+        document.title = `Cerita Bahasa ${pageTitle}`;
+        document.getElementById('language-name-placeholder').textContent = pageTitle;
             
-            if (!videos || videos.length === 0) {
-                videoTitleEl.textContent = "Segera hadir! Belum ada video untuk bahasa ini.";
-                return; // Dropdown tetap disabled
-            }
+        if (!videos || videos.length === 0) {
+            videoTitleEl.textContent = "Segera hadir! Belum ada video untuk bahasa ini.";
+            // ✅ Sembunyikan loader walaupun kosong
+            document.getElementById('page-loader').classList.add('hidden');
+            document.getElementById('mainContent').style.display = 'block';
+            return;
+        }
 
-            // --- KONDISI SAAT VIDEO LIST SIAP ---
-            populateVideoDropdown(videos);
-            videoTitleEl.textContent = "✅ Silakan pilih judul video";
-            videoSelect.disabled = false; // Aktifkan dropdown
-            
-            setupShareButtons();
-        })
-        .catch(err => {
-            videoTitleEl.textContent = "❌ Gagal memuat data video.";
-            console.error(err);
-        });
+        // --- KONDISI SAAT VIDEO LIST SIAP ---
+        populateVideoDropdown(videos);
+        videoTitleEl.textContent = "✅ Silakan pilih judul video";
+        videoSelect.disabled = false; // Aktifkan dropdown
+        setupShareButtons();
+
+        // ✅ Sembunyikan loader saat data siap
+        document.getElementById('page-loader').classList.add('hidden');
+        document.getElementById('mainContent').style.display = 'block';
+    })
+    .catch(err => {
+        videoTitleEl.textContent = "❌ Gagal memuat data video.";
+        console.error(err);
+        // ✅ Pastikan loader hilang walau error
+        document.getElementById('page-loader').classList.add('hidden');
+        document.getElementById('mainContent').style.display = 'block';
+    });
     
     initializeCommentSection();
     loadYouTubeIframeAPI();

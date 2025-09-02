@@ -43,11 +43,11 @@ document.addEventListener('DOMContentLoaded', function() {
     footer.style.marginTop = 'auto'; // Mendorong footer ke bawah halaman
 
     // 6. Gabungkan semua elemen menjadi satu dalam urutan yang benar
-    container.appendChild(termsLink);
-    container.appendChild(separator1);
     container.appendChild(privacyLink);
-    container.appendChild(separator2);
+    container.appendChild(separator1);
     container.appendChild(brandText);
+    container.appendChild(separator2);
+    container.appendChild(termsLink);
     footer.appendChild(container);
 
     // 7. Tambahkan footer ke bagian akhir dari <body>

@@ -17,17 +17,25 @@ let sortAsc = true;
 export async function initializeDownloadPage() {
     const tbody = document.querySelector('#downloadTable tbody');
     tbody.innerHTML = '<tr><td colspan="3" class="text-center">Memuat data...</td></tr>';
-    
-    // Memanggil service untuk mengambil data, bukan fetch langsung
-    const data = await api_service.fetchDownloadableContent();
-    
-    if (data.length > 0) {
-        fullData = data;
-        populateFilters(data);
-        renderTable(data);
-        setupEventListeners();
-    } else {
-        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Gagal memuat data atau data kosong.</td></tr>';
+
+    try {
+        const data = await api_service.fetchDownloadableContent();
+        
+        if (data && data.length > 0) {
+            fullData = data;
+            populateFilters(data);
+            renderTable(data);
+            setupEventListeners();
+
+            // ✅ Sembunyikan loader, tampilkan konten
+            document.getElementById('page-loader').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+        } else {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Data kosong.</td></tr>';
+        }
+    } catch (err) {
+        console.error("❌ Gagal memuat data:", err);
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-danger">Gagal memuat data.</td></tr>';
     }
 }
 

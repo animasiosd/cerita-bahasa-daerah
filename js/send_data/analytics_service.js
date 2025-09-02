@@ -3,6 +3,7 @@
 // Deskripsi: Bertanggung jawab untuk MENGIRIM semua data tracking
 //            ke endpoint Google Apps Script.
 // ======================================================================
+import { user_data_service } from '../load_data/user_data_service.js'; // <-- TAMBAHKAN BARIS INI
 
 const ANALYTICS_WEB_APP = "https://script.google.com/macros/s/AKfycbxm5YQAB2kify_9SzPph5xgaEMlsKpE8UNfrPuvmghgDM9meNKCiDPABKHJ4a4p3Nak/exec";
 const videoProgressSession = {};

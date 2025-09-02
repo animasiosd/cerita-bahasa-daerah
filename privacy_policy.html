@@ -101,7 +101,7 @@
                 <img src="assets/favicon-192.png" alt="Logo Cerita Bahasa Daerah" class="brand-logo">
                 <h1>Cerita Bahasa Daerah</h1>
             </div>
-            <a href="/home.html" class="btn-loginpage">Kembali ke Beranda</a>
+            <a href="/#" class="btn-loginpage smart-redirect">Kembali ke Beranda</a>
         </div>
 
         <div class="policy-container">
@@ -171,10 +171,28 @@
     <!-- Scripts -->
     <!-- auth.js dan skrip Firebase sengaja dihapus agar halaman ini bisa diakses tanpa login -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script type="module">
-      import './js/ui/common.js';
-      import './js/footer.js';
-    </script>
+    // Impor semua fungsi yang dibutuhkan oleh halaman ini
+    import { managePageAccess } from './js/ui/page_auth.js';
+    import { initializeNavbar } from './js/ui/common.js';
+
+    // Impor skrip lain agar fungsinya tersedia untuk modul lain
+    import './js/events.js';
+    import './js/load_data/user_data_service.js';
+    import './js/load_data/api_service.js';
+    import './js/send_data/analytics_service.js';
+    import './js/footer.js';
+
+    // Jalankan semua setelah halaman siap
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Muat dan siapkan Navbar
+      initializeNavbar();
+      
+      // 2. Kunci halaman ini. Jika belum login, akan redirect ke index.html
+      managePageAccess(); 
+    });
+  </script>
 
 </body>
 </html>

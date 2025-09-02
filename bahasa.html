@@ -4,20 +4,25 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Google Site Verification -->
-  <meta name="google-site-verification" content="S545LWpJJUmiJMSHVd_HRpn8JEMyONvPPVRMTV-9FzQ" />
+    <meta name="google-site-verification" content="S545LWpJJUmiJMSHVd_HRpn8JEMyONvPPVRMTV-9FzQ" />
 
-  <!-- Google Tag Manager -->
-   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-   new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-   j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-   'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-   })(window,document,'script','dataLayer','GTM-MP4G2NCV');</script>
-  <!-- End Google Tag Manager -->
+    <!-- Google Tag Manager -->
+    <script>
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-MP4G2NCV');
+    </script>
+    <!-- End Google Tag Manager -->
+
     <title>Cerita Bahasa Daerah</title>
     <meta property="og:title" content="Cerita Bahasa Daerah" id="og-title" />
     <meta property="og:description" content="Jelajahi cerita dari berbagai bahasa daerah di Indonesia." id="og-description" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="" id="og-url" />
+
+    <!-- Bootstrap & CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="/favicon.ico" type="image/x-icon">
@@ -26,83 +31,84 @@
     <meta name="theme-color" content="#0d6efd">
 
     <style>
-        #page-loader {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: #fff; display: flex; justify-content: center; align-items: center;
-            flex-direction: column; z-index: 9999; transition: opacity 0.75s ease-out;
-        }
-        .google-spinner {
-            width: 28px; height: 28px; border-radius: 50%;
-            border: 4px solid #f3f3f3; border-top: 4px solid #4285F4;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #page-loader.hidden { opacity: 0; }
-        #loader-text { color: #555; margin-top: 20px; font-size: 1.2em; }
-        .progress-container { width: 80%; max-width: 400px; background-color: #e0e0e0; border-radius: 25px; overflow: hidden; }
-        #progress-bar {
-            width: 0%; height: 20px; background-color: #0d6efd;
-            border-radius: 25px; transition: width 0.1s linear;
-        }
-        #loginContainer, #mainContent { display: none; }
+    /* === Loader Styling Sinkron dengan download.html === */
+    #page-loader {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: opacity 0.75s ease-out;
+    }
+    
+    #page-loader.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    #mainContent {
+      display: none;
+    }
     </style>
 </head>
 
 <body>
     <!-- Google Tag Manager (noscript) -->
-     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MP4G2NCV"
-        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MP4G2NCV"
+                height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
     <!-- End Google Tag Manager (noscript) -->
 
+    <!-- Navbar -->
     <div id="navbar-placeholder"></div>
-
-    <div id="page-loader">
-        <div class="progress-container">
-            <div id="progress-bar"></div>
-        </div>
-        <div id="loader-text">Memuat... 0%</div>
+    
+    <!-- Page Loader -->
+     <div id="page-loader" class="d-flex justify-content-center align-items-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Memuat...</span>
+      </div>
+      <p class="mt-3 text-muted">Memuat data, harap tunggu...</p>
     </div>
 
-    <div id="loginContainer" class="d-flex justify-content-center align-items-center vh-100">
-        <div class="text-center">
-            <h1 class="mb-3">Cerita Bahasa Daerah</h1>
-            <p class="mb-4">Masuk untuk menjelajahi cerita dari berbagai daerah.</p>
-            <p class="text-danger mt-3 bg-white p-2 rounded">Anda harus login terlebih dahulu untuk mengakses halaman ini.</p>
-            <button id="loginBtn" class="btn btn-primary btn-lg">Login dengan Google</button>
-        </div>
-    </div>
-
+    <!-- Konten Utama -->
     <div id="mainContent">
         <main class="container my-4">
             <h2 id="videoTitle" class="text-center mb-3">
-                <div class="google-spinner"></div>
+                <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;">
+                    <span class="visually-hidden">Memuat...</span>
+                </div>
             </h2>
 
+            <!-- Pilih Video -->
             <div class="input-group mb-3" id="videoSelectContainer">
-              <label class="input-group-text" for="videoSelect">Pilih Video:</label>
-              <select class="form-select" id="videoSelect"></select>
-            </div>
-            
-            <div class="ratio ratio-16x9 shadow-sm rounded overflow-hidden d-none" id="playerContainer">
-              <div id="yt-player-placeholder"></div>
+                <label class="input-group-text" for="videoSelect">Pilih Video:</label>
+                <select class="form-select" id="videoSelect"></select>
             </div>
 
+            <!-- Player -->
+            <div class="ratio ratio-16x9 shadow-sm rounded overflow-hidden d-none" id="playerContainer">
+                <div id="yt-player-placeholder"></div>
+            </div>
+
+            <!-- Bagikan -->
             <div class="text-center my-4">
                 <strong>Bagikan cerita ini:</strong>
                 <div class="mt-2">
-                    <a id="share-wa" class="btn btn-success me-2" href="#"
-                    target="_blank" rel="noopener noreferrer">
-                    Bagikan ke WhatsApp
-                </a>
-                
-                <a id="share-fb" class="btn btn-primary" href="#" 
-                target="_blank" rel="noopener noreferrer">
-                Bagikan ke Facebook
-            </a>
-
+                    <a id="share-wa" class="btn btn-success me-2" href="#" target="_blank" rel="noopener noreferrer">
+                        Bagikan ke WhatsApp
+                    </a>
+                    <a id="share-fb" class="btn btn-primary" href="#" target="_blank" rel="noopener noreferrer">
+                        Bagikan ke Facebook
+                    </a>
                 </div>
             </div>
 
+            <!-- Diskusi -->
             <div class="card mt-4">
                 <div class="card-header h5">Pertanyaan Diskusi</div>
                 <div class="card-body">
@@ -117,85 +123,82 @@
                 </div>
             </div>
 
+            <!-- Komentar -->
             <div id="comment-feature" class="mt-5">
-              <h3 class="mb-3">Komentar</h3>
-              <form id="comment-form" class="mb-4">
-                <div class="d-flex align-items-start">
-                  ...
-                  <div class="flex-grow-1">
-                    <textarea id="comment-input" class="form-control" rows="2" placeholder="Pilih video terlebih dahulu untuk berkomentar..." required disabled></textarea>
-                    <div class="text-end mt-2">
-                      <button type="submit" class="btn btn-primary" disabled>Kirim</button>
+                <h3 class="mb-3">Komentar</h3>
+                <form id="comment-form" class="mb-4">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-grow-1">
+                            <textarea id="comment-input" class="form-control" rows="2" placeholder="Pilih video terlebih dahulu untuk berkomentar..." required disabled></textarea>
+                            <div class="text-end mt-2">
+                                <button type="submit" class="btn btn-primary" disabled>Kirim</button>
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                </div>
-              </form>
-              <div id="comment-section"></div>
+                </form>
+                <div id="comment-section"></div>
             </div>
         </main>
     </div>
 
     <!-- Modal Bootstrap -->
-<div class="modal fade" id="tutorialModal" tabindex="-1" aria-labelledby="tutorialModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
+    <div class="modal fade" id="tutorialModal" tabindex="-1" aria-labelledby="tutorialModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
 
-      <!-- Header -->
-      <div class="modal-header">
-        <h5 class="modal-title" id="tutorialModalLabel">Cara Mengizinkan Lokasi</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tutorialModalLabel">Cara Mengizinkan Lokasi</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
-      <!-- Body: Bootstrap Carousel -->
-      <div class="modal-body">
-        <div id="tutorialCarousel" class="carousel slide" data-bs-ride="carousel">
-          <div class="carousel-inner" id="carousel-images"></div>
+                <div class="modal-body">
+                    <div id="tutorialCarousel" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner" id="carousel-images"></div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#tutorialCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#tutorialCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
 
-          <!-- Control Buttons -->
-          <button class="carousel-control-prev" type="button" data-bs-target="#tutorialCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          </button>
-          <button class="carousel-control-next" type="button" data-bs-target="#tutorialCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          </button>
+                <div class="modal-footer">
+                    <button id="allowLocationBtn" class="btn btn-primary">Saya Sudah Mengizinkan</button>
+                    <button id="denyLocationBtn" class="btn btn-danger">Tetap Tolak</button>
+                </div>
+            </div>
         </div>
-      </div>
-
-      <!-- Footer -->
-      <div class="modal-footer">
-        <button id="allowLocationBtn" class="btn btn-primary">Saya Sudah Mengizinkan</button>
-        <button id="denyLocationBtn" class="btn btn-danger">Tetap Tolak</button>
-      </div>
     </div>
-  </div>
-</div>
 
-<!-- Modal Konfirmasi Hapus -->
-<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title">Konfirmasi Hapus</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>Apakah Anda yakin ingin menghapus komentar ini?</p>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-        <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Hapus</button>
-      </div>
+    <!-- Modal Konfirmasi Hapus -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Konfirmasi Hapus</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah Anda yakin ingin menghapus komentar ini?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Hapus</button>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Module -->
     <script type="module">
       import { managePageAccess } from './js/ui/page_auth.js';
       import { initializeNavbar } from './js/ui/common.js';
       import { initializeVideoPage } from './js/ui/page_video.js';
-      
+
       import './js/events.js';
       import './js/load_data/user_data_service.js';
       import './js/send_data/analytics_service.js';
@@ -203,7 +206,7 @@
 
       document.addEventListener('DOMContentLoaded', () => {
         initializeNavbar();
-        managePageAccess(initializeVideoPage); 
+        managePageAccess(initializeVideoPage);
       });
     </script>
 </body>

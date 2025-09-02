@@ -1,6 +1,33 @@
 // File: js/ui/common.js
+import { auth } from './page_auth.js'
 import { api_service } from '../load_data/api_service.js';
 import { EventTracker } from '../events.js';
+
+/**
+ * Memeriksa status login dan mengubah 'href' pada elemen dengan kelas '.smart-redirect'
+ * jika pengguna belum login.
+ */
+export function initializeSmartRedirects() {
+  const smartButtons = document.querySelectorAll('.smart-redirect');
+  
+  smartButtons.forEach(button => {
+    button.addEventListener('click', (event) => {
+      // Mencegah tautan melakukan aksi default (pindah ke href="#")
+      event.preventDefault(); 
+      
+      // Cek status login saat ini secara langsung
+      const user = auth.currentUser; 
+
+      if (user) {
+        // Jika pengguna sudah login, arahkan ke home
+        window.location.href = '/home.html';
+      } else {
+        // Jika pengguna belum login, arahkan ke index
+        window.location.href = '/index.html';
+      }
+    });
+  });
+}
 /**
  * Memuat dan menginisialisasi navbar.
  */
