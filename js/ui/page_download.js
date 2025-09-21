@@ -1,8 +1,5 @@
 // ======================================================================
-// File: js/ui/page_download.js
-// Deskripsi: Menangani semua logika UI di halaman download:
-//            merender tabel, filter, dan sorting.
-// Asal Kode: download.html (inline script)
+// File: js/ui/page_download.js (PERBAIKAN)
 // ======================================================================
 import { api_service } from '../load_data/api_service.js';
 import { EventTracker } from '../events.js';
@@ -11,9 +8,6 @@ let fullData = [];
 let sortKey = '';
 let sortAsc = true;
 
-/**
- * Fungsi utama untuk inisialisasi halaman download.
- */
 export async function initializeDownloadPage() {
     const tbody = document.querySelector('#downloadTable tbody');
     tbody.innerHTML = '<tr><td colspan="3" class="text-center">Memuat data...</td></tr>';
@@ -27,7 +21,6 @@ export async function initializeDownloadPage() {
             renderTable(data);
             setupEventListeners();
 
-            // ✅ Sembunyikan loader, tampilkan konten
             document.getElementById('page-loader').style.display = 'none';
             document.getElementById('mainContent').style.display = 'block';
         } else {
@@ -40,18 +33,31 @@ export async function initializeDownloadPage() {
 }
 
 function populateFilters(data) {
-    const bahasaSet = new Set(data.map(item => item.bahasa));
-    const urutanSet = new Set(data.map(item => item.urutan));
-    const judulSet = new Set(data.map(item => item.title));
+    const filteredData = data.filter(item => item.link_download && item.link_download.trim() !== '');
+    const bahasaSet = new Set(filteredData.map(item => item.bahasa));
+    const urutanSet = new Set(filteredData.map(item => item.urutan));
+    const judulSet = new Set(filteredData.map(item => item.title));
 
     populateSelect('filterBahasa', [...bahasaSet].sort());
     populateSelect('filterUrutan', [...urutanSet].sort((a, b) => a - b));
     populateSelect('filterJudul', [...judulSet].sort());
 }
 
+function getCurrentFilterState() {
+    const languageEl = document.getElementById('filterBahasa');
+    const sequenceEl = document.getElementById('filterUrutan');
+    const titleEl = document.getElementById('filterJudul');
+
+    const language = languageEl ? languageEl.value : '';
+    const sequence = sequenceEl ? sequenceEl.value : '';
+    const title = titleEl ? titleEl.value : '';
+
+    return { language, sequence, title };
+}
+
 function populateSelect(id, items) {
     const select = document.getElementById(id);
-    select.length = 1; // Hapus opsi lama kecuali yang pertama
+    select.length = 1;
     items.forEach(val => {
         const opt = document.createElement('option');
         opt.value = val;
@@ -63,31 +69,34 @@ function populateSelect(id, items) {
 function renderTable(data) {
     const tbody = document.querySelector('#downloadTable tbody');
     tbody.innerHTML = '';
-    if (data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Tidak ada data yang cocok dengan filter.</td></tr>';
+
+    const filteredData = data.filter(row => row.link_download && row.link_download.trim() !== '');
+
+    if (filteredData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Tidak ada data download yang tersedia.</td></tr>';
         return;
     }
-    
-    data.forEach(row => {
+
+    filteredData.forEach(row => {
         const tr = document.createElement('tr');
         tr.innerHTML = `<td>${row.bahasa}</td><td>${row.urutan}</td><td>${row.title}</td>`;
+
         tr.onclick = () => {
             EventTracker.downloadPage.clickDownload(row.bahasa, row.title, row.urutan);
             window.open(row.link_download, '_blank');
         };
+
         tbody.appendChild(tr);
     });
 }
 
 function applyFiltersAndSort() {
-    const bahasa = document.getElementById('filterBahasa').value;
-    const urutan = document.getElementById('filterUrutan').value;
-    const judul = document.getElementById('filterJudul').value;
+    const { language, sequence, title } = getCurrentFilterState();
 
     let filteredData = fullData.filter(item => 
-        (!bahasa || item.bahasa === bahasa) &&
-        (!urutan || item.urutan.toString() === urutan) &&
-        (!judul || item.title === judul)
+        (!language || item.bahasa === language) &&
+        (!sequence || item.urutan.toString() === sequence) &&
+        (!title || item.title === title)
     );
 
     if (sortKey) {
@@ -122,21 +131,26 @@ function handleSort(event) {
         }
     });
 
-    EventTracker.downloadPage.sortTable(key, sortAsc ? "asc" : "desc");
+    EventTracker.downloadPage.sortTable(key, sortAsc ? "Asc" : "Desc");
     applyFiltersAndSort();
 }
 
 function setupEventListeners() {
     document.getElementById('filterBahasa').addEventListener('change', (e) => {
-        EventTracker.downloadPage.filterByBahasa(e.target.value);
+        const { language, sequence, title } = getCurrentFilterState();
+        EventTracker.downloadPage.filterChanged("Filter Bahasa", language || "Semua", title || "Semua", sequence || "Semua");
         applyFiltersAndSort();
     });
+
     document.getElementById('filterUrutan').addEventListener('change', (e) => {
-        EventTracker.downloadPage.filterByUrutan(e.target.value);
+        const { language, sequence, title } = getCurrentFilterState();
+        EventTracker.downloadPage.filterChanged("Filter Urutan", language || "Semua", title || "Semua", sequence || "Semua");
         applyFiltersAndSort();
     });
+
     document.getElementById('filterJudul').addEventListener('change', (e) => {
-        EventTracker.downloadPage.filterByJudul(e.target.value);
+        const { language, sequence, title } = getCurrentFilterState();
+        EventTracker.downloadPage.filterChanged("Filter Judul", language || "Semua", title || "Semua", sequence || "Semua");
         applyFiltersAndSort();
     });
     

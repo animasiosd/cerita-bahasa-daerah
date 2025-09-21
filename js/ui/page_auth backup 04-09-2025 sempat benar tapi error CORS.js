@@ -5,22 +5,17 @@ import {
   signInWithPopup,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getAnalytics, setUserId, setUserProperties, logEvent } 
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 import { app } from "./firebase_config.js";
-import { user_data_service } from "../load_data/user_data_service.js";
-import { logUserLogin, logPageView  } from "../send_data/analytics_service.js";
-import { EventTracker } from "../events.js";
+import { logUserLogin } from "../send_data/analytics_service.js";
 
 const auth = getAuth(app);
-const analytics = getAnalytics(app);
 const provider = new GoogleAuthProvider();
-//provider.addScope("https://www.googleapis.com/auth/userinfo.email");
+provider.addScope("https://www.googleapis.com/auth/userinfo.email");
 provider.addScope("https://www.googleapis.com/auth/user.birthday.read");
-provider.addScope("https://www.googleapis.com/auth/user.gender.read");
 provider.addScope("https://www.googleapis.com/auth/userinfo.profile");
-//provider.addScope("https://www.googleapis.com/auth/profile.agerange.read");
-provider.setCustomParameters({ prompt: "consent" });
+provider.addScope("https://www.googleapis.com/auth/profile.agerange.read");
+
+provider.addScope("https://www.googleapis.com/auth/user.gender.reaad");
 
 // Daftar halaman tanpa .html
 const protectedPages = ["home", "bahasa", "download", "locationtutorial"];
@@ -33,8 +28,6 @@ const logout = async () => {
   try {
     console.log("🔄 Proses logout dimulai...");
     await signOut(auth);
-    sessionStorage.removeItem('ageData');
-    sessionStorage.removeItem('googleAccessToken');
     console.log("✅ Logout berhasil dari Firebase");
     window.location.replace("/");
   } catch (error) {
@@ -72,69 +65,85 @@ const initializeLoginPage = () => {
   const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) {
     loginBtn.addEventListener("click", async () => {
-  try {
-    console.log("🔑 Memulai proses login Google...");
-    const result = await signInWithPopup(auth, provider);
-    console.log("🔁 signInWithPopup result (DEBUG):", result);
+      try {
+        console.log("🔑 Memulai proses login Google...");
+        const result = await signInWithPopup(auth, provider);
+        console.log(`✅ Login berhasil sebagai ${result.user.email}`);
 
-    // Ambil credential / access token dengan beberapa fallback (kadang struktur berbeda)
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const accessToken = credential?.accessToken
-                     || result?.credential?.accessToken
-                     || result?._tokenResponse?.access_token;
-                     
-    console.log("Credential scopes:", result?._tokenResponse?.scope);
-    console.log("🔐 Google accessToken present?", !!accessToken);
+        // Ambil token Google untuk akses People API
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const accessToken = credential.accessToken;
 
-    if (accessToken) {
-      // simpan sementara akses token di session agar analytics bisa melakukan fetch ulang
-      sessionStorage.setItem("googleAccessToken", accessToken);
-    } else {
-      console.warn("⚠️ Tidak ada accessToken dari Google. Kemungkinan scope tidak diberikan atau OAuth belum dikonfigurasi.");
-    }
+        // Panggil Google People API untuk ambil gender & birthday
+        const response = await fetch(
+          `https://people.googleapis.com/v1/people/me?personFields=genders,birthdays`,
+          {
+            headers: { Authorization: `Bearer ${accessToken}` }
+          }
+        );
 
-    // Ambil profil dari People API hanya jika token ada
-    const profileData = accessToken ? await user_data_service.fetchGoogleProfile(accessToken) : {};
+        if (response.ok) {
+          const data = await response.json();
+          const gender = data.genders?.[0]?.value || "Tidak Diketahui";
+          const birthdayObj = data.birthdays?.[0]?.date || null;
+          const birthday = birthdayObj
+            ? `${birthdayObj.day}-${birthdayObj.month}-${birthdayObj.year}`
+            : "";
 
-    // Simpan hanya bila ada data demografis yang berguna
-    if (profileData && (profileData.birthday || profileData.minAge || profileData.gender)) {
-      sessionStorage.setItem("ageData", JSON.stringify(profileData));
-      console.log("🎉 Data profil Google disimpan:", profileData);
-    } else {
-      console.warn("⚠️ People API mengembalikan sedikit/tiada data demografis:", profileData);
-      sessionStorage.setItem("ageData", JSON.stringify({})); // eksplisit kosong
-    }
+          // Hitung umur otomatis kalau birthday ada
+          let minAge = "";
+          if (birthdayObj?.year) {
+            minAge = new Date().getFullYear() - birthdayObj.year;
+          }
 
-    // redirect seperti biasa
-    const redirectTo = sessionStorage.getItem("redirectAfterLogin") || "/home";
-    sessionStorage.removeItem("redirectAfterLogin");
-    window.location.replace(redirectTo);
-  } catch (error) {
-    console.error("❌ Login gagal:", error);
-    alert("Login gagal. Silakan coba ulang (cek console).");
-  }
-});
+          // Simpan ke sessionStorage untuk dipakai analytics_service.js
+          sessionStorage.setItem("ageData", JSON.stringify({ gender, birthday, minAge }));
+          
+          console.log("🎉 Data profil Google disimpan:", { gender, birthday, minAge });
+        } else {
+          console.warn("⚠️ Gagal ambil data gender/birthday:", await response.text());
+        }
+
+        // Redirect kembali ke halaman yang diminta, atau default ke /home
+        const redirectTo = sessionStorage.getItem("redirectAfterLogin") || "/home";
+        sessionStorage.removeItem("redirectAfterLogin");
+        window.location.replace(redirectTo);
+
+      } catch (error) {
+        console.error("❌ Login gagal:", error.message);
+        alert("Login gagal. Silakan coba lagi!");
+      }
+    });
   }
 };
 
-let hasLoggedUserData = false; 
+async function ensureUserProfileData(user) {
+  const stored = sessionStorage.getItem("ageData");
+  if (stored) return; // sudah ada
 
-/**
- * Track user_id & login event ke Firebase Analytics
- */
-function trackUserLoginAnalytics(user) {
-  if (!user) return;
+  const token = await user.getIdToken();
+  const response = await fetch(
+    `https://people.googleapis.com/v1/people/me?personFields=genders,birthdays`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
 
-  setUserProperties(analytics, { id_user_firebase: user.uid }); // set user_id untuk GA4 User-ID
-  logEvent(analytics, "login", {
-    method: user.providerData?.[0]?.providerId || "unknown"
-  });
+  if (response.ok) {
+    const data = await response.json();
+    const gender = data.genders?.[0]?.value || "Tidak Diketahui";
+    const birthdayObj = data.birthdays?.[0]?.date || null;
+    const birthday = birthdayObj
+      ? `${birthdayObj.day}-${birthdayObj.month}-${birthdayObj.year}`
+      : "";
+    let minAge = "";
+    if (birthdayObj?.year) {
+      minAge = new Date().getFullYear() - birthdayObj.year;
+    }
 
-  console.log("📊 Firebase Analytics: user_id & login event tercatat", {
-    user_id: user.uid,
-    method: user.providerData?.[0]?.providerId
-  });
+    sessionStorage.setItem("ageData", JSON.stringify({ gender, birthday, minAge }));
+  }
 }
+
+let hasLoggedUserData = false; 
 
 /**
  * Fungsi utama untuk mengelola akses halaman
@@ -146,13 +155,7 @@ const managePageAccess = (callback) => {
   console.log("🔄 Mengecek status login...");
 
   onAuthStateChanged(auth, async (user) => {
-    EventTracker.page.view(user); // <--- PANGGILAN MELALUI EVENTTRACKER
     if (!user) {
-      const profileNameEl = document.getElementById('profileUserName');
-      const profileEmailEl = document.getElementById('profileUserEmail');
-      if (profileNameEl) profileNameEl.textContent = 'Tamu';
-      if (profileEmailEl) profileEmailEl.textContent = '';
-
       console.log("⛔ Tidak login");
 
       // Kalau halaman protected → redirect ke login
@@ -173,29 +176,14 @@ const managePageAccess = (callback) => {
     // ✅ Jika user login
     console.log(`✅ User login terdeteksi: ${user.email}`);
 
-    // Isi profile dropdown (readonly) — tampilkan nama & email dari Firebase
-    const profileNameEl = document.getElementById('profileUserName');
-    const profileEmailEl = document.getElementById('profileUserEmail');
-    
-    if (profileNameEl) profileNameEl.textContent = user.displayName || 'Tanpa Nama';
-    if (profileEmailEl) profileEmailEl.textContent = user.email || '';
-    
-    // optional: jika dropdown tersembunyi di awal, pastikan visible
-    // const profileDropdown = document.getElementById('profileDropdown');
-    // if (profileDropdown) profileDropdown.classList.remove('d-none');
-
-
     // 1️⃣ Pastikan profil lengkap
-    //await ensureUserProfileData(user);
-
-    // 1️⃣ Track ke Firebase Analytics
-    trackUserLoginAnalytics(user);
+    await ensureUserProfileData(user);
 
     // 2️⃣ Kirim log hanya sekali per session
-    //if (!hasLoggedUserData) {
-      //await logUserLogin(user);
-      //hasLoggedUserData = true;
-    //}
+    if (!hasLoggedUserData) {
+      await logUserLogin(user);
+      hasLoggedUserData = true;
+    }
 
     // 3️⃣ Kalau user di login/index → redirect ke home
     if (currentPage === "login" || currentPage === "index") {
@@ -206,9 +194,9 @@ const managePageAccess = (callback) => {
 
     // 4️⃣ Cek izin lokasi untuk halaman protected
     const permissionStatus = await navigator.permissions.query({ name: "geolocation" });
-    handleLoggedInUser(permissionStatus.state, currentPage, callback, user);
+    handleLoggedInUser(permissionStatus.state, currentPage, callback);
     permissionStatus.onchange = () => {
-      handleLoggedInUser(permissionStatus.state, currentPage, callback, user);
+      handleLoggedInUser(permissionStatus.state, currentPage, callback);
     };
 
     const pageLoader = document.getElementById("page-loader");
@@ -219,18 +207,10 @@ const managePageAccess = (callback) => {
 /**
  * Fungsi untuk menangani user login + cek izin lokasi
  */
-function handleLoggedInUser(permissionState, currentPage, callback, user) {
+function handleLoggedInUser(permissionState, currentPage, callback) {
   switch (permissionState) {
     case "granted":
       console.log("📍 Izin lokasi diberikan");
-
-      if (user && !hasLoggedUserData) {
-        logUserLogin(user).then(() => {
-            console.log("✅ Data login dan lokasi berhasil dikirim.");
-        });
-        hasLoggedUserData = true;
-      }
-
       const mainContent = document.getElementById("mainContent");
       if (mainContent) mainContent.classList.remove("d-none");
       if (callback) callback();
@@ -273,10 +253,9 @@ const handleLocationPermissionRequest = (onDenied) => {
 const attachLogoutHandler = () => {
   const currentPage = getNormalizedPage();
 
-  // PERBAIKAN 2: Tambahkan pengecualian agar tidak mencari tombol logout
-  // di halaman locationtutorial.
-  if (publicPages.includes(currentPage) || currentPage === 'locationtutorial') {
-    console.log("ℹ️ Halaman publik atau tutorial, tidak pasang listener logout");
+  // Jika halaman publik, tidak perlu cek tombol logout
+  if (publicPages.includes(currentPage)) {
+    console.log("ℹ️ Halaman publik, tidak pasang listener logout");
     return;
   }
 
@@ -284,7 +263,6 @@ const attachLogoutHandler = () => {
   if (logoutBtn) {
     logoutBtn.addEventListener("click", async (e) => {
       e.preventDefault();
-      EventTracker.auth.logoutClick()
       console.log("🔄 Tombol logout diklik");
       await logout();
     });

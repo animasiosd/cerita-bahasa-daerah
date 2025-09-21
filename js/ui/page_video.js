@@ -6,14 +6,11 @@
 import { auth } from "./page_auth.js";
 import { api_service } from "../load_data/api_service.js";
 import { EventTracker } from "../events.js";
-import { logUserBehavior } from "../send_data/analytics_service.js";
+import { logUserBehavior, trackVideoInteraction  } from "../send_data/analytics_service.js";
 
 export { initializeVideoPage };
 
-// --- Variabel Global untuk Halaman Video ---
-let currentVideoId = null;
-let currentLanguagePage = null;
-let ytPlayer;
+let ytPlayer = null;
 
 /**
  * Fungsi utama untuk menginisialisasi seluruh halaman video.
@@ -24,13 +21,16 @@ function initializeVideoPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const language = urlParams.get('bahasa');
 
+    // Inisialisasi variabel global di window object
+    window.currentVideoId = null;
+    window.currentLanguagePage = null;
+
     if (!language) {
         document.title = "Bahasa Tidak Ditemukan";
         videoTitleEl.textContent = "Bahasa tidak ditemukan. Silahkan pilih bahasa terlebih dahulu.";
         return;
     }
 
-    // --- PERUBAHAN UTAMA: Format nama bahasa secara instan di sini ---
     const formattedLanguageName = formatLanguageName(language);
     document.title = `Cerita Bahasa ${formattedLanguageName}`;
     document.getElementById('language-name-placeholder').textContent = formattedLanguageName;
@@ -42,42 +42,40 @@ function initializeVideoPage() {
             <span>Memuat judul video. Tunggu sebentar...</span>
         </div>`;
     
-    if (!language) {
-        videoTitleEl.textContent = "Parameter ?bahasa= tidak ditemukan.";
-        return;
-    }
-    currentLanguagePage = language;
-
     api_service.fetchVideos(language)
     .then(responseData => {
         const videos = responseData.videos;
-        const pageTitle = responseData.displayName || language;
+        const pageTitle = responseData.displayName || formattedLanguageName;
+
+        // --- SOLUSI #1: Atur nama bahasa di window object ---
+        window.currentLanguagePage = pageTitle;
 
         document.title = `Cerita Bahasa ${pageTitle}`;
         document.getElementById('language-name-placeholder').textContent = pageTitle;
             
         if (!videos || videos.length === 0) {
             videoTitleEl.textContent = "Segera hadir! Belum ada video untuk bahasa ini.";
-            // ✅ Sembunyikan loader walaupun kosong
             document.getElementById('page-loader').classList.add('hidden');
             document.getElementById('mainContent').style.display = 'block';
             return;
         }
 
-        // --- KONDISI SAAT VIDEO LIST SIAP ---
         populateVideoDropdown(videos);
-        videoTitleEl.textContent = "✅ Silakan pilih judul video";
-        videoSelect.disabled = false; // Aktifkan dropdown
+        videoTitleEl.textContent = "Silakan pilih judul video";
+        videoSelect.disabled = false;
         setupShareButtons();
 
-        // ✅ Sembunyikan loader saat data siap
         document.getElementById('page-loader').classList.add('hidden');
         document.getElementById('mainContent').style.display = 'block';
+
+        // --- SOLUSI #2: Kirim event 'video_page' di sini, SETELAH data siap TAPI SEBELUM video dipilih ---
+        // Video ID sengaja dikosongkan karena belum ada yang dipilih.
+        // trackVideoInteraction('video_page_loaded');
+
     })
     .catch(err => {
         videoTitleEl.textContent = "❌ Gagal memuat data video.";
         console.error(err);
-        // ✅ Pastikan loader hilang walau error
         document.getElementById('page-loader').classList.add('hidden');
         document.getElementById('mainContent').style.display = 'block';
     });
@@ -94,9 +92,9 @@ function initializeVideoPage() {
 function formatLanguageName(slug) {
     if (!slug) return '';
     return slug
-        .split('-') // 1. Pisahkan berdasarkan tanda hubung -> ["toli", "toli"]
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1)) // 2. Ubah setiap kata jadi huruf kapital -> ["Toli", "Toli"]
-        .join(' '); // 3. Gabungkan dengan spasi -> "Toli Toli"
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
 }
 
 /**
@@ -105,7 +103,6 @@ function formatLanguageName(slug) {
 function populateVideoDropdown(videos) {
     const videoSelect = document.getElementById('videoSelect');
     const playerContainer = document.getElementById('playerContainer');
-    // Ambil elemen form komentar
     const commentInput = document.getElementById('comment-input');
     const commentSubmitBtn = document.querySelector('#comment-form button[type="submit"]');
 
@@ -121,36 +118,41 @@ function populateVideoDropdown(videos) {
         const videoId = this.value;
         
         if (!videoId) {
-            // --- KONDISI SAAT TIDAK ADA VIDEO DIPILIH ---
             playerContainer.classList.add('d-none');
             commentInput.disabled = true;
             commentSubmitBtn.disabled = true;
             commentInput.placeholder = "Pilih video terlebih dahulu untuk berkomentar...";
             document.getElementById('videoTitle').textContent = "✅ Silakan pilih judul video";
-            // --- Kosongkan daftar komentar ---
             document.getElementById('comment-section').innerHTML = '';
+            
+            // Atur ulang video ID global
+            window.currentVideoId = null;
             return;
         }
 
-        // --- KONDISI SAAT VIDEO DIPILIH ---
         const selectedVideo = videos.find(v => v.videoId === videoId);
-        currentVideoId = videoId;
+        
+        // --- SOLUSI #3: Atur video ID di window object ---
+        window.currentVideoId = videoId;
         
         document.getElementById('videoTitle').textContent = selectedVideo.title;
-        playerContainer.classList.remove('d-none'); // Tampilkan player
+        playerContainer.classList.remove('d-none');
         
-        // Aktifkan form komentar
         commentInput.disabled = false;
         commentSubmitBtn.disabled = false;
         commentInput.placeholder = `Tulis komentar untuk video "${selectedVideo.title}"...`;
         
+        // Event ini sudah benar, tidak perlu diubah
         EventTracker.videoPage.chooseVideo(selectedVideo.title, videoId);
+        
         loadVideoInPlayer(videoId); 
         renderCommentsForVideo(videoId);
     };
 }
 
 // --- Bagian Logika Player YouTube ---
+let lastPlayerState = null; // ✅ Tambahan: simpan state terakhir
+
 function loadYouTubeIframeAPI() {
     if (window.YT && window.YT.Player) {
         onYouTubeIframeAPIReady();
@@ -163,7 +165,7 @@ function loadYouTubeIframeAPI() {
 }
 
 window.onYouTubeIframeAPIReady = function() {
-    if (ytPlayer) return;
+    if (ytPlayer) return; // ✅ Player dibuat hanya sekali
     ytPlayer = new YT.Player('yt-player-placeholder', {
         height: '100%',
         width: '100%',
@@ -175,18 +177,69 @@ window.onYouTubeIframeAPIReady = function() {
 function loadVideoInPlayer(videoId) {
     if (ytPlayer && typeof ytPlayer.cueVideoById === 'function') {
         ytPlayer.cueVideoById(videoId);
+    } else {
+        console.error("YouTube player is not ready or cueVideoById function is not available.");
     }
 }
 
-function onPlayerStateChange(event) {
-    const state = event.data;
-    const percentage = Math.floor((ytPlayer.getCurrentTime() / ytPlayer.getDuration()) * 100);
+// --- Filter Event Duplikat --- //
+let lastEventKey = null;
 
-    if (state === YT.PlayerState.PLAYING) EventTracker.videoPage.play(percentage);
-    else if (state === YT.PlayerState.PAUSED) EventTracker.videoPage.pause(percentage);
-    else if (state === YT.PlayerState.ENDED) EventTracker.videoPage.ended();
+function shouldSendEvent(videoId, action, percentage) {
+    const sessionId = window.sessionId || "no-session";
+    const key = `${sessionId}|${videoId}|${action}|${percentage}`;
+    if (lastEventKey === key) {
+        console.log("⏩ Event duplikat, dilewati:", key);
+        return false;
+    }
+    lastEventKey = key;
+    return true;
 }
 
+// --- BAGIAN BARU: Filter Event karena Tab Switching ---
+let isTabSwitching = false;
+
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden" || document.visibilityState === "visible") {
+        isTabSwitching = true;
+        setTimeout(() => { isTabSwitching = false; }, 800); // reset otomatis
+    }
+});
+
+function onPlayerStateChange(event) {
+    const state = event.data;
+
+    // ✅ Abaikan event otomatis karena tab switching
+    if (isTabSwitching) {
+        console.log("⏩ Abaikan event karena tab switching:", state);
+        return;
+    }
+
+    // ✅ Cegah duplikat state (buffering → play → play)
+    if (state === lastPlayerState) return;
+    lastPlayerState = state;
+
+    try {
+        const videoId = window.currentVideoId || "unknown";
+        const percentage = Math.floor((ytPlayer.getCurrentTime() / ytPlayer.getDuration()) * 100);
+
+        if (state === YT.PlayerState.PLAYING) {
+            if (shouldSendEvent(videoId, "play", percentage)) {
+                EventTracker.videoPage.play(percentage);
+            }
+        } else if (state === YT.PlayerState.PAUSED) {
+            if (shouldSendEvent(videoId, "pause", percentage)) {
+                EventTracker.videoPage.pause(percentage);
+            }
+        } else if (state === YT.PlayerState.ENDED) {
+            if (shouldSendEvent(videoId, "ended", 100)) {
+                EventTracker.videoPage.ended();
+            }
+        }
+    } catch (err) {
+        console.warn("Player state change error:", err);
+    }
+}
 
 // --- BAGIAN BARU: Semua Logika Komentar Terintegrasi ---
 
@@ -349,10 +402,16 @@ function handleLikeClick(button, commentId) {
     const user = auth.currentUser;
     if (!user) return alert("Login untuk menyukai komentar.");
 
-    const wasLiked = button.classList.contains('btn-primary');
-    EventTracker.videoPage.comment[wasLiked ? 'unlike' : 'like'](commentId);
+    // Ambil teks komentar dari elemen DOM (tidak berubah)
+    const commentCard = button.closest('.card[data-comment-id]');
+    const commentText = commentCard ? (commentCard.querySelector('.comment-text')?.textContent || '') : '';
 
-    // Optimistic UI update
+    const wasLiked = button.classList.contains('btn-primary');
+
+    // Kirim commentId dan commentText untuk kedua aksi (like dan unlike)
+    EventTracker.videoPage.comment[wasLiked ? 'unlike' : 'like'](commentId, commentText);
+
+    // Optimistic UI update (tidak berubah)
     const likesCountEl = button.querySelector('.likes-count');
     let currentLikes = parseInt(likesCountEl.textContent);
     button.classList.toggle('btn-primary');
@@ -501,11 +560,16 @@ function setupShareButtons() {
     document.getElementById('share-wa').href = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + " " + pageUrl)}`;
     document.getElementById('share-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(pageUrl)}`;
 
-    document.getElementById('share-wa').onclick = () => logShare('whatsapp');
-    document.getElementById('share-fb').onclick = () => logShare('facebook');
+    document.getElementById('share-wa').onclick = () => logShare('Whatsapp');
+    document.getElementById('share-fb').onclick = () => logShare('Facebook');
 }
 
 function logShare(platform) {
     const videoTitle = document.getElementById("videoTitle")?.textContent || "Tanpa Judul";
-    logUserBehavior("share_button", platform, videoTitle);
+    const videoId = window.currentVideoId || "ID Tidak Diketahui";
+    const eventAction = `Share ${platform}`;
+    const languageDisplayName = window.currentLanguagePage || "Bahasa Tidak Diketahui";
+
+    logUserBehavior(eventAction, languageDisplayName, videoTitle);
+    trackVideoInteraction(eventAction, videoTitle, videoId);
 }

@@ -82,8 +82,7 @@ const initializeLoginPage = () => {
     const accessToken = credential?.accessToken
                      || result?.credential?.accessToken
                      || result?._tokenResponse?.access_token;
-                     
-    console.log("Credential scopes:", result?._tokenResponse?.scope);
+
     console.log("🔐 Google accessToken present?", !!accessToken);
 
     if (accessToken) {
@@ -148,11 +147,6 @@ const managePageAccess = (callback) => {
   onAuthStateChanged(auth, async (user) => {
     EventTracker.page.view(user); // <--- PANGGILAN MELALUI EVENTTRACKER
     if (!user) {
-      const profileNameEl = document.getElementById('profileUserName');
-      const profileEmailEl = document.getElementById('profileUserEmail');
-      if (profileNameEl) profileNameEl.textContent = 'Tamu';
-      if (profileEmailEl) profileEmailEl.textContent = '';
-
       console.log("⛔ Tidak login");
 
       // Kalau halaman protected → redirect ke login
@@ -172,18 +166,6 @@ const managePageAccess = (callback) => {
 
     // ✅ Jika user login
     console.log(`✅ User login terdeteksi: ${user.email}`);
-
-    // Isi profile dropdown (readonly) — tampilkan nama & email dari Firebase
-    const profileNameEl = document.getElementById('profileUserName');
-    const profileEmailEl = document.getElementById('profileUserEmail');
-    
-    if (profileNameEl) profileNameEl.textContent = user.displayName || 'Tanpa Nama';
-    if (profileEmailEl) profileEmailEl.textContent = user.email || '';
-    
-    // optional: jika dropdown tersembunyi di awal, pastikan visible
-    // const profileDropdown = document.getElementById('profileDropdown');
-    // if (profileDropdown) profileDropdown.classList.remove('d-none');
-
 
     // 1️⃣ Pastikan profil lengkap
     //await ensureUserProfileData(user);

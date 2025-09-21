@@ -17,10 +17,9 @@ const analytics = getAnalytics(app);
 const provider = new GoogleAuthProvider();
 //provider.addScope("https://www.googleapis.com/auth/userinfo.email");
 provider.addScope("https://www.googleapis.com/auth/user.birthday.read");
-provider.addScope("https://www.googleapis.com/auth/user.gender.read");
+//provider.addScope("https://www.googleapis.com/auth/user.gender.read");
 provider.addScope("https://www.googleapis.com/auth/userinfo.profile");
 //provider.addScope("https://www.googleapis.com/auth/profile.agerange.read");
-provider.setCustomParameters({ prompt: "consent" });
 
 // Daftar halaman tanpa .html
 const protectedPages = ["home", "bahasa", "download", "locationtutorial"];
@@ -33,8 +32,6 @@ const logout = async () => {
   try {
     console.log("🔄 Proses logout dimulai...");
     await signOut(auth);
-    sessionStorage.removeItem('ageData');
-    sessionStorage.removeItem('googleAccessToken');
     console.log("✅ Logout berhasil dari Firebase");
     window.location.replace("/");
   } catch (error) {
@@ -72,48 +69,35 @@ const initializeLoginPage = () => {
   const loginBtn = document.getElementById("loginBtn");
   if (loginBtn) {
     loginBtn.addEventListener("click", async () => {
-  try {
-    console.log("🔑 Memulai proses login Google...");
-    const result = await signInWithPopup(auth, provider);
-    console.log("🔁 signInWithPopup result (DEBUG):", result);
+      try {
+        console.log("🔑 Memulai proses login Google...");
+        const result = await signInWithPopup(auth, provider);
+        console.log(`✅ Login berhasil sebagai ${result.user.email}`);
 
-    // Ambil credential / access token dengan beberapa fallback (kadang struktur berbeda)
-    const credential = GoogleAuthProvider.credentialFromResult(result);
-    const accessToken = credential?.accessToken
-                     || result?.credential?.accessToken
-                     || result?._tokenResponse?.access_token;
-                     
-    console.log("Credential scopes:", result?._tokenResponse?.scope);
-    console.log("🔐 Google accessToken present?", !!accessToken);
+        // 🔹 Track ke Firebase Analytics
+        trackUserLoginAnalytics(result.user);
 
-    if (accessToken) {
-      // simpan sementara akses token di session agar analytics bisa melakukan fetch ulang
-      sessionStorage.setItem("googleAccessToken", accessToken);
-    } else {
-      console.warn("⚠️ Tidak ada accessToken dari Google. Kemungkinan scope tidak diberikan atau OAuth belum dikonfigurasi.");
-    }
+        // Ambil token Google untuk akses People API
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        const accessToken = credential.accessToken;
+        
+        const profileData = await user_data_service.fetchGoogleProfile(accessToken);
+        
+        // Simpan hasilnya ke sessionStorage
+        if (profileData) {
+          sessionStorage.setItem("ageData", JSON.stringify(profileData));
+          console.log("🎉 Data profil Google disimpan:", profileData);
+          
+          const redirectTo = sessionStorage.getItem("redirectAfterLogin") || "/home";
+          sessionStorage.removeItem("redirectAfterLogin");
+          window.location.replace(redirectTo);
+        }
 
-    // Ambil profil dari People API hanya jika token ada
-    const profileData = accessToken ? await user_data_service.fetchGoogleProfile(accessToken) : {};
-
-    // Simpan hanya bila ada data demografis yang berguna
-    if (profileData && (profileData.birthday || profileData.minAge || profileData.gender)) {
-      sessionStorage.setItem("ageData", JSON.stringify(profileData));
-      console.log("🎉 Data profil Google disimpan:", profileData);
-    } else {
-      console.warn("⚠️ People API mengembalikan sedikit/tiada data demografis:", profileData);
-      sessionStorage.setItem("ageData", JSON.stringify({})); // eksplisit kosong
-    }
-
-    // redirect seperti biasa
-    const redirectTo = sessionStorage.getItem("redirectAfterLogin") || "/home";
-    sessionStorage.removeItem("redirectAfterLogin");
-    window.location.replace(redirectTo);
-  } catch (error) {
-    console.error("❌ Login gagal:", error);
-    alert("Login gagal. Silakan coba ulang (cek console).");
-  }
-});
+      } catch (error) {
+        console.error("❌ Login gagal:", error.message);
+        alert("Login gagal. Silakan coba lagi!");
+      }
+    });
   }
 };
 
@@ -148,11 +132,6 @@ const managePageAccess = (callback) => {
   onAuthStateChanged(auth, async (user) => {
     EventTracker.page.view(user); // <--- PANGGILAN MELALUI EVENTTRACKER
     if (!user) {
-      const profileNameEl = document.getElementById('profileUserName');
-      const profileEmailEl = document.getElementById('profileUserEmail');
-      if (profileNameEl) profileNameEl.textContent = 'Tamu';
-      if (profileEmailEl) profileEmailEl.textContent = '';
-
       console.log("⛔ Tidak login");
 
       // Kalau halaman protected → redirect ke login
@@ -172,18 +151,6 @@ const managePageAccess = (callback) => {
 
     // ✅ Jika user login
     console.log(`✅ User login terdeteksi: ${user.email}`);
-
-    // Isi profile dropdown (readonly) — tampilkan nama & email dari Firebase
-    const profileNameEl = document.getElementById('profileUserName');
-    const profileEmailEl = document.getElementById('profileUserEmail');
-    
-    if (profileNameEl) profileNameEl.textContent = user.displayName || 'Tanpa Nama';
-    if (profileEmailEl) profileEmailEl.textContent = user.email || '';
-    
-    // optional: jika dropdown tersembunyi di awal, pastikan visible
-    // const profileDropdown = document.getElementById('profileDropdown');
-    // if (profileDropdown) profileDropdown.classList.remove('d-none');
-
 
     // 1️⃣ Pastikan profil lengkap
     //await ensureUserProfileData(user);

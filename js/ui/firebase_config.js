@@ -3,13 +3,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 
 // Konfigurasi Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyCAOg2aMzFVCQVx07t85lFpTXv3c2ugL1E",
-  authDomain: "animasiosd-github.firebaseapp.com",
-  projectId: "animasiosd-github",
-  storageBucket: "animasiosd-github.firebasestorage.app",
-  messagingSenderId: "424179260770",
-  appId: "1:424179260770:web:2f4a04a8c9643027bca03b",
-  measurementId: "G-SFLNYPDQ04"
+  apiKey: "AIzaSyCsWkjQp6LxyZX6NZ9Z4rlnY4ygKHJDspU",
+  authDomain: "ceritabahasadaerah.firebaseapp.com",
+  databaseURL: "https://ceritabahasadaerah-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "ceritabahasadaerah",
+  storageBucket: "ceritabahasadaerah.firebasestorage.app",
+  messagingSenderId: "619825814461",
+  appId: "1:619825814461:web:c4b6a51097fc8648d650d4",
+  measurementId: "G-ENLD2274X0"
 };
 
 // Inisialisasi Firebase App

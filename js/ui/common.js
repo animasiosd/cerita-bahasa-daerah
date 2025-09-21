@@ -3,6 +3,18 @@ import { auth } from './page_auth.js'
 import { api_service } from '../load_data/api_service.js';
 import { EventTracker } from '../events.js';
 
+// ----------------------
+// Ensure Material Symbols loaded (inject once)
+// ----------------------
+function ensureMaterialSymbols() {
+  if (!document.querySelector('link[href*="Material+Symbols+Outlined"]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined';
+    document.head.appendChild(link);
+  }
+}
+
 /**
  * Memeriksa status login dan mengubah 'href' pada elemen dengan kelas '.smart-redirect'
  * jika pengguna belum login.
@@ -58,6 +70,7 @@ export function initializeNavbar() {
  * Menjalankan fungsi-fungsi setelah navbar dirender.
  */
 function setupNavbarFunctionality() {
+  ensureMaterialSymbols();
   if (window.navbarInitialized) return;
 
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
@@ -93,6 +106,51 @@ function setupNavbarFunctionality() {
       });
   }
 
+  // --- TAMBAHAN BARU: MEMASANG EVENT LISTENER UNTUK TRACKING ---
+  const navLogoLink = document.getElementById('navLogoLink');
+  if (navLogoLink) {
+    navLogoLink.addEventListener('click', () => EventTracker.navigation.logoClick());
+  }
+
+  const navBerandaLink = document.getElementById('navBerandaLink');
+  if (navBerandaLink) {
+    navBerandaLink.addEventListener('click', () => EventTracker.navigation.berandaClick());
+  }
+
+  const navDownloadLink = document.getElementById('navDownloadLink');
+  if (navDownloadLink) {
+    navDownloadLink.addEventListener('click', () => EventTracker.navigation.downloadClick());
+  }
+  // --- AKHIR TAMBAHAN ---
+
+  // --- Tutup menu jika klik area luar (mobile slide) ---
+document.addEventListener('click', (e) => {
+  const navbarNav   = document.getElementById('navbarNav');
+  const hamburger   = document.querySelector('.navbar-toggler');
+  const isExpanded  = hamburger?.getAttribute('aria-expanded') === 'true';
+
+  // jika menu terbuka dan klik di luar menu & bukan tombol hamburger
+  if (
+    isExpanded &&
+    !navbarNav.contains(e.target) &&
+    !hamburger.contains(e.target)
+  ) {
+    const bsCollapse = bootstrap.Collapse.getInstance(navbarNav);
+    if (bsCollapse) {
+      bsCollapse.hide(); // collapse kembali
+    }
+  }
+});
+
+const closeBtn = document.getElementById("closeMobileMenu");
+if (closeBtn) {
+  closeBtn.addEventListener("click", () => {
+    const nav = document.getElementById("navbarNav");
+    const bsCollapse = bootstrap.Collapse.getInstance(nav);
+    if (bsCollapse) bsCollapse.hide();
+  });
+}
+
   initializePWAInstallButton();
   window.navbarInitialized = true;
 }
@@ -120,7 +178,10 @@ function initializePWAInstallButton() {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
           if (choiceResult.outcome === 'accepted') {
+            EventTracker.pwa.installAccepted(); // Tracking diterima
             event.target.style.display = 'none';
+          } else {
+            EventTracker.pwa.installDismissed();
           }
           deferredPrompt = null;
         });

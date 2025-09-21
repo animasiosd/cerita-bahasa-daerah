@@ -1,6 +1,8 @@
 // File: js/footer.js
 // Skrip ini akan secara otomatis membuat dan menambahkan footer ke halaman.
 
+import { EventTracker } from "./events.js"; 
+
 document.addEventListener('DOMContentLoaded', function() {
     // 1. Buat elemen-elemen untuk footer
     const footer = document.createElement('footer');
@@ -14,6 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 2. Atur atribut dan konten untuk link Ketentuan Layanan
     termsLink.href = 'terms_of_service';
     termsLink.textContent = 'Ketentuan Layanan';
+    termsLink.addEventListener('click', () => EventTracker.footer.termsOfServiceClick()); 
     termsLink.style.color = '#ffffff';
     termsLink.style.textDecoration = 'underline';
     termsLink.style.margin = '0 10px';
@@ -21,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 3. Atur atribut dan konten untuk link Kebijakan Privasi
     privacyLink.href = 'privacy_policy';
     privacyLink.textContent = 'Kebijakan Privasi';
+    privacyLink.addEventListener('click', () => EventTracker.footer.privacyPolicyClick());
     privacyLink.style.color = '#ffffff';
     privacyLink.style.textDecoration = 'underline';
     privacyLink.style.margin = '0 10px';
